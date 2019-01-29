@@ -1,0 +1,288 @@
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib";
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+else
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5;
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 24
+
+###################################################
+use strict;
+use warnings;
+use Getopt::Long qw//;
+
+our $VERSION = '2.12';
+my $branch       = '3';
+
+my $options = {
+    'verbose'  => 1,
+    'backends' => [],
+    'url'      => [],
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+Getopt::Long::GetOptions (
+   "h|help"             => \$options->{'help'},
+   "v|verbose"          => sub { $options->{'verbose'}++ },
+   "q|quiet"            => \$options->{'quiet'},
+   "V|version"          => \$options->{'version'},
+   "r|remote-url=s"     => \$options->{'remoteurl'},
+     "local"            => \$options->{'local'},
+   "c|credential=s"     => \$options->{'credential'},
+   "l|list-backends"    => \$options->{'listbackends'},
+   "b|backend=s"        =>  $options->{'backends'},
+   "A|auth=s"           => \$options->{'auth'},
+   "a|action=s"         => \$options->{'action'},
+   "y|yes"              => \$options->{'yes'},
+   "f|force"            => \$options->{'force'},
+   "i|all-inclusive"    => \$options->{'all_inclusive'},
+   "s|start=s"          => \$options->{'start'},
+     "end=s"            => \$options->{'end'},
+     "format=s"         => \$options->{'format'},
+     "host=s"           => \$options->{'host'},
+     "service=s"        => \$options->{'service'},
+     "width=i"          => \$options->{'width'},
+     "height=i"         => \$options->{'height'},
+   "<>"                 => sub { push @{$options->{'url'}}, "".shift },
+) or do {
+    print "usage: $0 [<options>] <action>\nsee --help for detailed help.\n";
+    exit 3;
+};
+if($options->{'help'}) {
+    require Pod::Usage;
+    Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+}
+if($options->{'version'}) {
+    require Thruk::Config;
+    $branch = Thruk::Config::get_git_name() unless $branch ne '';
+    print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0;
+}
+$options->{'verbose'} = 0 if $options->{'quiet'};
+if(!$options->{'action'} and scalar @{$options->{'url'}} == 0 and !$options->{'listbackends'}) {
+    print "usage: $0 [options]\nsee --help for complete help.\n";
+    exit 3;
+}
+
+require Thruk::Utils::CLI;
+my $cli = Thruk::Utils::CLI->new($options);
+exit $cli->_run();
+
+1;
+__END__
+##############################################
+
+=head1 NAME
+
+thruk - Command Line Utility for Thruk Monitoring Gui
+
+=head1 SYNOPSIS
+
+  Usage: thruk [options] [url|files...]
+
+  Options:
+  -h, --help                    Show this help message and exit
+  -v, --verbose                 Print verbose output
+  -V, --version                 Print version
+
+  -b, --backend=<backend>       Comma seperated list of backends/sites
+                                which should be used for querys.
+  -l, --list-backends           List available backends/sites.
+  -a, --action=<action>         Perform given action. see below for a list.
+
+  -A, --auth=<auth>             Set username for querys
+
+  -c, --credential=<pw>         Credential when connecting to remote
+                                Thruk installations specified by the
+                                remote-url.
+  -r, --remote-url=<url>        URL to remote installation.
+      --local                   Don't try to connect fastcgi daemon first.
+
+  -y, --yes                     answer yes to all given questions.
+  -f, --force                   some actions need to be forced
+
+=head1 DESCRIPTION
+
+This script gives access to various parts of the Thruk gui and allows to generate
+excel reports, csv exports or any other url by using command line and bypassing the
+webserver.
+
+=head1 OPTIONS
+
+script has the following arguments
+
+=over 4
+
+=item B<-h> , B<--help>
+
+    print help and exit
+
+=item B<-v> , B<--verbose>
+
+    print verbose output too
+
+=item B<-V> , B<--version>
+
+    print version and exit
+
+=item B<-b> I<backend>, B<--backend>=I<backend>
+
+    specify backend(s), otherwise the default backends will be
+    used. Specify the key of the backend. Use <-l> to get a list
+    of backends.
+
+    All default backends (backends without the 'hidden' flag) will be used unless
+    backend(s) are specified with this option.
+
+    Use 'ALL' to use all backends, regardless of the hidden flag.
+
+=item B<-l> , B<--list-backends>
+
+    get list of available backends
+
+=item B<-a> I<action>, B<--action>=I<action>
+
+    perform selected action:
+      - url=<url>                   output url result
+        -i / --all-inclusive        includes all css, javascript and images in the resulting html page
+      - report=<nr>                 generate report
+      - reportmail=<nr>             send report by mail
+
+    Logcache: ( MySQL / MongoDB )
+      - logcacheimport(=blocksize)  initial logcache import. Blocksize is in seconds. Defaults is one day. (hint: use --start=3w to import last 3weeks only)
+      - logcacheupdate              update logcache
+      - logcacheauthupdate          update logcache authorization information
+      - logcachestats               print logcache statistics
+      - logcacheclean(=days)        clean everything older than specified number of days. Default is one year.
+      - logcacheoptimize            optimize and repair logcache (mysql only)
+      - logcacheremoveunused        remove old tables from no longer used backends (mysql only)
+
+    Livestatus Cache:
+      - livecachestart              start shadownaemons livecache
+      - livecachestop               stop all shadownaemons
+      - livecacherestart            restart livecaches for each site sequentially
+      - livecachestatus             show livecache status
+
+    Data Commands
+      - listbackends                list all backends
+      - listhosts                   list hostnames
+      - listservices                list servicesnames
+      - listhostgroups              list hostgroupnames
+      - command <host> <service>    print used command line for this host/service
+
+    Graph Commands
+      - graph                       print graph to stdout. Options are
+                                    --host, --service, --width, --height, --source, --format
+                                    --start and --end.
+                                    --format can bei either 'png' or 'base64'.
+                                    this export will export the exact same graph as used in the
+                                    reports or on the details page.
+
+    Selfcheck Commands
+      - selfcheck(=subtype)         run self check(s)
+                                    availabel subtypes:
+                                     - filesystem
+                                     - logfiles
+                                     - reports
+                                     - recurring_downtimes
+
+    Scheduling Commands
+      - fix_scheduling(=filter)     balance scheduling or all hosts and services
+                                    or just a group by adding a filter like
+                                    fix_scheduling=hg:<hostgroup>
+                                    fix_scheduling=sg:<servicegroup>
+
+    Internal Commands
+      - installcron                 update cronjobs for downtimes and reports
+                                    (only needed during package installation)
+      - uninstallcron               remove all thruk cronjobs
+                                    (only needed during package deinstallation)
+      - compile                     compile templates for faster access
+      - bp/bpd(=nr)                 calculate all/specified business process(es)
+      - bpcommit                    write objects for business processes and reloads core
+      - clean_dashboards            remove empty dashboards which are older than 1 day
+
+
+
+=item B<-A> I<authname>, B<--auth>=I<authname>
+
+    use this username for authentication
+
+=item B<-c> I<credential>, B<--credential>=I<credential>
+
+    use this key for authentication when using remoteurl
+
+=item B<-r> I<remote-url>, B<--remote-url>=I<remote-url>
+
+    Connect to this remote instance instead of the local one.
+    Defaults to http://localhost/thruk/cgi-bin/remote.cgi.
+    Retrieving information from the fcgi daemon saves time to
+    startup and allows to connect to remote located sites.
+
+=item B<--local>
+
+    Don't contact remote server. Normally remote-url is tried first for
+    faster access.
+
+=item B<-y> , B<--yes>
+
+    answer yes to a given questions during commands.
+
+=back
+
+=head1 RETURN VALUE
+
+thruk returns 0 on success and >= 1 otherwise
+
+=head1 EXAMPLES
+
+List available backends:
+
+  %> thruk -l
+
+Export the event log as excel file:
+
+  %> thruk -A thrukadmin -a 'url=/thruk/cgi-bin/showlog.cgi?view_mode=xls' > eventlog.xls
+
+Urls can be shortened.
+Export all services into an excel file:
+
+  %> thruk 'status.cgi?view_mode=xls&host=all' > allservices.xls
+
+Export service availability data into a csv file:
+
+  %> thruk -A thrukadmin -a 'url=avail.cgi?host=all&timeperiod=last7days&csvoutput=1' > all_host_availability.csv
+
+Generate pdf report
+
+  %> thruk -a 'report=1' > report.pdf
+
+Generate pdf report and send it by mail:
+
+  %> thruk -a 'reportmail=1'
+
+Reschedule next check for host localhost now:
+
+  %> thruk 'cmd.cgi?cmd_mod=2&cmd_typ=96&host=localhost&start_time=now'
+
+=head1 AUTHOR
+
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
+
+=cut

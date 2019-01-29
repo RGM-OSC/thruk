@@ -1,0 +1,10 @@
+/var/log/thruk/*.log /var/lib/thruk/*.log {
+    weekly
+    missingok
+    rotate 10
+    compress
+    delaycompress
+    notifempty
+    #create www-data www-data
+    #su www-data www-data
+}

@@ -1,0 +1,81 @@
+﻿<script type="text/javascript">
+<!--
+    jQuery('DIV.navsectionlinks > UL > LI').click(function(ev) {
+        if(ev.target.tagName == 'LI') {
+            var target = jQuery(ev.target).find('A:first').attr('target');
+            var href   = jQuery(ev.target).find('A:first').attr('href');
+            if(target == '_parent') {
+                window.parent.location = href;
+            }
+            else if(target == 'main') {
+                window.parent.frames[1].location = href;
+            }
+            else if(target == '_blank') {
+                window.open(href);
+            } else {
+                window.location = href;
+            }
+        }
+    });
+
+    var menuState = [% menu_states_json %];
+    jQuery(document).ready(function() {
+        // make them toggle
+        jQuery('DIV.navsectiontitle').click(function() {
+            var title = this.innerHTML.replace(/<[^>]+>/g, '').toLowerCase().replace(/ /g, '_');
+            jQuery(this).parent().children("DIV.navsectionlinks").slideToggle('fast', function() {
+                menuState[title] = this.style.display == 'none' ? 0 : 1;
+                cookieSave('thruk_side', toQueryString(menuState));
+            });
+            return false;
+        });
+
+        [% IF use_frames %]
+        jQuery('input.deletable').wrap('<span class="deleteicon" />').after(jQuery('<span/>').click(function() {
+            jQuery(this).prev('input').val('').focus();
+        }));
+        [% END %]
+    });
+
+    function check_frame_loaded() {
+        var frameloc;
+        try {
+            frameloc = ""+new String(top.frames['main'].location);
+            var body = top.frames['main'].document.body.innerHTML;
+            if(   frameloc.match('thruk/cgi-bin/')
+               && frameloc.match(/_=\d+/)
+               && !body.match('Produced by Thruk')
+            ) {
+                load_errors++;
+            } else {
+                load_errors = 0;
+            }
+        }
+        catch(e) {
+            //debug(e);
+            // probably permission errors. ex. error message from proxy which results in cross-domain permission errors
+            if(is_reloading) {
+                load_errors++;
+                frameloc = is_reloading;
+            }
+        }
+
+        if(load_errors > 0 && (load_errors == 3 || load_errors%10 == 0)) {
+            if(top.frames['main']) {
+                debug("trying to reload");
+                frameloc.replace(/_=\d+/, '_='+(new Date()).getTime());
+                debug(frameloc);
+                top.frames['main'].location.replace(frameloc);
+            }
+        }
+    }
+
+    var check_frame_loaded_interval;
+    var load_errors = 0;
+    var is_reloading;
+    var thruk_debug_js = [% IF thruk_debug %]1[% ELSE %]0[% END %];
+    if(top.frames.length > 0) {
+        check_frame_loaded_interval = window.setInterval('check_frame_loaded()', 5000);
+    }
+-->
+</script>
