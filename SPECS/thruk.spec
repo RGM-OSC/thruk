@@ -41,7 +41,7 @@ It is designed to be a "dropin" replacement. The target is to cover 100% of the 
 %prep
 %setup -T -b 0 -n %{lname}-%{version}%{lver}
 %patch0 -p1
-%setup -T -b 1 -n %{name}-eon
+%setup -T -b 1 -n %{name}-rgm
 
 %install
 cd ..
@@ -55,22 +55,22 @@ install -d -m0775 %{buildroot}%{datadir}/var
 install -d -m0755 %{buildroot}%{_sysconfdir}/httpd/conf.d
 cp -afpvr %{lname}-%{version}%{lver}/* %{buildroot}%{datadir}
 
-# eon specifics
+# rgm specifics
 install -d -m0755 %{buildroot}%{eonconfdir}
-cp -afpvr %{name}-eon/* %{buildroot}%{eonconfdir}
+cp -afpvr %{name}-rgm/* %{buildroot}%{eonconfdir}
 rm -rf %{buildroot}%{eonconfdir}/local-lib
 rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/conf
 rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/shinken_features
-install -m0644 %{name}-eon/%{name}_local.conf %{buildroot}%{datadir}/%{name}_local.conf
-install -m0644 %{name}-eon/cgi.cfg %{buildroot}%{datadir}/cgi.cfg
-install -m0644 %{name}-eon/%{name}.conf %{buildroot}/%{_sysconfdir}/httpd/conf.d/%{name}.conf
-install -m0755 %{name}-eon/fcgid_env.sh %{buildroot}%{datadir}/support/
-install -m0755 %{name}-eon/phantomjs %{buildroot}%{datadir}/script/
-install -m0755 %{name}-eon/pnp_export.sh %{buildroot}%{datadir}/script/
-cp -afpvr %{name}-eon/local-lib %{buildroot}%{datadir}/
-cp -afpvr %{name}-eon/EyesOfNetwork %{buildroot}%{datadir}/themes/themes-available/
+install -m0644 %{name}-rgm/%{name}_local.conf %{buildroot}%{datadir}/%{name}_local.conf
+install -m0644 %{name}-rgm/cgi.cfg %{buildroot}%{datadir}/cgi.cfg
+install -m0644 %{name}-rgm/%{name}.conf %{buildroot}/%{_sysconfdir}/httpd/conf.d/%{name}.conf
+install -m0755 %{name}-rgm/fcgid_env.sh %{buildroot}%{datadir}/support/
+install -m0755 %{name}-rgm/phantomjs %{buildroot}%{datadir}/script/
+install -m0755 %{name}-rgm/pnp_export.sh %{buildroot}%{datadir}/script/
+cp -afpvr %{name}-rgm/local-lib %{buildroot}%{datadir}/
+cp -afpvr %{name}-rgm/RGM %{buildroot}%{datadir}/themes/themes-available/
 cd %{buildroot}%{datadir}/root/thruk/themes/
-ln -sf ../themes-available/EyesOfNetwork %{buildroot}%{datadir}/root/thruk/themes/EyesOfNetwork
+ln -sf ../themes-available/RGM %{buildroot}%{datadir}/root/thruk/themes/RGM
 cd
 
 %clean
