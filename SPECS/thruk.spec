@@ -9,14 +9,14 @@
 
 Name: thruk
 Version: 2.12
-Release: 0.eon
+Release: 0.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
 License: GPL
 URL: http://www.thruk.org/
 Source0: %{lname}-%{version}%{lver}.tar.gz
-Source1: %{name}-eon.tar.gz
+Source1: %{name}-rgm.tar.gz
 Patch0:  %{name}-%{version}.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -25,14 +25,14 @@ Requires: xorg-x11-server-Xvfb
 Requires: systemd
 
 # define path
-%define eondir		/srv/eyesofnetwork
+%define eondir		/srv/rgm
 %define eonconfdir	/srv/eyesofnetworkconf/%{name}
 %define datadir		%{eondir}/%{name}-%{version}
 %define linkdir		%{eondir}/%{name}
 
 # define user / group
 %define NAGIOSUSR	nagios
-%define APPLIANCEGRP	eyesofnetwork
+%define APPLIANCEGRP	rgm
 
 %description
 Thruk is an independent multibackend monitoring webinterface which currently supports Nagios, Icinga and Shinken as backend using the MKLivestatus addon.
@@ -77,17 +77,17 @@ cd
 rm -rf %{buildroot}
 
 %post
-sed -i '/use lib "\/srv\/eyesofnetwork\/thruk\/lib";/d' %{datadir}/script/*.pl %{datadir}/script/thruk
-sed -i '/use lib "\/srv\/eyesofnetwork\/thruk\/local-lib\/lib\/perl5";/d' %{datadir}/script/*.pl %{datadir}/script/thruk
-sed -i 's/use strict;/use lib "\/srv\/eyesofnetwork\/thruk\/lib";\nuse lib "\/srv\/eyesofnetwork\/thruk\/local-lib\/lib\/perl5";\n\nuse strict;/g' %{datadir}/script/*.pl %{datadir}/script/thruk
+sed -i '/use lib "\/srv\/rgm\/thruk\/lib";/d' %{datadir}/script/*.pl %{datadir}/script/thruk
+sed -i '/use lib "\/srv\/rgm\/thruk\/local-lib\/lib\/perl5";/d' %{datadir}/script/*.pl %{datadir}/script/thruk
+sed -i 's/use strict;/use lib "\/srv\/rgm\/thruk\/lib";\nuse lib "\/srv\/rgm\/thruk\/local-lib\/lib\/perl5";\n\nuse strict;/g' %{datadir}/script/*.pl %{datadir}/script/thruk
 ln -nsf %{datadir} %{linkdir}
 
 chown -h %{NAGIOSUSR}:%{APPLIANCEGRP} %{linkdir}
 chmod 775 %{datadir}/script 
-chown apache:eyesofnetwork %{datadir}/bp 
-chown apache:eyesofnetwork %{datadir}/panorama
-chown apache:eyesofnetwork %{datadir}/tmp 
-chown apache:eyesofnetwork %{datadir}/var 
+chown apache:rgm %{datadir}/bp 
+chown apache:rgm %{datadir}/panorama
+chown apache:rgm %{datadir}/tmp 
+chown apache:rgm %{datadir}/var 
 touch /var/spool/cron/apache
 chown apache:root /var/spool/cron/apache
 chmod 600 /var/spool/cron/apache
@@ -108,6 +108,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Fri Mar 01 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.12-3-0.rgm
+- Initial fork
+
 * Thu Jan 19 2017 Jean-Philippe Levy <jeanphilippe.levy@gmail.com> - 2.12-3-0.eon
 - upgrade to version 2.12-3-0
 
