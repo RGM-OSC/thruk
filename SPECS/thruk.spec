@@ -109,7 +109,7 @@ systemctl restart httpd > /dev/null 2>&1
 
 %changelog
 * Fri Mar 01 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.12-3-0.rgm
-- Initial fork
+- Initial fork 
 
 * Thu Jan 19 2017 Jean-Philippe Levy <jeanphilippe.levy@gmail.com> - 2.12-3-0.eon
 - upgrade to version 2.12-3-0
