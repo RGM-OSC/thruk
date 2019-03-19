@@ -9,7 +9,7 @@
 
 Name: thruk
 Version: 2.12
-Release: 0.rgm
+Release: 1.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -25,14 +25,9 @@ Requires: xorg-x11-server-Xvfb
 Requires: systemd
 
 # define path
-%define eondir		/srv/rgm
-%define eonconfdir	/srv/eyesofnetworkconf/%{name}
-%define datadir		%{eondir}/%{name}-%{version}
-%define linkdir		%{eondir}/%{name}
+%define datadir		%{rgm_path}/%{name}-%{version}
+%define linkdir		%{rgm_path}/%{name}
 
-# define user / group
-%define NAGIOSUSR	nagios
-%define APPLIANCEGRP	rgm
 
 %description
 Thruk is an independent multibackend monitoring webinterface which currently supports Nagios, Icinga and Shinken as backend using the MKLivestatus addon.
@@ -56,9 +51,9 @@ install -d -m0755 %{buildroot}%{_sysconfdir}/httpd/conf.d
 cp -afpvr %{lname}-%{version}%{lver}/* %{buildroot}%{datadir}
 
 # rgm specifics
-install -d -m0755 %{buildroot}%{eonconfdir}
-cp -afpvr %{name}-rgm/* %{buildroot}%{eonconfdir}
-rm -rf %{buildroot}%{eonconfdir}/local-lib
+install -d -m0755 %{buildroot}%{rgm_docdir}/%{name}
+cp -afpvr %{name}-rgm/* %{buildroot}%{rgm_docdir}/%{name}
+rm -rf %{buildroot}%{rgm_docdir}/%{name}/local-lib
 rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/conf
 rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/shinken_features
 install -m0644 %{name}-rgm/%{name}_local.conf %{buildroot}%{datadir}/%{name}_local.conf
@@ -82,12 +77,12 @@ sed -i '/use lib "\/srv\/rgm\/thruk\/local-lib\/lib\/perl5";/d' %{datadir}/scrip
 sed -i 's/use strict;/use lib "\/srv\/rgm\/thruk\/lib";\nuse lib "\/srv\/rgm\/thruk\/local-lib\/lib\/perl5";\n\nuse strict;/g' %{datadir}/script/*.pl %{datadir}/script/thruk
 ln -nsf %{datadir} %{linkdir}
 
-chown -h %{NAGIOSUSR}:%{APPLIANCEGRP} %{linkdir}
+chown -h %{rgm_user_nagios}:%{rgm_group} %{linkdir}
 chmod 775 %{datadir}/script 
-chown apache:rgm %{datadir}/bp 
-chown apache:rgm %{datadir}/panorama
-chown apache:rgm %{datadir}/tmp 
-chown apache:rgm %{datadir}/var 
+chown apache:%{rgm_group} %{datadir}/bp 
+chown apache:%{rgm_group} %{datadir}/panorama
+chown apache:%{rgm_group} %{datadir}/tmp 
+chown apache:%{rgm_group} %{datadir}/var 
 touch /var/spool/cron/apache
 chown apache:root /var/spool/cron/apache
 chmod 600 /var/spool/cron/apache
@@ -102,12 +97,17 @@ systemctl restart httpd > /dev/null 2>&1
 %config(noreplace) %{datadir}/thruk_local.conf
 %config(noreplace) %{datadir}/cgi.cfg
 %config(noreplace) %{datadir}/var/
-%{eonconfdir}
-%defattr(-, %{NAGIOSUSR}, %{APPLIANCEGRP}, 0755)
+%{rgm_docdir}/%{name}
+%defattr(-, %{rgm_user_nagios}, %{rgm_group}, 0755)
 %{datadir}
 
 
 %changelog
+* Tue Mar 19 2019 Eric Belhomme <ebelhomme@fr.scc.com> - 2.12-3-1.rgm
+- use of rpm-macros-rgm
+- fix config files
+- fix ownerships
+
 * Fri Mar 01 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.12-3-0.rgm
 - Initial fork 
 

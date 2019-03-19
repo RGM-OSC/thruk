@@ -8,8 +8,8 @@
 
 
 PNP_WGET="wget -q"
-PNP_ETC=/srv/eyesofnetwork/pnp4nagios/etc
-PNP_INDEX=/srv/eyesofnetwork/pnp4nagios/html/index.php
+PNP_ETC=/srv/rgm/pnp4nagios/etc
+PNP_INDEX=/srv/rgm/pnp4nagios/html/index.php
 
 # read rc files if exist
 [ -e ~/.thruk   ] && . ~/.thruk

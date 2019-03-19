@@ -150,6 +150,6 @@ diff -Naur thruk-2.12-3.orig/plugins/plugins-available/reports2/templates/report
 +<script language="javascript" type="text/javascript">
 +/* add complete new elements by javascript */
 +  jQuery(document).ready(function() {
-+    jQuery('<br><img class="logo_eon" src="/thruk/themes/EyesOfNetwork/images/logos/logo_eon.png"><br>').insertAfter('DIV.page.cover DIV.titletext');
++    jQuery('<br><img class="logo_eon" src="/thruk/themes/RGM/images/logos/logo_eon.png"><br>').insertAfter('DIV.page.cover DIV.titletext');
 +  });
 +</script>
