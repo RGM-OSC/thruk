@@ -11,8 +11,8 @@
 
 .stateInfoPanel { font-size: 11pt; }
 .stateStatisticsPanel { }
-.stateInfoTable1 { background-color: #f4f2f2; border: 1px solid #d0d0d0; }
-.stateInfoTable2 { background-color: #f4f2f2; border: 1px solid #d0d0d0; }
+.stateInfoTable1 { background-color: #f8f8f8; border: 1px solid #d0d0d0; }
+.stateInfoTable2 { background-color: #f8f8f8; border: 1px solid #d0d0d0; }
 
 .dataVar { font-size: 11pt; font-weight: bold; }
 .dataVal { font-size: 11pt; }
@@ -20,16 +20,16 @@
 /* FIXME: override the defaults until php/html is fixed */
 /* .data      { font-size: 12pt; font-weight: bold; } */
 div.data   { font-size: 12pt; font-weight: normal; }
-.dataTitle { font-size: 14pt; color: #337ab7; padding-bottom: 5px; }
+.dataTitle { font-size: 14pt; padding-bottom: 5px; }
 
-.commandTitle { font-size: 12pt; text-align: center; font-weight: bold; padding-bottom: 5px; }
-table.command { background-color: #f4f2f2; border: 1px solid #d0d0d0; }
+.commandTitle { font-size: 12pt; text-align: center; padding-bottom: 5px; }
+table.command { background-color: #f8f8f8; border: 1px solid #d0d0d0; }
 .command      { font-size: 11pt; }
 .commandPanel { }
 .commentPanel { }
 
 table.commandPanel { border:1px #E2DECD outset; }
-table.commandPanel td,td.statusOdd { background-color: #f4f2f2; }
+table.commandPanel td,td.statusOdd { background-color: #f8f8f8; }
 table.commandPanel td { padding-left: 10px; padding-right: 10px; }
 table.commandPanel th { background-image:none; border:0 none; vertical-align:top; }
 
@@ -37,7 +37,7 @@ table.commandPanel th { background-image:none; border:0 none; vertical-align:top
 
 table.perfdata_human              { border: 1px solid #d0d0d0; }
 table.perfdata_human .statusOdd   { font-size: 11pt; background-color: #e7e7e7; }
-table.perfdata_human .statusEven  { font-size: 11pt; background-color: #f4f2f2; }
+table.perfdata_human .statusEven  { font-size: 11pt; background-color: #f8f8f8; }
 
 .commentTitle  { font-size: 12pt; text-align: center; font-weight: bold; }
 div.commentNav { font-size: 12pt; text-align: center; }
@@ -46,7 +46,7 @@ a.commentNav   { font-size: 12pt; }
 table.comment { font-size: 12pt; text-align: center; background-color: white; padding: 2px; max-width: 900px; }
 th.comment    { font-size: 11pt; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; white-space: nowrap; }
 .commentOdd   { font-size: 11pt; background-color: #e7e7e7; }
-.commentEven  { font-size: 11pt; background-color: #f4f2f2; }
+.commentEven  { font-size: 11pt; background-color: #f8f8f8; }
 div.comment,a.comment { font-size: 12pt; background-color: white; text-align: center; }
 
 .downtimeTitle  { font-size: 14pt; text-align: center; font-weight: bold; }
@@ -56,7 +56,7 @@ a.downtimeNav   { font-size: 12pt; }
 table.downtime { font-size: 12pt; text-align: center; background-color: white; padding: 2px; max-width: 900px; }
 th.downtime    { font-size: 11pt; center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; white-space: nowrap; }
 .downtimeOdd   { font-size: 11pt; background-color: #e7e7e7; }
-.downtimeEven  { font-size: 11pt; background-color: #f4f2f2; }
+.downtimeEven  { font-size: 11pt; background-color: #f8f8f8; }
 
 .notflapping           { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; float: left; }
 .flapping              { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; float: left; }
@@ -72,10 +72,10 @@ th.downtime    { font-size: 11pt; center; padding: 0 3px 0 3px; background-color
 .downtimeINACTIVE      { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; float: left; }
 .processOK             { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; }
 .processUNKNOWN        { color: #fff; background-color: #6ec2fd; border: 1px solid #777777; font-weight: bold; }
-.processWARNING        { background-color: #ffff00; border: 1px solid #777777; font-weight: bold; }
+.processWARNING        { color: #fff; background-color: #ffa500; border: 1px solid #777777; font-weight: bold; }
 .processCRITICAL       { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; }
 .modeACTIVE            { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; }
-.modeSTANDBY           { background-color: #ffff00; border: 1px solid #777777; font-weight: bold; }
+.modeSTANDBY           { color: #fff; background-color: #ffa500; border: 1px solid #777777; font-weight: bold; }
 
 .eventhandlersCOMMAND  { position: absolute; margin-left: 90px; }
 
@@ -84,7 +84,7 @@ th.downtime    { font-size: 11pt; center; padding: 0 3px 0 3px; background-color
 .hostUNREACHABLE  { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; float: left; }
 
 .serviceOK        { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; float: left; }
-.serviceWARNING   { background-color: #ffff00; border: 1px solid #777777; font-weight: bold; float: left; }
+.serviceWARNING   { color: #fff; background-color: #ffa500; border: 1px solid #777777; font-weight: bold; float: left; }
 .serviceUNKNOWN   { color: #fff; background-color: #6ec2fd; border: 1px solid #777777; font-weight: bold; float: left; }
 .serviceCRITICAL  { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; float: left; }
 
@@ -92,7 +92,7 @@ th.downtime    { font-size: 11pt; center; padding: 0 3px 0 3px; background-color
 table.queue    { font-size: 11pt; padding: 0; }
 th.queue       { font-size: 11pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; }
 .queueOdd      { font-size: 11pt; background-color: #e7e7e7; padding: 0 4px 0 4px; }
-.queueEven     { font-size: 11pt; background-color: #f4f2f2; padding: 0 4px 0 4px; }
+.queueEven     { font-size: 11pt; background-color: #f8f8f8; padding: 0 4px 0 4px; }
 .queueENABLED  { font-size: 11pt; color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .queueDISABLED { font-size: 11pt; color: #fff; background-color: #ff3300; border: 1px solid #777777; padding: 0 4px 0 4px; }
 

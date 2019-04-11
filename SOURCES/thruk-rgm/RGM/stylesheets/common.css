@@ -12,7 +12,7 @@
 
                 color    dark    light   border
            OK:  green    88d066  cce8cc  777777
-      WARNING:  yellow   ffff00  feffc1  777777
+      WARNING:  yellow   ffa500  feffc1  777777
      CRITICAL:  red      f88888  ffdddd  777777
       PENDING:  grey     acacac  fefefe  777777
       UNKNOWN:  orange   ffbb55  ffddaa  777777
@@ -277,11 +277,11 @@ table.linkBox td { white-space: nowrap; }
 table.data    { padding: 0; }
 th.data       { font-size: 11pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; }
 .dataOdd      { font-size: 10pt; background-color: #e7e7e7; padding: 0 4px 0 4px; }
-.dataEven     { font-size: 10pt; background-color: #f4f2f2; padding: 0 4px 0 4px; }
+.dataEven     { font-size: 10pt; background-color: #f8f8f8; padding: 0 4px 0 4px; }
 .dataTitle    { font-size: 14pt; text-align: center; }
 .dataSubTitle { font-size: 12pt; text-align: center; }
 
-th.pnpSelected, th.dataSelected { background-color: #f0f1ee; border: 1px #444444 outset; font-size: 12px; }
+th.pnpSelected, th.dataSelected { background-color: #f0f1ee; border: 1px #444444 outset; font-size: 14px; color: #337ab7;}
 
 .optBox             { font-size:  11pt; white-space: nowrap; padding: 2px 0 0 0; }
 .optBoxTitle        { font-size: 12pt; font-weight: bold; text-align: center; }

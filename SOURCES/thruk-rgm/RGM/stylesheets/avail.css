@@ -21,7 +21,7 @@
 table.logEntries { font-size: 11pt; padding: 5px 0 0 0; }
 th.logEntries    { font-size: 11pt; text-align: left; padding: 0 3px 0 3px; border-bottom: 1px solid #777777; color: #333333; }
 .logEntriesOdd   { background-color: #e7e7e7; padding: 0 4px 0 4px; }
-.logEntriesEven  { background-color: #f4f2f2; padding: 0 4px 0 4px; }
+.logEntriesEven  { background-color: #f8f8f8; padding: 0 4px 0 4px; }
 
 .logEntriesOK            { background-color: #cce8cc; padding: 0 4px 0 4px; }
 .logEntriesUNKNOWN       { background-color: #ffddaa; padding: 0 4px 0 4px; }

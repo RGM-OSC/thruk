@@ -8,7 +8,7 @@
 .cmd { }
 
 .cmdType            { font-size: 14pt; font-weight: bold; color: #aa0000; padding-bottom: 40px; }
-.commandDescription { font-size:  10pt; background-color: #f4f2f2; border: 1px solid #d0d0d0; margin: 4px 0 0 0; padding: 4px 4px 4px 4px; }
+.commandDescription { font-size:  10pt; background-color: #f8f8f8; border: 1px solid #d0d0d0; margin: 4px 0 0 0; padding: 4px 4px 4px 4px; }
 .descriptionTitle   { font-size: 12pt; font-weight: bold; }
 .infoMessage        { font-size:  10pt; background-color: #efefaa; border: 1px solid #777777; margin: 40px 20% 0 20%; padding: 5px 5px 5px 5px; }
 .optBox             { font-size:  11pt; padding: 5px 5px 5px 5px; }

@@ -10,16 +10,17 @@
 .itemTotalsTitle { font-size: 10pt; font-style: italic; }
 
 table.status { font-size: 10pt; padding: 0 0 10px 0; }
-th.status    { font-size: 11pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; }
+//th.status    { font-size: 11pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; }
+th.status    { font-size: 12pt; font-weight: normal; text-align: center;  padding: 20px 3px 0 3px;  border: 1px #fdfdfd00 outset;   color: #333333; }
 div.status   { font-size: 12pt; text-align: center; }
 .statusOdd   { font-size: 10pt; background-color: #e7e7e7; line-height: 150%; padding: 0 4px 0 4px; }
-.statusEven  { font-size: 10pt; background-color: #f4f2f2; line-height: 150%; padding: 0 4px 0 4px; }
+.statusEven  { font-size: 10pt; background-color: #f8f8f8; line-height: 150%; padding: 0 4px 0 4px; }
 
 .statusPENDING  { font-size: 10pt; background-color: #acacac; border: 1px solid #777777; padding: 0 5px 0 5px; }
 .statusOK       { font-size: 10pt; color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 5px 0 5px; }
 .statusRECOVERY { font-size: 10pt; color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 5px 0 5px; }
 .statusUNKNOWN  { font-size: 10pt; color: #fff; background-color: #6ec2fd; border: 1px solid #777777; padding: 0 5px 0 5px; }
-.statusWARNING  { font-size: 10pt; background-color: #ffff00; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.statusWARNING  { font-size: 10pt; color: #fff; background-color: #ffa500; border: 1px solid #777777; padding: 0 5px 0 5px; }
 .statusCRITICAL { font-size: 10pt; color: #fff; background-color: #ff3300; border: 1px solid #777777; padding: 0 5px 0 5px; }
 
 .statusHOSTPENDING          { font-size: 10pt; background-color: #acacac; line-height: 150%; padding: 0 4px 0 4px; }
@@ -52,7 +53,7 @@ table.serviceTotals    { font-size: 12pt; }
 th.serviceTotals,a.serviceTotals { font-size: 10pt; font-weight: normal; }
 td.serviceTotals       { font-size: 10pt; text-align: center; background-color: #e0e0e0; border: 1px solid #777777; }
 .serviceTotalsOK       { font-size: 10pt; text-align: center; color: #fff; background-color: #00CC33; border: 1px solid #777777; }
-.serviceTotalsWARNING  { font-size: 10pt; text-align: center; background-color: #ffff00; border: 1px solid #777777; }
+.serviceTotalsWARNING  { font-size: 10pt; text-align: center; color: #fff; background-color: #ffa500; border: 1px solid #777777; }
 .serviceTotalsUNKNOWN  { font-size: 10pt; text-align: center; color: #fff; background-color: #6ec2fd; border: 1px solid #777777; }
 .serviceTotalsCRITICAL { font-size: 10pt; text-align: center; color: #fff; background-color: #ff3300; border: 1px solid #777777; }
 .serviceTotalsPENDING  { font-size: 10pt; text-align: center; background-color: #acacac; border: 1px solid #777777; }
@@ -71,7 +72,7 @@ td.hostTotals          { font-size: 10pt; text-align: center; background-color: 
 .miniStatusPENDING     { font-size: 10pt; text-align: center; background-color: #acacac; border: 1px solid #777777; padding: 0 5px 0 5px; }
 .miniStatusOK          { font-size: 10pt; text-align: center; color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 5px 0 5px; }
 .miniStatusUNKNOWN     { font-size: 10pt; text-align: center; color: #fff; background-color: #6ec2fd; border: 1px solid #777777; padding: 0 5px 0 5px; }
-.miniStatusWARNING     { font-size: 10pt; text-align: center; background-color: #ffff00; border: 1px solid #777777; padding: 0 5px 0 5px; }
+.miniStatusWARNING     { font-size: 10pt; text-align: center; color: #fff; background-color: #ffa500; border: 1px solid #777777; padding: 0 5px 0 5px; }
 .miniStatusCRITICAL    { font-size: 10pt; text-align: center; color: #fff; background-color: #ff3300; border: 1px solid #777777; padding: 0 5px 0 5px; }
 
 .miniStatusUP          { font-size: 10pt; text-align: center; color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 5px 0 5px; }

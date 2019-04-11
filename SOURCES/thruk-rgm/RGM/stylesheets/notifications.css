@@ -10,12 +10,12 @@
 table.notifications { padding: 0; margin: 0; }
 th.notifications    { font-size: 11pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; }
 .notificationsOdd   { font-size: 10pt; background-color: #e7e7e7; padding: 0 4px 0 4px; }
-.notificationsEven  { font-size: 10pt; background-color: #f4f2f2; padding: 0 4px 0 4px; }
+.notificationsEven  { font-size: 10pt; background-color: #f8f8f8; padding: 0 4px 0 4px; }
 
 /* these are dark colors */
 .notificationsOK              { color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .notificationsUNKNOWN         { color: #fff; background-color: #6ec2fd; border: 1px solid #777777; padding: 0 4px 0 4px; }
-.notificationsWARNING         { background-color: #ffff00; border: 1px solid #777777; padding: 0 4px 0 4px; }
+.notificationsWARNING         { color: #fff; background-color: #ffa500; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .notificationsCRITICAL        { color: #fff; background-color: #ff3300; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .notificationsACKNOWLEDGEMENT { background-color: #aaaaaa; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .notificationsCUSTOM          { background-color: #778899; border: 1px solid #777777; padding: 0 4px 0 4px; }

@@ -14,11 +14,11 @@
 .StaticData   { font-size: 12pt; padding: 2px; }
 .TableHeader  { font-size: 12pt; background-color: #d0d0d0; font-weight: bold; }
 
-.Item         { font-size: 12pt; background-color: #f4f2f2; font-weight: bold; }
-.DataSource   { font-size: 12pt; background-color: #f4f2f2; }
-.Number       { font-size: 12pt; background-color: #f4f2f2; }
+.Item         { font-size: 12pt; background-color: #f8f8f8; font-weight: bold; }
+.DataSource   { font-size: 12pt; background-color: #f8f8f8; }
+.Number       { font-size: 12pt; background-color: #f8f8f8; }
 
-.Value        { font-size: 12pt; background-color: #f4f2f2; font-weight: bold; }
+.Value        { font-size: 12pt; background-color: #f8f8f8; font-weight: bold; }
 .ValueOk      { font-size: 12pt; color: #fff; background-color: #00CC33; font-weight: bold; }
 .ValueError   { font-size: 12pt; color: #fff; background-color: #ff3300; font-weight: bold; }
 

@@ -1,0 +1,44 @@
+--- templates/_header_prefs.tt.old	2019-04-11 16:30:56.189429422 +0200
++++ templates/_header_prefs.tt	2019-04-11 16:33:34.173621854 +0200
+@@ -9,27 +9,8 @@
+               <th colspan=2 class="separator">Settings</th>
+             </tr>
+             <tr>
+-              <th width="100">User Profile:</th>
+-              <td>
+-                <img src="[% url_prefix %]themes/[% theme %]/images/config.png" alt="show user profile" width=16 height=16 style="vertical-align:sub;">
+-                <input type="button" name="submit" value="show user profile" onClick="window.location='[% url_prefix %]cgi-bin/user.cgi'; return false;" class="pref_pane_short_inp">
+-              </td>
+-            </tr>
+-            <tr>
+               <th colspan=2 class="separator">Session Settings</th>
+             </tr>
+-            <tr>
+-              <th width="100">Theme:</th>
+-              <td>
+-                <img src="[% url_prefix %]themes/[% theme %]/images/page_white_picture.png" alt="change theme" width=16 height=16 style="vertical-align:sub;">
+-                <select name="theme" id="pref_theme" class="pref_pane_short_inp">
+-                  [% FOR t = themes %]
+-                  <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
+-                  [% END %]
+-                </select>
+-                <input type="button" name="submit" value="change" onClick="prefSubmit(full_uri, '[% theme %]')">
+-              </td>
+-            </tr>
+             [% IF show_sounds %]
+             <tr>
+               <th>Sounds:</th>
+@@ -64,13 +45,6 @@
+             </tr>
+             [% END %]
+             [% IF has_debug_options %]
+-            <tr>
+-              <th>Debug:</th>
+-              <td>
+-                <img src="[% url_prefix %]themes/[% theme %]/images/wand.png" alt="debug mode" width=16 height=16 style="vertical-align:sub;">
+-                <input type="button" name="submit" value="open page with debug options"  class="pref_pane_long_inp" onClick="window.location=uriWith(full_uri, { debug: 1 }); return false;">
+-              </td>
+-            </tr>
+             [% END %]
+             <tr>
+               <th>Page Refresh:</th>

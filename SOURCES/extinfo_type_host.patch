@@ -1,0 +1,219 @@
+--- templates/extinfo_type_1.tt.old	2019-04-11 17:07:09.572256984 +0200
++++ templates/extinfo_type_1.tt	2019-04-11 17:55:54.694875103 +0200
+@@ -163,7 +163,6 @@
+         </td>
+       </tr>
+     </table>
+-    <br>
+ 
+     <div align="center">
+       <table border="0" cellpadding="0" width="100%" class="extdetails">
+@@ -352,128 +351,33 @@
+                         </table>
+                       </td>
+                     </tr>
+-                  </table>
+-                </td>
+-              </tr>
+-              <tr>
+-                <td>
+-                  <table border="1" cellspacing="0" cellpadding="0" class="data checkstatus">
++                     [% IF pnp_url %]
+                     <tr>
+-                      <td class='stateInfoTable2 checkstatus'>
+-                        <table border="0">
+-                          <tr>
+-                            <td class='dataVar'>Active Checks:</td>
+-                            <td class='dataVal'>
+-                              [% IF host.checks_enabled %]
+-                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+-                              [% ELSE %]
+-                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+-                              [% END %]
+-                            </td>
+-                          </tr>
+-                          <tr>
+-                            <td class='dataVar'>Passive Checks:</td>
+-                            <td class='dataVal'>
+-                              [% IF host.accept_passive_checks %]
+-                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+-                              [% ELSE %]
+-                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+-                              [% END %]
+-                            </td>
+-                          </tr>
+-                          <tr>
+-                            <td class='dataVar'>Obsessing:</td>
+-                            <td class='dataVal'>
+-                              [% IF host.obsess_over_host %]
+-                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+-                              [% ELSE %]
+-                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+-                              [% END %]
+-                            </td>
+-                          </tr>
+-                          <tr>
+-                            <td class='dataVar'>Notifications:</td>
+-                            <td class='dataVal'>
+-                              [% IF host.notifications_enabled %]
+-                              <div class='notificationsENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+-                              [% ELSE %]
+-                              <div class='notificationsDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+-                              [% END %]
+-                            </td>
+-                          </tr>
+-                          <tr>
+-                            <td class='dataVar'>Event Handler:</td>
+-                            <td class='dataVal eventHandler'>
+-                              [% IF !host.event_handler %]
+-                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;UNUSED&nbsp;&nbsp;</div>
+-                              [% ELSIF host.event_handler_enabled %]
+-                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
+-                                [% IF   show_full_commandline == 2 ||
+-                                      ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') )
+-                                %]
+-                                <div class='eventhandlersCOMMAND'>([% host.event_handler %])</div>
+-                                [% END %]
+-                              [% ELSE %]
+-                              <div class='eventhandlersDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
+-                              [% END %]
+-                            </td>
+-                          </tr>
+-                          <tr>
+-                            <td class='dataVar'>Flap Detection:</td>
+-                            <td class='dataVal'>
+-                              [% IF host.flap_detection_enabled %]
+-                              <div class='flapdetectionENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp; </div>
+-                              [% ELSE %]
+-                              <div class='flapdetectionDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp; </div>
+-                              [% END %]
+-                            </td>
+-                          </tr>
+-                        </table>
++                      <td colspan="2" align="center">
++                      [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
++                      </td>
++                    </tr>
++                    [% ELSIF histou_url %]
++                    <tr>
++                      <td colspan="2" align="center">
++                      [% PROCESS _histou_graph.tt hst=host.name svc="" %]
++                      </td>
++                    </tr>
++                    [% ELSE %]
++                    [% graph_url = get_graph_url(c, host, 1)%]
++                    [% IF graph_url %]
++                    <tr>
++                      <td colspan="2" align="center">
++                      [% PROCESS _third_graph.tt hst=host.name svc="_HOST_" %]
+                       </td>
+                     </tr>
++                    [% END %]
++                    [% END %]
+                   </table>
+-                </td>
+-              </tr>
+-            </table>
+ 
+-          </td>
+-          <td align="center" valign="top" class="action_menu">
+-            [% IF c.config.use_new_command_box %]
+-              [% PROCESS _host_command_box.tt %]
+-            [% ELSE %]
+-              [% PROCESS _host_command_box_full.tt %]
+-            [% END %]
+-          </td>
+-        </tr>
+ 
+-        [% IF pnp_url %]
+-        <tr>
+-          <td colspan="2" align="center">
+-          [% PROCESS _pnp_graph.tt hst=host.name svc="_HOST_" %]
+-          </td>
+-        </tr>
+-        [% ELSIF histou_url %]
+-        <tr>
+-          <td colspan="2" align="center">
+-          [% PROCESS _histou_graph.tt hst=host.name svc="" %]
+-          </td>
+-        </tr>
+-        [% ELSE %]
+-        [% graph_url = get_graph_url(c, host, 1)%]
+-        [% IF graph_url %]
+-        <tr>
+-          <td colspan="2" align="center">
+-          [% PROCESS _third_graph.tt hst=host.name svc="_HOST_" %]
+-          </td>
+-        </tr>
+-        [% END %]
+-        [% END %]
+ 
+-        <tr>
+-          <td colspan="2">
+-            <br>
+-          </td>
+-        </tr>
++
+         <tr>
+           <td colspan="2" align="center" valign="top" class='commentPanel'>
+             <a name="comments" id="comments"></a>
+@@ -601,6 +505,59 @@
+             <br>
+           </td>
+         </tr>
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++                </td>
++              </tr>
++              <tr>
++                <td>
++                  <table border="1" cellspacing="0" cellpadding="0" class="data checkstatus">
++                  </table>
++                </td>
++              </tr>
++            </table>
++
++          </td>
++          <td align="center" valign="top" class="action_menu">
++            [% IF c.config.use_new_command_box %]
++              [% PROCESS _host_command_box.tt %]
++            [% ELSE %]
++              [% PROCESS _host_command_box_full.tt %]
++            [% END %]
++          </td>
++        </tr>
++
++        <tr>
++          <td colspan="2">
++            <br>
++          </td>
++        </tr>
++
+         [% END %]
+       </table>
+     </div>
