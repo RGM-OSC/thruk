@@ -43,7 +43,7 @@ table.perfdata_human .statusEven  { font-size: 11pt; background-color: #f8f8f8; 
 div.commentNav { font-size: 12pt; text-align: center; }
 a.commentNav   { font-size: 12pt; }
 
-table.comment { font-size: 12pt; text-align: center; background-color: white; padding: 2px; max-width: 900px; }
+table.comment { font-size: 12pt; text-align: center; padding: 2px; max-width: 900px; }
 th.comment    { font-size: 11pt; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; white-space: nowrap; }
 .commentOdd   { font-size: 11pt; background-color: #e7e7e7; }
 .commentEven  { font-size: 11pt; background-color: #f8f8f8; }
