@@ -1,0 +1,18 @@
+---
+- hosts: all
+  tasks:
+  - shell: sudo su - demo -c "set_admin_password omd"
+  - copy:
+      src: "/omd/sites/demo/share/doc/naemon/example.cfg"
+      dest: "/omd/sites/demo/etc/naemon/conf.d/example.cfg"
+      owner: "demo"
+      group: "demo"
+  - yum:
+      name: stunnel
+      state: latest
+  - file:
+      src: "/omd/sites/demo/etc/stunnel/xinetd.conf"
+      dest: "/omd/sites/demo/etc/xinetd.d/stunnel"
+      owner: demo
+      group: demo
+      state: link

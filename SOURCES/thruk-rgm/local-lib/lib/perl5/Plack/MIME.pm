@@ -8,6 +8,7 @@ our $MIME_TYPES = {
     ".ai"      => "application/postscript",
     ".aif"     => "audio/x-aiff",
     ".aiff"    => "audio/x-aiff",
+    ".apk"     => "application/vnd.android.package-archive",
     ".asc"     => "application/pgp-signature",
     ".asf"     => "video/x-ms-asf",
     ".asm"     => "text/x-asm",
@@ -155,6 +156,7 @@ our $MIME_TYPES = {
     ".vrml"    => "model/vrml",
     ".war"     => "application/java-archive",
     ".wav"     => "audio/x-wav",
+    ".webm"    => "video/webm",
     ".wma"     => "audio/x-ms-wma",
     ".wmv"     => "video/x-ms-wmv",
     ".wmx"     => "video/x-ms-wmx",
@@ -221,7 +223,7 @@ selection of MIME types is based on Rack's Rack::Mime module.
 
 =head1 SEE ALSO
 
-Rack::Mime L<MIME::Types>
+L<Rack::Mime|https://github.com/rack/rack/blob/master/lib/rack/mime.rb> L<MIME::Types>
 
 =cut
 

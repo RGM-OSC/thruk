@@ -1,25 +1,25 @@
 package #
 Date::Manip::Offset::off000;
-# Copyright (c) 2008-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'tzdata' is run.
-#    Generated on: Wed Feb 18 18:24:53 GMT 2015
-#    Data version: tzdata2015a
-#    Code version: tzcode2015a
+#    Generated on: Tue May 30 10:44:03 EDT 2017
+#    Data version: tzdata2017b
+#    Code version: tzcode2017b
 
 # This module contains data from the zoneinfo time zone database.  The original
 # data was obtained from the URL:
-#    ftp://ftp.iana.orgtz
+#    ftp://ftp.iana.org/tz
 
 use strict;
 use warnings;
 require 5.010000;
 
 our ($VERSION);
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 our ($Offset,%Offset);
@@ -35,8 +35,8 @@ $Offset        = '+00:00:00';
       'wet',
       'europe/london',
       'atlantic/faroe',
-      'africa/abidjan',
       'europe/lisbon',
+      'africa/abidjan',
       'africa/casablanca',
       'europe/dublin',
       'africa/accra',
@@ -51,6 +51,7 @@ $Offset        = '+00:00:00';
       'ut',
       'utc',
       'z',
+      'antarctica/troll',
       'atlantic/azores',
       'africa/ceuta',
       'africa/algiers',
@@ -69,16 +70,15 @@ $Offset        = '+00:00:00';
       'america/yellowknife',
       'america/pangnirtung',
       'america/cambridge_bay',
-      'antarctica/troll',
-      'antarctica/rothera',
       'antarctica/casey',
       'antarctica/davis',
+      'antarctica/dumontdurville',
+      'antarctica/macquarie',
+      'antarctica/mawson',
       'antarctica/palmer',
+      'antarctica/rothera',
       'antarctica/syowa',
       'antarctica/vostok',
-      'antarctica/dumontdurville',
-      'antarctica/mawson',
-      'antarctica/macquarie',
       ],
    1 => [
       'atlantic/azores',

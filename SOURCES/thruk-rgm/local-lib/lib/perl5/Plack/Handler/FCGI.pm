@@ -91,13 +91,15 @@ sub run {
 
             # detach *before* the ProcManager inits
             $self->daemon_detach if $self->{daemonize};
-
-            $proc_manager->pm_manage;
         }
         elsif ($self->{daemonize}) {
             $self->daemon_detach;
         }
+    } elsif (blessed $self->{manager}) {
+        $proc_manager = $self->{manager};
     }
+
+    $proc_manager && $proc_manager->pm_manage;
 
     while ($request->Accept >= 0) {
         $proc_manager && $proc_manager->pm_pre_dispatch;
@@ -110,11 +112,13 @@ sub run {
             'psgi.errors'       => 
                 ($self->{keep_stderr} ? \*STDERR : $self->{stderr}),
             'psgi.multithread'  => Plack::Util::FALSE,
-            'psgi.multiprocess' => Plack::Util::TRUE,
+            'psgi.multiprocess' => defined $proc_manager,
             'psgi.run_once'     => Plack::Util::FALSE,
             'psgi.streaming'    => Plack::Util::TRUE,
             'psgi.nonblocking'  => Plack::Util::FALSE,
             'psgix.harakiri'    => defined $proc_manager,
+            'psgix.cleanup'     => 1,
+            'psgix.cleanup.handlers' => [],
         };
 
         delete $env->{HTTP_CONTENT_TYPE};
@@ -160,8 +164,24 @@ sub run {
 
         $proc_manager && $proc_manager->pm_post_dispatch();
 
+        # When the fcgi-manager exits it sends a TERM signal to the workers.
+        # However, if we're busy processing the cleanup handlers, testing
+        # shows that the worker doesn't actually exit in that case.
+        # Trapping the TERM signal and finshing up fixes that.
+        my $exit_due_to_signal = 0;
+        if ( @{ $env->{'psgix.cleanup.handlers'} || [] } ) {
+            local $SIG{TERM} = sub { $exit_due_to_signal = 1 };
+            for my $handler ( @{ $env->{'psgix.cleanup.handlers'} } ) {
+                $handler->($env);
+            }
+        }
+
         if ($proc_manager && $env->{'psgix.harakiri.commit'}) {
             $proc_manager->pm_exit("safe exit with harakiri");
+        }
+        elsif ($exit_due_to_signal) {
+            $proc_manager && $proc_manager->pm_exit("safe exit due to signal");
+            exit;    # want to exit, even without a $proc_manager
         }
     }
 }
@@ -275,6 +295,7 @@ Specify a filename for the pid file
 =item manager
 
 Specify either a FCGI::ProcManager subclass, or an actual FCGI::ProcManager-compatible object.
+If you do not want a FCGI::ProcManager but instead run in a single process, set this to undef.
 
   use FCGI::ProcManager::Dynamic;
   Plack::Handler::FCGI->new(
@@ -295,7 +316,35 @@ Send psgi.errors to STDERR instead of to the FCGI error stream.
 
 =item backlog
 
-Maximum length of the queue of pending connections
+Maximum length of the queue of pending connections, defaults to 100.
+
+=back
+
+=head2 EXTENSIONS
+
+Supported L<PSGI::Extensions>.
+
+=over 4
+
+=item psgix.cleanup
+
+    push @{ $env->{'psgix.cleanup.handlers'} }, sub { warn "Did this later" }
+        if $env->{'psgix.cleanup'};
+
+Supports the C<psgix.cleanup> extension,
+in order to use it, just push a callback onto
+C<< $env->{'psgix.cleanup.handlers' >>.
+These callbacks are run after the C<pm_post_dispatch> hook.
+
+=item psgix.harakiri
+
+    $env->{'psgix.harakiri.commit'} = 1
+        if $env->{'psgix.harakiri'};
+
+If there is a L</manager>, then C<psgix.harakiri> will be enabled
+and setting C<< $env->{'psgix.harakiri.commit'} >> to a true value
+will cause C<< $manager->pm_exit >> to be called after the
+request is finished.
 
 =back
 
@@ -416,7 +465,7 @@ Apache2 with mod_fastcgi:
 
 mod_fcgid:
 
-  FcgiPassHeader Authorization
+  FcgidPassHeader Authorization
 
 =head2 Server::Starter
 

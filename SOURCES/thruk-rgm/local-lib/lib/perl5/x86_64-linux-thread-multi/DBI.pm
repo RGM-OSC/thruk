@@ -11,7 +11,7 @@ package DBI;
 require 5.008_001;
 
 BEGIN {
-our $XS_VERSION = our $VERSION = "1.633"; # ==> ALSO update the version in the pod text below!
+our $XS_VERSION = our $VERSION = "1.639"; # ==> ALSO update the version in the pod text below!
 $VERSION = eval $VERSION;
 }
 
@@ -122,20 +122,19 @@ DBI IRC Channel: #dbi on irc.perl.org (L<irc://irc.perl.org/#dbi>)
 =head3 Online
 
 StackOverflow has a DBI tag L<http://stackoverflow.com/questions/tagged/dbi>
-with over 400 questions.
+with over 800 questions.
 
 The DBI home page at L<http://dbi.perl.org/> and the DBI FAQ
 at L<http://faq.dbi-support.com/> may be worth a visit.
 They include links to other resources, but I<are rather out-dated>.
-
-I don't recommend the DBI cpanforum (at http://www.cpanforum.com/dist/DBI)
-because relatively few people read it compared with dbi-users@perl.org.
 
 =head3 Reporting a Bug
 
 If you think you've found a bug then please read
 "How to Report Bugs Effectively" by Simon Tatham:
 L<http://www.chiark.greenend.org.uk/~sgtatham/bugs.html>.
+
+If you think you've found a memory leak then read L</Memory Leaks>.
 
 Your problem is most likely related to the specific DBD driver module you're
 using. If that's the case then click on the 'Bugs' link on the L<http://metacpan.org>
@@ -144,7 +143,7 @@ sure that your issue isn't related to the driver you're using.
 
 =head2 NOTES
 
-This is the DBI specification that corresponds to DBI version 1.633
+This is the DBI specification that corresponds to DBI version 1.639
 (see L<DBI::Changes> for details).
 
 The DBI is evolving at a steady pace, so it's good to check that
@@ -172,6 +171,7 @@ related to the DBI can be found at L<https://metacpan.org/search?q=DBI>.
 
 # The POD text continues at the end of the file.
 
+use Scalar::Util ();
 use Carp();
 use DynaLoader ();
 use Exporter ();
@@ -301,14 +301,6 @@ if ($INC{'Apache/DBI.pm'} && $ENV{MOD_PERL}) {
     DBI->trace_msg("DBI connect via $DBI::connect_via in $INC{'Apache/DBI.pm'}\n");
 }
 
-# check for weaken support, used by ChildHandles
-my $HAS_WEAKEN = eval {
-    require Scalar::Util;
-    # this will croak() if this Scalar::Util doesn't have a working weaken().
-    Scalar::Util::weaken( \my $test ); # same test as in t/72childhandles.t
-    1;
-};
-
 %DBI::installed_drh = ();  # maps driver names to installed driver handles
 sub installed_drivers { %DBI::installed_drh }
 %DBI::installed_methods = (); # XXX undocumented, may change
@@ -346,6 +338,7 @@ my $dbd_prefix_registry = {
   ing_         => { class => 'DBD::Ingres',         },
   ix_          => { class => 'DBD::Informix',       },
   jdbc_        => { class => 'DBD::JDBC',           },
+  mem_         => { class => 'DBD::Mem',            },
   mo_          => { class => 'DBD::MO',             },
   monetdb_     => { class => 'DBD::monetdb',        },
   msql_        => { class => 'DBD::mSQL',           },
@@ -383,6 +376,7 @@ my $dbd_prefix_registry = {
   wmi_         => { class => 'DBD::WMI',            },
   x_           => { }, # for private use
   xbase_       => { class => 'DBD::XBase',          },
+  xmlsimple_   => { class => 'DBD::XMLSimple',      },
   xl_          => { class => 'DBD::Excel',          },
   yaswi_       => { class => 'DBD::Yaswi',          },
 };
@@ -456,6 +450,7 @@ my $keeperr = { O=>0x0004 };
 	selectrow_arrayref=>{U =>[2,0,'$statement [, \%attr [, @bind_params ] ]'], O=>0x2000 },
 	selectrow_hashref=>{ U =>[2,0,'$statement [, \%attr [, @bind_params ] ]'], O=>0x2000 },
 	selectall_arrayref=>{U =>[2,0,'$statement [, \%attr [, @bind_params ] ]'], O=>0x2000 },
+	selectall_array   =>{U =>[2,0,'$statement [, \%attr [, @bind_params ] ]'], O=>0x2000 },
 	selectall_hashref=>{ U =>[3,0,'$statement, $keyfield [, \%attr [, @bind_params ] ]'], O=>0x2000 },
 	selectcol_arrayref=>{U =>[2,0,'$statement [, \%attr [, @bind_params ] ]'], O=>0x2000 },
 	ping       	=> { U =>[1,1], O=>0x0404 },
@@ -531,7 +526,6 @@ while ( my ($class, $meths) = each %DBI::DBI_methods ) {
 }
 
 # End of init code
-
 
 END {
     return unless defined &DBI::trace_msg; # return unless bootstrap'd ok
@@ -613,7 +607,8 @@ sub connect {
 	DBI->trace_msg("    -> $class->$connect_meth(".join(", ",@args).")\n");
     }
     Carp::croak('Usage: $class->connect([$dsn [,$user [,$passwd [,\%attr]]]])')
-	if (ref $old_driver or ($attr and not ref $attr) or ref $pass);
+        if (ref $old_driver or ($attr and not ref $attr) or
+            (ref $pass and not defined Scalar::Util::blessed($pass)));
 
     # extract dbi:driver prefix from $dsn into $1
     $dsn =~ s/^dbi:(\w*?)(?:\((.*?)\))?://i
@@ -1391,7 +1386,7 @@ sub _new_sth {	# called by DBD::<drivername>::db::prepare)
 	    unless $class =~ /^DBD::(\w+)::(dr|db|st)$/;
 	my ($driver, $subtype) = ($1, $2);
 	Carp::croak("invalid method name '$method'")
-	    unless $method =~ m/^([a-z]+_)\w+$/;
+	    unless $method =~ m/^([a-z][a-z0-9]*_)\w+$/;
 	my $prefix = $1;
 	my $reg_info = $dbd_prefix_registry->{$prefix};
 	Carp::carp("method name prefix '$prefix' is not associated with a registered driver") unless $reg_info;
@@ -1588,9 +1583,13 @@ sub _new_sth {	# called by DBD::<drivername>::db::prepare)
 	my $quoted_id = join '.', grep { defined } @id;
 
 	if ($catalog) {			# add catalog correctly
-	    $quoted_id = ($info->[2] == 2)	# SQL_CL_END
-		    ? $quoted_id . $info->[1] . $catalog
-		    : $catalog   . $info->[1] . $quoted_id;
+        if ($quoted_id) {
+            $quoted_id = ($info->[2] == 2)	# SQL_CL_END
+                ? $quoted_id . $info->[1] . $catalog
+                    : $catalog   . $info->[1] . $quoted_id;
+        } else {
+            $quoted_id = $catalog;
+        }
 	}
 	return $quoted_id;
     }
@@ -1654,6 +1653,10 @@ sub _new_sth {	# called by DBD::<drivername>::db::prepare)
 	my $row = _do_selectrow('fetchrow_arrayref', @_) or return;
 	return $row->[0] unless wantarray;
 	return @$row;
+    }
+
+    sub selectall_array {
+        return @{ shift->selectall_arrayref(@_) || [] };
     }
 
     # XXX selectall_arrayref also has C implementation in Driver.xst
@@ -1761,7 +1764,11 @@ sub _new_sth {	# called by DBD::<drivername>::db::prepare)
 	my $sth    = $dbh->table_info(@args[0,1,2,3,4]) or return;
 	my $tables = $sth->fetchall_arrayref or return;
 	my @tables;
-	if ($dbh->get_info(29)) { # SQL_IDENTIFIER_QUOTE_CHAR
+	if (defined($args[3]) && $args[3] eq '%' # special case for tables('','','','%')
+	    && grep {defined($_) && $_ eq ''} @args[0,1,2]
+	) {
+	    @tables = map { $_->[3] } @$tables;
+	} elsif ($dbh->get_info(29)) { # SQL_IDENTIFIER_QUOTE_CHAR
 	    @tables = map { $dbh->quote_identifier( @{$_}[0,1,2] ) } @$tables;
 	}
 	else {		# temporary old style hack (yeach)
@@ -2060,8 +2067,7 @@ sub _new_sth {	# called by DBD::<drivername>::db::prepare)
             }
 	}
 	elsif ($mode eq 'HASH') {
-            if (keys %$slice) {
-                keys %$slice; # reset the iterator
+            if (keys %$slice) { # resets the iterator
                 my $name2idx = $sth->FETCH('NAME_lc_hash');
                 while ( my ($name, $unused) = each %$slice ) {
                     my $idx = $name2idx->{lc $name};
@@ -2071,7 +2077,10 @@ sub _new_sth {	# called by DBD::<drivername>::db::prepare)
                 }
 	    }
 	    else {
-		$sth->bind_columns( \( @row{ @{$sth->FETCH($sth->FETCH('FetchHashKeyName')) } } ) );
+		my @column_names = @{ $sth->FETCH($sth->FETCH('FetchHashKeyName')) };
+		return [] if !@column_names;
+
+		$sth->bind_columns( \( @row{@column_names} ) );
 	    }
 	}
 	else {
@@ -2652,7 +2661,7 @@ is a reference to a hash containing the parsed attribute names and values.
 $driver_dsn is the last part of the DBI DSN string. For example:
 
   ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn)
-      = DBI->parse_dsn("DBI:MyDriver(RaiseError=>1):db=test;port=42");
+      = DBI->parse_dsn("dbi:MyDriver(RaiseError=>1):db=test;port=42");
   $scheme      = 'dbi';
   $driver      = 'MyDriver';
   $attr_string = 'RaiseError=>1';
@@ -2738,7 +2747,7 @@ handle, or it I<dies> with an error message that includes the string
 will die
 on a driver installation failure and will only return C<undef> on a
 connect failure, in which case C<$DBI::errstr> will hold the error message.
-Use C<eval { ... }> if you need to catch the "C<install_driver>" error.
+Use C<eval> if you need to catch the "C<install_driver>" error.
 
 The C<$data_source> argument (with the "C<dbi:...:>" prefix removed) and the
 C<$username> and C<$password> arguments are then passed to the driver for
@@ -3136,7 +3145,8 @@ L<http://www.isthe.com/chongo/tech/comp/fnv/> for more information.
 Both types are implemented in C and are very fast.
 
 This function doesn't have much to do with databases, except that
-it can be handy to store hash values in a database.
+it can sometimes be handy to store such values in a database.
+It also doesn't have much to do with perl hashes, like %foo.
 
 =head3 C<sql_type_cast>
 
@@ -3643,7 +3653,7 @@ Type: array ref
 The ChildHandles attribute contains a reference to an array of all the
 handles created by this handle which are still accessible.  The
 contents of the array are weak-refs and will become undef when the
-handle goes out of scope.
+handle goes out of scope. (They're cleared out occasionally.)
 
 C<ChildHandles> returns undef if your perl version does not support weak
 references (check the L<Scalar::Util|Scalar::Util> module).  The referenced
@@ -3789,23 +3799,24 @@ that failed. E.g.,
 If you turn C<RaiseError> on then you'd normally turn C<PrintError> off.
 If C<PrintError> is also on, then the C<PrintError> is done first (naturally).
 
-Typically C<RaiseError> is used in conjunction with C<eval { ... }>
-to catch the exception that's been thrown and followed by an
-C<if ($@) { ... }> block to handle the caught exception.
+Typically C<RaiseError> is used in conjunction with C<eval>,
+or a module like L<Try::Tiny> or L<TryCatch>,
+to catch the exception that's been thrown and handle it.
 For example:
 
-  eval {
+  use Try::Tiny;
+
+  try {
     ...
     $sth->execute();
     ...
-  };
-  if ($@) {
+  } catch {
     # $sth->err and $DBI::err will be true if error was from DBI
-    warn $@; # print the error
+    warn $_; # print the error (which Try::Tiny puts into $_)
     ... # do whatever you need to deal with the error
-  }
+  };
 
-In that eval block the $DBI::lasth variable can be useful for
+In the catch block the $DBI::lasth variable can be useful for
 diagnosis and reporting if you can't be sure which handle triggered
 the error.  For example, $DBI::lasth->{Type} and $DBI::lasth->{Statement}.
 
@@ -4579,7 +4590,7 @@ L</fetchrow_arrayref> into a single call. It returns the first row of
 data from the statement.  The C<$statement> parameter can be a previously
 prepared statement handle, in which case the C<prepare> is skipped.
 
-If any method fails, and L</RaiseError> is not set, C<selectrow_array>
+If any method fails, and L</RaiseError> is not set, C<selectrow_arrayref>
 will return undef.
 
 
@@ -4635,7 +4646,7 @@ In which case the array is copied and each value decremented before
 passing to C</fetchall_arrayref>.
 
 You may often want to fetch an array of rows where each row is stored as a
-hash. That can be done simple using:
+hash. That can be done simply using:
 
   my $emps = $dbh->selectall_arrayref(
       "SELECT ename FROM emp ORDER BY ename",
@@ -4650,6 +4661,18 @@ Or, to fetch into an array instead of an array ref:
   @result = @{ $dbh->selectall_arrayref($sql, { Slice => {} }) };
 
 See L</fetchall_arrayref> method for more details.
+
+=head3 C<selectall_array>
+
+  @ary = $dbh->selectall_array($statement);
+  @ary = $dbh->selectall_array($statement, \%attr);
+  @ary = $dbh->selectall_array($statement, \%attr, @bind_values);
+
+This is a convenience wrapper around L<selectall_arrayref> that returns
+the rows directly as a list, rather than a reference to an array of rows.
+
+Note that if L</RaiseError> is not set then you can't tell the difference
+between returning no rows and an error. Using RaiseError is best practice.
 
 =head3 C<selectall_hashref>
 
@@ -4731,7 +4754,8 @@ statement, such as C<$sth-E<gt>{NUM_OF_FIELDS}>, until after C<$sth-E<gt>execute
 has been called. Portable applications should take this into account.
 
 In general, DBI drivers do not parse the contents of the statement
-(other than simply counting any L</Placeholders>). The statement is
+(other than simply counting any L<Placeholders|/Placeholders and Bind Values>).
+The statement is
 passed directly to the database engine, sometimes known as pass-thru
 mode. This has advantages and disadvantages. On the plus side, you can
 access all the functionality of the engine being used. On the downside,
@@ -4757,7 +4781,7 @@ Like L</prepare> except that the statement handle returned will be
 stored in a hash associated with the C<$dbh>. If another call is made to
 C<prepare_cached> with the same C<$statement> and C<%attr> parameter values,
 then the corresponding cached C<$sth> will be returned without contacting the
-database server.
+database server. Be sure to understand the cautions and caveats noted below.
 
 The C<$if_active> parameter lets you adjust the behaviour if an
 already cached statement handle is still Active.  There are several
@@ -4839,6 +4863,12 @@ like:
 
 which will ensure that prepare_cached only returns statements cached
 by that line of code in that source file.
+
+Also, to ensure the attributes passed are always the same, avoid passing
+references inline. For example, the Slice attribute is specified as a
+reference. Be sure to declare it external to the call to prepare_cached(), such
+that a new hash reference is not created on every call. See L</connect_cached>
+for more details and examples.
 
 If you'd like the cache to managed intelligently, you can tie the
 hashref returned by C<CachedKids> to an appropriate caching module,
@@ -5995,7 +6025,7 @@ mark character (C<?>). For example:
   $sth->execute;
   DBI::dump_results($sth);
 
-See L</"Placeholders and Bind Values"> for more information.
+See L</Placeholders and Bind Values> for more information.
 
 
 B<Data Types for Placeholders>
@@ -6047,7 +6077,7 @@ For example:
 The C<CONVERT> function used here is just an example. The actual function
 and syntax will vary between different databases and is non-portable.
 
-See also L</"Placeholders and Bind Values"> for more information.
+See also L</Placeholders and Bind Values> for more information.
 
 
 =head3 C<bind_param_inout>
@@ -6073,7 +6103,7 @@ pick a generous length, i.e., a length larger than the longest value that would 
 returned.  The only cost of using a larger value than needed is wasted memory.
 
 Undefined values or C<undef> are used to indicate null values.
-See also L</"Placeholders and Bind Values"> for more information.
+See also L</Placeholders and Bind Values> for more information.
 
 
 =head3 C<bind_param_array>
@@ -7220,24 +7250,24 @@ C<AutoCommit> is off.  See L</AutoCommit> for details of using C<AutoCommit>
 with various types of databases.
 
 The recommended way to implement robust transactions in Perl
-applications is to use C<RaiseError> and S<C<eval { ... }>>
-(which is very fast, unlike S<C<eval "...">>). For example:
+applications is to enable L</RaiseError> and catch the error that's 'thrown' as
+an exception.  For example, using L<Try::Tiny>:
 
+  use Try::Tiny;
   $dbh->{AutoCommit} = 0;  # enable transactions, if possible
   $dbh->{RaiseError} = 1;
-  eval {
+  try {
       foo(...)        # do lots of work here
       bar(...)        # including inserts
       baz(...)        # and updates
       $dbh->commit;   # commit the changes if we get this far
-  };
-  if ($@) {
-      warn "Transaction aborted because $@";
+  } catch {
+      warn "Transaction aborted because $_"; # Try::Tiny copies $@ into $_
       # now rollback to undo the incomplete changes
       # but do it in an eval{} as it may also fail
       eval { $dbh->rollback };
       # add other application on-error-clean-up code here
-  }
+  };
 
 If the C<RaiseError> attribute is not set, then DBI calls would need to be
 manually checked for errors, typically like this:
@@ -7455,18 +7485,23 @@ to refer to some code that will be executed when an ALRM signal
 arrives and then to call alarm($seconds) to schedule an ALRM signal
 to be delivered $seconds in the future. For example:
 
+  my $failed;
   eval {
     local $SIG{ALRM} = sub { die "TIMEOUT\n" }; # N.B. \n required
     eval {
       alarm($seconds);
       ... code to execute with timeout here (which may die) ...
-    };
+      1;
+    } or $failed = 1;
     # outer eval catches alarm that might fire JUST before this alarm(0)
     alarm(0);  # cancel alarm (if code ran fast)
-    die "$@" if $@;
-  };
-  if ( $@ eq "TIMEOUT\n" ) { ... }
-  elsif ($@) { ... } # some other error
+    die "$@" if $failed;
+    1;
+  } or $failed = 1;
+  if ( $failed ) {
+    if ( defined $@ and $@ eq "TIMEOUT\n" ) { ... }
+    else { ... } # some other error
+  }
 
 The first (outer) eval is used to avoid the unlikely but possible
 chance that the "code to execute" dies and the alarm fires before it
@@ -7499,17 +7534,20 @@ The code would look something like this (for the DBD-Oracle connect()):
    my $oldaction = POSIX::SigAction->new();
    sigaction( SIGALRM, $action, $oldaction );
    my $dbh;
+   my $failed;
    eval {
       eval {
         alarm(5); # seconds before time out
         $dbh = DBI->connect("dbi:Oracle:$dsn" ... );
-      };
+        1;
+      } or $failed = 1;
       alarm(0); # cancel alarm (if connect worked fast)
-      die "$@\n" if $@; # connect died
-   };
+      die "$@\n" if $failed; # connect died
+      1;
+   } or $failed = 1;
    sigaction( SIGALRM, $oldaction );  # restore original signal handler
-   if ( $@ ) {
-     if ($@ eq "connect timeout\n") {...}
+   if ( $failed ) {
+     if ( defined $@ and $@ eq "connect timeout\n" ) {...}
      else { # connect died }
    }
 
@@ -7521,7 +7559,7 @@ Unfortunately, this solution is somewhat messy, and it does I<not> work with
 perl versions less than perl 5.8 where C<POSIX::sigaction()> appears to be broken.
 
 For a cleaner implementation that works across perl versions, see Lincoln Baxter's
-Sys::SigAction module at L<http://search.cpan.org/~lbaxter/Sys-SigAction/>.
+Sys::SigAction module at L<Sys::SigAction>.
 The documentation for Sys::SigAction includes an longer discussion
 of this problem, and a DBD::Oracle test script.
 
@@ -7662,6 +7700,23 @@ an C<eval> block.
 You can stash private data into DBI handles
 via C<$h-E<gt>{private_..._*}>.  See the entry under L</ATTRIBUTES
 COMMON TO ALL HANDLES> for info and important caveats.
+
+=head2 Memory Leaks
+
+When tracking down memory leaks using tools like L<Devel::Leak>
+you'll find that some DBI internals are reported as 'leaking' memory.
+This is very unlikely to be a real leak.  The DBI has various caches to improve
+performance and the apparrent leaks are simply the normal operation of these
+caches.
+
+The most frequent sources of the apparrent leaks are L</ChildHandles>,
+L</prepare_cached> and L</connect_cached>.
+
+For example http://stackoverflow.com/questions/13338308/perl-dbi-memory-leak
+
+Given how widely the DBI is used, you can rest assured that if a new release of
+the DBI did have a real leak it would be discovered, reported, and fixed
+immediately. The leak you're looking for is probably elsewhere. Good luck!
 
 
 =head1 TRACING
@@ -8098,17 +8153,12 @@ Oracle 7 SQL and PL/SQL) is available here:
 
   http://cui.unige.ch/db-research/Enseignement/analyseinfo/SQL92/BNFindex.html
 
-A BNF syntax for SQL3 is available here:
+You can find more information about SQL standards online by searching for the
+appropriate standard names and numbers. For example, searching for
+"ANSI/ISO/IEC International Standard (IS) Database Language SQL - Part 1:
+SQL/Framework" you'll find a copy at:
 
-  http://www.sqlstandards.org/SC32/WG3/Progression_Documents/Informal_working_drafts/iso-9075-2-1999.bnf
-
-The following links provide further useful information about SQL.
-Some of these are rather dated now but may still be useful.
-
-  http://www.jcc.com/SQLPages/jccs_sql.htm
-  http://www.contrib.andrew.cmu.edu/~shadow/sql.html
-  http://www.altavista.com/query?q=sql+tutorial
-
+  ftp://ftp.iks-jena.de/mitarb/lutz/standards/sql/ansi-iso-9075-1-1999.pdf
 
 =head2 Books and Articles
 
@@ -8127,9 +8177,9 @@ Details of many other books related to perl can be found at L<http://books.perl.
 
 Index of DBI related modules available from CPAN:
 
- https://metacpan.org/search?q=DBD%3A%3A
- https://metacpan.org/search?q=DBIx%3A%3A
- https://metacpan.org/search?q=DBI
+ L<https://metacpan.org/search?q=DBD%3A%3A>
+ L<https://metacpan.org/search?q=DBIx%3A%3A>
+ L<https://metacpan.org/search?q=DBI>
 
 For a good comparison of RDBMS-OO mappers and some OO-RDBMS mappers
 (including Class::DBI, Alzabo, and DBIx::RecordSet in the former
@@ -8147,7 +8197,7 @@ A similar page for Java toolkits can be found at:
 The I<dbi-users> mailing list is the primary means of communication among
 users of the DBI and its related modules. For details send email to:
 
- dbi-users-help@perl.org
+ L<dbi-users-help@perl.org>
 
 There are typically between 700 and 900 messages per month.  You have
 to subscribe in order to be able to post. However you can opt for a
@@ -8159,7 +8209,7 @@ Mailing list archives (of variable quality) are held at:
  http://www.xray.mpe.mpg.de/mailing-lists/dbi/
  http://www.mail-archive.com/dbi-users%40perl.org/
 
-=head2 Assorted Related WWW Links
+=head2 Assorted Related Links
 
 The DBI "Home Page":
 
@@ -8167,42 +8217,17 @@ The DBI "Home Page":
 
 Other DBI related links:
 
- http://tegan.deltanet.com/~phlip/DBUIdoc.html
- http://dc.pm.org/perl_db.html
- http://wdvl.com/Authoring/DB/Intro/toc.html
- http://www.hotwired.com/webmonkey/backend/tutorials/tutorial1.html
- http://bumppo.net/lists/macperl/1999/06/msg00197.html
  http://www.perlmonks.org/?node=DBI%20recipes
  http://www.perlmonks.org/?node=Speeding%20up%20the%20DBI
 
 Other database related links:
 
- http://www.jcc.com/sql_stnd.html
- http://cuiwww.unige.ch/OSG/info/FreeDB/FreeDB.home.html
  http://www.connectionstrings.com/
 
 Security, especially the "SQL Injection" attack:
 
- http://www.ngssoftware.com/research/papers.html
- http://www.ngssoftware.com/papers/advanced_sql_injection.pdf
- http://www.ngssoftware.com/papers/more_advanced_sql_injection.pdf
- http://www.esecurityplanet.com/trends/article.php/2243461
- http://www.spidynamics.com/papers/SQLInjectionWhitePaper.pdf
- http://www.imperva.com/application_defense_center/white_papers/blind_sql_server_injection.html
+ http://bobby-tables.com/
  http://online.securityfocus.com/infocus/1644
-
-Commercial and Data Warehouse Links
-
- http://www.dwinfocenter.org
- http://www.datawarehouse.com
- http://www.datamining.org
- http://www.olapcouncil.org
- http://www.idwa.org
- http://www.knowledgecenters.org/dwcenter.asp
-
-Recommended Perl Programming Links
-
- http://language.perl.com/style/
 
 
 =head2 FAQ
@@ -8377,11 +8402,6 @@ available, thanks to O'Reilly, at:
 
   http://www.oreilly.de/catalog/perldbiger/
 
-Some other translations:
-
- http://cronopio.net/perl/                              - Spanish
- http://member.nifty.ne.jp/hippo2000/dbimemo.htm        - Japanese
-
 =head1 TRAINING
 
 References to DBI related training resources. No recommendation implied.
@@ -8396,7 +8416,7 @@ please send me your details so I can add them here.)
 
 =over 4
 
-=item Apache::DBI by E.Mergl@bawue.de
+=item L<Apache::DBI>
 
 To be used with the Apache daemon together with an embedded Perl
 interpreter like C<mod_perl>. Establishes a database connection which

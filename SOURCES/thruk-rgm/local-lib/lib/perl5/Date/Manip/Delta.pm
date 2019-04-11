@@ -1,5 +1,5 @@
 package Date::Manip::Delta;
-# Copyright (c) 1995-2015 Sullivan Beck. All rights reserved.
+# Copyright (c) 1995-2017 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -25,7 +25,7 @@ use Date::Manip::Base;
 use Date::Manip::TZ;
 
 our $VERSION;
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 ########################################################################
@@ -73,13 +73,7 @@ sub _init_args {
    my($self) = @_;
 
    my @args = @{ $$self{'args'} };
-   if (@args) {
-      if ($#args == 0) {
-         $self->parse($args[0]);
-      } else {
-         warn "WARNING: [new] invalid arguments: @args\n";
-      }
-   }
+   $self->parse(@args);
 }
 
 sub value {
@@ -87,7 +81,7 @@ sub value {
    my $dmt = $$self{'tz'};
    my $dmb = $$dmt{'base'};
 
-   return undef  if ($$self{'err'});
+   return ''  if ($$self{'err'});
    if (wantarray) {
       return @{ $$self{'data'}{'delta'} };
    } else {
@@ -97,7 +91,7 @@ sub value {
                                              'source'  => 'delta',
                                              'sign'    => 0 },
                                            [@delta]);
-      return undef  if ($err);
+      return ''  if ($err);
       return join(':',@delta);
    }
 }
@@ -681,14 +675,18 @@ sub _printf_field {
    if ($width) {
       if      ($pad eq ">") {
          $val = "$s$val";
-         $val .= ' 'x($width-length($val));
+         my $pad = ($width > length($val) ? $width - length($val) : 0);
+         $val .= ' 'x$pad;
 
       } elsif ($pad eq "<") {
          $val = "$s$val";
-         $val = ' 'x($width-length($val)) . $val;
+         my $pad = ($width > length($val) ? $width - length($val) : 0);
+         $val = ' 'x$pad . $val;
 
       } else {
-         $val = $s . '0'x($width-length($val)-length($s)) . $val;
+         my $pad = ($width > length($val)-length($s) ?
+                    $width - length($val) - length($s): 0);
+         $val = $s . '0'x$pad . $val;
       }
    } else {
       $val = "$s$val";
@@ -981,7 +979,7 @@ sub cmp {
                                        $d*$dl + $h*3600 + $mn*60 + $s);
    }
 
-   return ($$self{'data'}{'length'} cmp $$delta{'data'}{'length'});
+   return ($$self{'data'}{'length'} <=> $$delta{'data'}{'length'});
 }
 
 1;

@@ -1,4 +1,4 @@
-# Copyright (c) 1995-2015 Sullivan Beck. All rights reserved.
+# Copyright (c) 1995-2017 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -498,13 +498,13 @@ in a day of week and possibly a time:
 
    $err = $date->prev($dow, $curr [,$time]);
 
-If $curr = 0, this means to look for the previous occurence of the day
+If $curr = 0, this means to look for the previous occurrence of the day
 of week, and set the time to the value passed in (or current time if
 no time was passed in). The day is ALWAY less than the current day. If
 the current day is the same day of week as $dow, then the date
 returned will be one week earlier.
 
-If $curr = 1, it means to look for the current or previous occurence
+If $curr = 1, it means to look for the current or previous occurrence
 of the day of week, and set the time to the value passed in (or 00:00:00 if
 none was passed in). If the current day of week is the same as $dow, the
 date will remain unchanged. Since the time is then set, the new date may
@@ -594,7 +594,7 @@ This returns the number of seconds that have elapsed since Jan 1, 1970
 
 The reverse is also allowed:
 
-   $err = $date->secs_sincs_1970_GMT($secs);
+   $err = $date->secs_since_1970_GMT($secs);
 
 which sets the date to $secs seconds from Jan 1, 1970 00:00:00 GMT in
 the local time zone.
@@ -680,7 +680,7 @@ SetDate or ForceDate config variables).
 
 If $type is "gmt", the date is returned in the GMT time zone.
 
-An empty string or list is returned i the case of an error (and
+An empty string or list is returned in the case of an error (and
 an error code is set).
 
 =item B<week_of_year>
@@ -769,7 +769,7 @@ The first way to specify the time zone is to specify it by complete name
 Although this is unambiguous when it comes to determining the time zone,
 the time is ambiguous in most zones for one hour of the year. When
 a time change occurs during which the clock is moved back, the same
-wallclock time occurs twice.
+wall clock time occurs twice.
 
 For example, in America/New_York, on Sunday, Nov 2, 2008, at 02:00 in
 the morning, the clock was set back to 01:00. As a result, the date
@@ -863,7 +863,7 @@ A calendar date includes the following fields:
    YY    2-digit representation of the year in
          a century
    MM    2-digit representation of a month
-   DD    2-ditit representation of a day of month
+   DD    2-digit representation of a day of month
    DoY   3-digit representation of a day of year
          (001-366)
    Www   the character "W" followed by a 2-digit
@@ -1057,7 +1057,7 @@ The following date formats are supported:
    YYYY/mmm/D          2009/Mar/5
 
    mmmD                Mar5
-   mmmDDYY             Mar0509
+   mmmDDYY     4       Mar0509
    mmmDDYYYY           Mar052009
    Dmmm                5Mar
    DmmmYY              5Mar09
@@ -1086,13 +1086,19 @@ The following date formats are supported:
 
    YYYY:MM:DD          2010:01:15 (EXIF format)
 
+   mmmYYYY     4       Jun 2010
+   YYYYmmm     4       2010 June
+   mmm/YYYY    4       Jun/2010
+   YYYY/mmm    4       2010/Jun
+
 In the formats above, the slash (/) can be replace by any of the valid
 separators: whitespace, slash (/), period (.), or dash (-). The dash,
 though allowed, is discouraged since it may conflict with an ISO 8601
 format.  For example, the format MM/DD/YY is just fine, but MM-DD-YY
 does not work since it conflicts with YY-MM-DD.  To be safe, if "-" is
 used as a separator in a non-ISO format, they should be turned into
-"/" before calling the Date::Manip routines.
+"/" before calling the Date::Manip routines or you should use the 'noiso8601'
+option with the B<parse> or B<parse_date> methods.
 
 No matter what separator is used, the same separator must be used
 throughout the date. For example, MM/DD/YY is valid and MM.DD.YY is
@@ -1110,6 +1116,28 @@ Notes:
 
 3  The M/D format should not use the period (.) separator as that will
    incorrectly match the HH,H+ time format.
+
+4  Historically, I have not supported partial dates (i.e. dates that
+   were not fully specified), but it has been argued that something like
+   'Jun 1910' would be interpreted by almost everyone as a day in June
+   of 1910 instead of June 19, 2010.  And it has been shown that in
+   some applications, dates are specified in that way.  I have added the
+   new config variable Format_MMMYYYY which will change this.  If this
+   variable is not set, the formats allowed are:
+
+      mmmDDYY
+
+   If it is set, the formats allowed are:
+
+      mmmYYYY
+      YYYYmmm
+
+   The day of week may not be included with these formats.  When
+   parsing a full date/time, if Format_MMMYYYY is set to 'first',
+   it returns the 1st of the month at midnight.  If it is set to
+   'last', it returns the last day at 23:59:59.  If parsing only
+   only a date, it will be set to the first or last day of the
+   month at midnight.
 
 These formats explicitly set the date, but not the time. The default
 time is determined by the DefaultTime config variable.
@@ -1133,7 +1161,7 @@ The following formats are also supported by Date::Manip:
         1970 1st Dec
 
    next/prev DoW
-        The next or last occurence of DoW
+        The next or last occurrence of DoW
            next Friday
            last Friday at 12:40
 
@@ -1527,7 +1555,7 @@ a valid combined date and time.
 Dates are often specified in terms of a delta from "now". For example,
 "in 2 days".
 
-Any valid delta can be used to specify a date, and the date is defined
+Most valid deltas can be used to specify a date, and the date is defined
 as that delta added to "now". Refer to the Date::Manip::Delta documentation
 for a list of valid delta formats.
 
@@ -1696,7 +1724,7 @@ from the date.
 
    Extended formats
        %<A=NUM>   These returns the NUMth value of the %A, %a, and %v formats
-       %<a=NUM>   resepectively.  In English, that would yield:
+       %<a=NUM>   respectively.  In English, that would yield:
        %<v=NUM>      %<A=2>   => Tuesday
                      %<a=2>   => Tue
                      %<v=2>   => T

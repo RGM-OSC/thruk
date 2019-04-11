@@ -10,7 +10,8 @@ use strict;
 
 use vars qw($VERSION $CLASS $STRICT $LAX);
 
-$VERSION = '7.04';
+$VERSION = '7.30';
+$VERSION = eval $VERSION;
 
 #--------------------------------------------------------------------------#
 # Version regexp components

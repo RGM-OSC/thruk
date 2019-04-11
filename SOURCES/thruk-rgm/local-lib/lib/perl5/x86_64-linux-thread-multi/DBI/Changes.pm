@@ -6,6 +6,134 @@ DBI::Changes - List of significant changes to the DBI
 
 =cut
 
+=head2 Changes in DBI 1.638 - ...
+
+    Fix UTF-8 support for warn/croak calls within DBI internals,
+        thanks to pali #53
+    Fix dependency on Storable for perl older than 5.8.9,
+        thanks to H.Merijn Brand.
+
+    Add DBD::Mem driver, a pure-perl in-memory driver using DBI::DBD::SqlEngine,
+        thanks to Jens Rehsack #42
+
+    Corrected missing semicolon in example in documentation,
+        thanks to pali #55
+
+=head2 Changes in DBI 1.637 - 16th August 2017
+
+    Fix use of externally controlled format string (CWE-134) thanks to pali #44
+        This could cause a crash if, for example, a db error contained a %.
+        https://cwe.mitre.org/data/definitions/134.html
+    Fix extension detection for DBD::File related drivers
+    Fix tests for perl without dot in @INC RT#120443
+    Fix loss of error message on parent handle, thanks to charsbar #34
+    Fix disappearing $_ inside callbacks, thanks to robschaber #47
+    Fix dependency on Storable for perl older than 5.8.9
+
+    Allow objects to be used as passwords without throwing an error, thanks to demerphq #40
+    Allow $sth NAME_* attributes to be set from Perl code, re #45
+    Added support for DBD::XMLSimple thanks to nigelhorne #38
+
+    Documentation updates:
+    Improve examples using eval to be more correct, thanks to pali #39
+    Add cautionary note to prepare_cached docs re refs in %attr #46
+    Small POD changes (Getting Help -> Online) thanks to openstrike #33
+    Adds links to more module names and fix typo, thanks to oalders #43
+    Typo fix thanks to bor #37
+
+=head2 Changes in DBI 1.636 - 24th April 2016
+
+    Fix compilation for threaded perl <= 5.12 broken in 1.635 RT#113955
+    Revert change to DBI::PurePerl DESTROY in 1.635
+    Change t/16destroy.t to avoid race hazard RT#113951
+    Output perl version and archname in t/01basics.t
+    Add perl 5.22 and 5.22-extras to travis-ci config
+
+=head2 Changes in DBI 1.635 - 24th April 2016
+
+    Fixed RaiseError/PrintError for UTF-8 errors/warnings. RT#102404
+    Fixed cases where ShowErrorStatement might show incorrect Statement RT#97434
+    Fixed DBD::Gofer for UTF-8-enabled STDIN/STDOUT
+        thanks to mauke PR#32
+    Fixed fetchall_arrayref({}) behavior with no columns
+        thanks to Dan McGee PR#31
+    Fixed tied CachedKids ref leak in attribute cache by weakening
+        thanks to Michael Conrad RT#113852
+    Fixed "panic: attempt to copy freed scalar" upon commit() or rollback()
+        thanks to fbriere for detailed bug report RT#102791
+    Ceased to ignore DESTROY of outer handle in DBI::PurePerl
+    Treat undef in DBI::Profile Path as string "undef"
+        thanks to fREW Schmidt RT#113298
+    Fix SQL::Nano parser to ignore trailing semicolon
+        thanks to H.Merijn Brand.
+
+    Added @ary = $dbh->selectall_array(...) method
+        thanks to Ed Avis RT#106411
+    Added appveyor support (Travis like CI for windows)
+        thanks to mbeijen PR#30
+
+    Corrected spelling errors in pod
+        thanks to Gregor Herrmann RT#107838
+    Corrected and/or removed broken links to SQL standards
+        thanks to David Pottage RT#111437
+    Corrected doc example to use dbi: instead of DBI: in DSN
+        thanks to Michael R. Davis RT#101181
+    Removed/updated broken links in docs
+        thanks to mbeijen PR#29
+    Clarified docs for DBI::hash($string)
+    Removed the ancient DBI::FAQ module RT#102714
+    Fixed t/pod.t to require Test::Pod >= 1.41 RT#101769
+
+This release was developed at the Perl QA Hackathon 2016
+L<http://act.qa-hackathon.org/qa2016/>
+which was made possible by the generosity of many sponsors:
+
+L<https://www.fastmail.com> FastMail,
+L<https://www.ziprecruiter.com> ZipRecruiter,
+L<http://www.activestate.com> ActiveState,
+L<http://www.opusvl.com> OpusVL,
+L<https://www.strato.com> Strato,
+L<http://www.surevoip.co.uk> SureVoIP,
+L<http://www.cv-library.co.uk> CV-Library,
+L<https://www.iinteractive.com/> Infinity,
+L<https://opensource.careers/perl-careers/> Perl Careers,
+L<https://www.mongodb.com> MongoDB,
+L<https://www.thinkproject.com> thinkproject!,
+L<https://www.dreamhost.com/> Dreamhost,
+L<http://www.perl6.org/> Perl 6,
+L<http://www.perl-services.de/> Perl Services,
+L<https://www.evozon.com/> Evozon,
+L<http://www.booking.com> Booking,
+L<http://eligo.co.uk> Eligo,
+L<http://www.oetiker.ch/> Oetiker+Partner,
+L<http://capside.com/en/> CAPSiDE,
+L<https://www.procura.nl/> Procura,
+L<https://constructor.io/> Constructor.io,
+L<https://metacpan.org/author/BABF> Robbie Bow,
+L<https://metacpan.org/author/RSAVAGE> Ron Savage,
+L<https://metacpan.org/author/ITCHARLIE> Charlie Gonzalez,
+L<https://twitter.com/jscook2345> Justin Cook.
+
+=head2 Changes in DBI 1.634 - 3rd August 2015
+
+    Enabled strictures on all modules (Jose Luis Perez Diez) #22
+        Note that this might cause new exceptions in existing code.
+        Please take time for extra testing before deploying to production.
+    Improved handling of row counts for compiled drivers and enable them to
+        return larger row counts (IV type) by defining new *_iv macros.
+    Fixed quote_identifier that was adding a trailing separator when there
+        was only a catalog (Martin J. Evans)
+
+    Removed redundant keys() call in fetchall_arrayref with hash slice (ilmari) #24
+    Corrected pod xref to Placeholders section (Matthew D. Fuller)
+    Corrected pod grammar (Nick Tonkin) #25
+
+    Added support for tables('', '', '', '%') special case (Martin J. Evans)
+    Added support for DBD prefixes with numbers (Jens Rehsack) #19
+    Added extra initializer for DBI::DBD::SqlEngine based DBD's (Jens Rehsack)
+    Added Memory Leaks section to the DBI docs (Tim)
+    Added Artistic v1 & GPL v1 LICENSE file (Jose Luis Perez Diez) #21
+
 =head2 Changes in DBI 1.633 - 11th Jan 2015
 
     Fixed selectrow_*ref to return undef on error in list context

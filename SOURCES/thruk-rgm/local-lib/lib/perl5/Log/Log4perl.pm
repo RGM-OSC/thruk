@@ -8,13 +8,15 @@ use 5.006;
 use strict;
 use warnings;
 
+use Carp;
+
 use Log::Log4perl::Util;
 use Log::Log4perl::Logger;
 use Log::Log4perl::Level;
 use Log::Log4perl::Config;
 use Log::Log4perl::Appender;
 
-our $VERSION = '1.46';
+our $VERSION = '1.49';
 
    # set this to '1' if you're using a wrapper
    # around Log::Log4perl
@@ -109,11 +111,11 @@ sub import {
             my $name  = "$caller_pkg\::$key";
                # Need to split this up in two lines, or CVS will
                # mess it up.
-            my $value = $
-                        Log::Log4perl::Level::PRIORITY{$key};
+            my $value = $Log::Log4perl::Level::PRIORITY{
+              $key};
             no strict qw(refs);
             *{"$name"} = \$value;
-        }
+        } 
 
         delete $tags{':levels'};
     }
@@ -298,6 +300,11 @@ sub easy_init { # Initialize the root logger with a screen appender
             } elsif(ref($arg) eq "HASH") {
                 my %logger = (%default, %$arg);
                 push @loggers, \%logger;
+            } else {
+                # I suggest this becomes a croak() after a
+                # reasonable deprecation cycle.
+                carp "All arguments to easy_init should be either "
+                   . "an integer log level or a hash reference.";
             }
         }
     }
@@ -608,7 +615,10 @@ sub remove_logger {
     Log::Log4perl->easy_closure_logger_remove( $logger );
 
     # Remove the logger from the system
-    delete $Log::Log4perl::Logger::LOGGERS_BY_NAME->{ $logger->{category} };
+      # Need to split this up in two lines, or CVS will
+      # mess it up.
+    delete $Log::Log4perl::Logger::LOGGERS_BY_NAME->{ 
+      $logger->{category} };
 }
 
 1;
@@ -622,7 +632,8 @@ __END__
 Log::Log4perl - Log4j implementation for Perl
 
 =head1 SYNOPSIS
-        # Easy mode if you like it simple ...
+        
+		# Easy mode if you like it simple ...
 
     use Log::Log4perl qw(:easy);
     Log::Log4perl->easy_init($ERROR);
@@ -1236,7 +1247,7 @@ of a date, according to the SimpleDateFormat in the Java World
 (L<http://java.sun.com/j2se/1.3/docs/api/java/text/SimpleDateFormat.html>)
 
 In this way, C<%d{HH:mm}> displays only hours and minutes of the current date,
-while C<%d{yy, EEEE}> displays a two-digit year, followed by a spelled-out
+while C<%d{yy, EEEE}> displays a two-digit year, followed by a spelled-out day
 (like C<Wednesday>). 
 
 Similar options are available for shrinking the displayed category or
@@ -1697,8 +1708,8 @@ By default it will use a L<LWP::UserAgent> that is created as follows:
  $LWP_USER_AGENT = LWP::UserAgent->new;
  $LWP_USER_AGENT->env_proxy;
 
-Note that env_proxy reads proxy settings from environment variables, which is what I need to
-do to get thru our firewall. If you want to use a different LWP::UserAgent, you can 
+Note that env_proxy reads proxy settings from environment variables, which is what Log4perl needs to
+do to get through our firewall. If you want to use a different LWP::UserAgent, you can 
 set it with
 
     Log::Log4perl::Config::set_LWP_UserAgent($my_agent);
@@ -2024,7 +2035,7 @@ There are also two equivalent functions:
 They're included to allow you a choice in readability. Some folks
 will prefer more/less_logging, as they're fairly clear in what they
 do, and allow the programmer not to worry too much about what a Level
-is and whether a higher Level means more or less logging. However,
+is and whether a higher level means more or less logging. However,
 other folks who do understand and have lots of code that deals with
 levels will probably prefer the inc_level() and dec_level() methods as
 they want to work with Levels and not worry about whether that means
@@ -2061,7 +2072,7 @@ You'd do such as follows:
 
     Log::Log4perl::Logger::create_custom_level("NOTIFY", "WARN");
 
-And that's it! create_custom_level() creates the following functions /
+And that's it! C<create_custom_level()> creates the following functions /
 variables for level FOO:
 
     $FOO_INT        # integer to use in L4p::Level::to_level()
@@ -2461,7 +2472,7 @@ This will decrease the thresholds of all appenders in the system by
 one level, i.e. WARN becomes INFO, INFO becomes DEBUG, etc. To only modify 
 selected ones, use
 
-       # decrease thresholds of all appenders
+       # decrease thresholds of selected appenders
     Log::Log4perl->appender_thresholds_adjust(-1, ['AppName1', ...]);
 
 and pass the names of affected appenders in a ref to an array.

@@ -1,14 +1,14 @@
 package #
 Date::Manip::TZ::askolk00;
-# Copyright (c) 2008-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'tzdata' is run.
-#    Generated on: Wed Feb 18 16:55:34 GMT 2015
-#    Data version: tzdata2015a
-#    Code version: tzcode2015a
+#    Generated on: Tue May 30 10:43:25 EDT 2017
+#    Data version: tzdata2017b
+#    Code version: tzcode2017b
 
 # This module contains data from the zoneinfo time zone database.  The original
 # data was obtained from the URL:
@@ -25,7 +25,7 @@ END {
 }
 
 our ($VERSION);
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 %Dates         = (
@@ -44,7 +44,7 @@ END { undef $VERSION; }
    1941 =>
      [
         [ [1941,9,30,18,6,40],[1941,10,1,0,36,40],'+06:30:00',[6,30,0],
-          'BURT',0,[1942,5,14,17,29,59],[1942,5,14,23,59,59],
+          '+0630',0,[1942,5,14,17,29,59],[1942,5,14,23,59,59],
           '1941093018:06:40','1941100100:36:40','1942051417:29:59','1942051423:59:59' ],
      ],
    1942 =>
@@ -53,7 +53,7 @@ END { undef $VERSION; }
           'IST',0,[1942,8,31,18,29,59],[1942,8,31,23,59,59],
           '1942051417:30:00','1942051423:00:00','1942083118:29:59','1942083123:59:59' ],
         [ [1942,8,31,18,30,0],[1942,9,1,1,0,0],'+06:30:00',[6,30,0],
-          'IST',1,[1945,10,14,17,29,59],[1945,10,14,23,59,59],
+          '+0630',1,[1945,10,14,17,29,59],[1945,10,14,23,59,59],
           '1942083118:30:00','1942090101:00:00','1945101417:29:59','1945101423:59:59' ],
      ],
    1945 =>

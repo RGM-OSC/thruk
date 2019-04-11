@@ -123,12 +123,13 @@ sub currstr {
 
 package ExtUtils::MakeMaker::version::vpp;
 
-use 5.006002;
+use 5.006001;
 use strict;
 
 use Config;
 use vars qw($VERSION $CLASS @ISA $LAX $STRICT);
-$VERSION = '7.04';
+$VERSION = '7.30';
+$VERSION = eval $VERSION;
 $CLASS = 'ExtUtils::MakeMaker::version::vpp';
 
 require ExtUtils::MakeMaker::version::regex;

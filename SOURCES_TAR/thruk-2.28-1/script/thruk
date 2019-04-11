@@ -1,0 +1,249 @@
+#!/bin/bash
+
+# read rc files if exist
+[ -e ~/.profile ] && . ~/.profile
+[ -e ~/.thruk   ] && . ~/.thruk
+
+if [ -e $(dirname $0)/../lib/Thruk.pm ]; then
+  export PERL5LIB="$PERL5LIB:$(dirname $0)/../lib";
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$(dirname $0)/../"; fi
+elif [ ! -z $OMD_ROOT ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+else
+  export PERL5LIB=$PERL5LIB:/usr/share/thruk/lib:/usr/lib/thruk/perl5:/usr/lib64/thruk/perl5;
+  if [ -z $THRUK_CONFIG ]; then export THRUK_CONFIG='/etc/thruk'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 25
+
+###################################################
+use strict;
+use warnings;
+use Getopt::Long qw//;
+
+our $VERSION = '2.28';
+my $branch       = '';
+
+my $options = {
+    'verbose'        => 1,
+    'backends'       => [],
+    'commandoptions' => [],
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+Getopt::Long::Configure('pass_through');
+Getopt::Long::GetOptions (
+   "h|help"             => \$options->{'help'},
+   "v|verbose"          => sub { $options->{'verbose'}++ },
+   "q|quiet"            => \$options->{'quiet'},
+   "V|version"          => \$options->{'version'},
+   "r|remote-url=s"     => \$options->{'remoteurl'},
+     "local"            => \$options->{'local'},
+   "c|credential=s"     => \$options->{'credential'},
+   "b|backend=s"        =>  $options->{'backends'},
+   "A|auth=s"           => \$options->{'auth'},
+   "y|yes"              => \$options->{'yes'},
+   "f|force"            => \$options->{'force'},
+
+     "list-commands"    => \$options->{'listcommands'},
+   "l|list-backends"    => \$options->{'listbackends'},
+   "a|action=s"         => \$options->{'action'},
+) or do {
+    print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
+    _print_modules();
+    exit 3;
+};
+@{$options->{'commandoptions'}} = @ARGV;
+if($options->{'help'}) {
+    require Pod::Usage;
+    Pod::Usage::pod2usage( { -verbose => 2, -exit => 3 } );
+    exit(3);
+}
+if($options->{'version'}) {
+    require Thruk::Config;
+    $branch = Thruk::Config::get_git_name() unless $branch ne '';
+    print "Thruk Version $VERSION".($branch ne '' ? '~'.$branch : '')."\n"; exit 0;
+}
+$options->{'verbose'} = 0 if $options->{'quiet'};
+if(!$options->{'action'} and scalar @{$options->{'commandoptions'}} == 0 and !$options->{'listbackends'} and !$options->{'listcommands'}) {
+    print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
+    _print_modules();
+    exit 3;
+}
+if($options->{'listcommands'}) {
+    _print_modules();
+    exit 0;
+}
+
+require Thruk::Utils::CLI;
+my $cli = Thruk::Utils::CLI->new($options);
+exit $cli->_run();
+
+##############################################
+sub _print_modules {
+    require Thruk::Utils;
+    require Thruk::Config;
+    # read the config which puts our loaded addons into @INC and those cli modules will be found as well
+    Thruk::Config::get_config();
+    print "Enabled cli plugins: ".join(", ", @{Thruk::Utils::get_cli_modules()})."\n";
+    print "get help for a specific plugin with: $0 <plugin> help\n";
+    return;
+}
+
+##############################################
+
+1;
+__END__
+
+=head1 NAME
+
+thruk - Command Line Utility for Thruk Monitoring Gui
+
+=head1 SYNOPSIS
+
+  Usage: thruk [globaloptions] <command> [commandoptions]
+
+  Globaloptions:
+    -h, --help                    Show this help message and exit
+    -v, --verbose                 Print verbose output
+    -q, --quiet                   Print less output
+    -V, --version                 Print version
+
+    -b, --backend=<backend>       Comma seperated list of backends/sites
+                                  which should be used for querys.
+    -A, --auth=<auth>             Set username for querys
+
+    -c, --credential=<pw>         Credential when connecting to remote
+                                  Thruk installations specified by the
+                                  remote-url.
+    -r, --remote-url=<url>        URL to remote installation.
+        --local                   Don't try to connect fastcgi daemon first.
+
+    -y, --yes                     answer yes to all given questions.
+    -f, --force                   some actions need to be forced
+
+  Compatibility options:
+        --list-commands           List available commands.
+    -l, --list-backends           List available backends/sites. Alias for 'backend list'.
+    -a, --action=<command>        Perform given action. see below for a list.
+
+
+=head1 DESCRIPTION
+
+This script gives access to various parts of the Thruk gui and allows to generate
+excel reports, csv exports or any other url by using command line and bypassing the
+webserver.
+
+=head1 COMMANDS
+
+Available commands will be listed when running thruk without any argument or by
+
+  %> thruk --list-commands
+
+=head1 GLOBALOPTIONS
+
+script has the following arguments
+
+=over 4
+
+=item B<-h> , B<--help>
+
+    print help and exit
+
+=item B<-v> , B<--verbose>
+
+    print verbose output too
+
+=item B<-V> , B<--version>
+
+    print version and exit
+
+=item B<-b> I<backend>, B<--backend>=I<backend>
+
+    specify backend(s), otherwise the default backends will be
+    used. Specify the key of the backend. Use <-l> to get a list
+    of backends.
+
+    All default backends (backends without the 'hidden' flag) will be used unless
+    backend(s) are specified with this option.
+
+    Use 'ALL' to use all backends, regardless of the hidden flag.
+
+=item B<-l> , B<--list-backends>
+
+    get list of available backends
+
+=item B<--list-commands>
+
+    get list of available commands.
+
+=item B<-a> I<action>, B<--action>=I<action>
+
+    This is deprecated, use the new form 'thruk <cmd> ...' instead.
+
+    perform selected action:
+
+    Scheduling Commands
+      - fix_scheduling(=filter)     balance scheduling or all hosts and services
+                                    or just a group by adding a filter like
+                                    fix_scheduling=hg:<hostgroup>
+                                    fix_scheduling=sg:<servicegroup>
+
+    Internal Commands
+      - compile                     compile templates for faster access
+      - clean_dashboards            remove empty dashboards which are older than 1 day
+
+
+
+=item B<-A> I<authname>, B<--auth>=I<authname>
+
+    use this username for authentication
+
+=item B<-c> I<credential>, B<--credential>=I<credential>
+
+    use this key for authentication when using remoteurl
+
+=item B<-r> I<remote-url>, B<--remote-url>=I<remote-url>
+
+    Connect to this remote instance instead of the local one.
+    Defaults to http://localhost/thruk/cgi-bin/remote.cgi.
+    Retrieving information from the fcgi daemon saves time to
+    startup and allows to connect to remote located sites.
+
+=item B<--local>
+
+    Don't contact remote server. Normally remote-url is tried first for
+    faster access.
+
+=item B<-y> , B<--yes>
+
+    answer yes to a given questions during commands.
+
+=back
+
+=head1 RETURN VALUE
+
+thruk returns 0 on success and >= 1 otherwise
+
+=head1 EXAMPLES
+
+List available backends:
+
+  %> thruk -l
+
+List available commands:
+
+  %> thruk
+
+=head1 AUTHOR
+
+Sven Nierlein, 2009-2014, <sven@nierlein.org>
+
+=cut

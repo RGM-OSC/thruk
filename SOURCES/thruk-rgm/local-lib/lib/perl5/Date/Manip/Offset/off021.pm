@@ -1,25 +1,25 @@
 package #
 Date::Manip::Offset::off021;
-# Copyright (c) 2008-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'tzdata' is run.
-#    Generated on: Wed Feb 18 18:24:53 GMT 2015
-#    Data version: tzdata2015a
-#    Code version: tzcode2015a
+#    Generated on: Tue May 30 10:44:03 EDT 2017
+#    Data version: tzdata2017b
+#    Code version: tzcode2017b
 
 # This module contains data from the zoneinfo time zone database.  The original
 # data was obtained from the URL:
-#    ftp://ftp.iana.orgtz
+#    ftp://ftp.iana.org/tz
 
 use strict;
 use warnings;
 require 5.010000;
 
 our ($VERSION);
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 our ($Offset,%Offset);
@@ -52,19 +52,19 @@ $Offset        = '+01:00:00';
       'europe/brussels',
       'europe/warsaw',
       'africa/lagos',
+      'europe/madrid',
       'africa/algiers',
       'europe/amsterdam',
       'europe/paris',
       'europe/monaco',
       'europe/andorra',
-      'europe/madrid',
       'europe/gibraltar',
       'africa/ceuta',
       'africa/windhoek',
       'etc/gmt+1',
       'n',
-      'europe/vilnius',
       'africa/tripoli',
+      'europe/vilnius',
       'europe/lisbon',
       'europe/uzhgorod',
       'africa/casablanca',
@@ -86,19 +86,19 @@ $Offset        = '+01:00:00';
       'europe/lisbon',
       'europe/london',
       'europe/dublin',
+      'africa/casablanca',
       'atlantic/madeira',
+      'africa/el_aaiun',
       'atlantic/canary',
       'atlantic/faroe',
-      'africa/casablanca',
       'africa/algiers',
       'africa/ceuta',
       'europe/gibraltar',
-      'europe/madrid',
       'europe/monaco',
       'europe/paris',
       'europe/brussels',
       'europe/luxembourg',
-      'africa/el_aaiun',
+      'europe/madrid',
       ],
 );
 

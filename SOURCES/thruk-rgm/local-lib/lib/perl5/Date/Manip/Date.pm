@@ -1,5 +1,5 @@
 package Date::Manip::Date;
-# Copyright (c) 1995-2015 Sullivan Beck. All rights reserved.
+# Copyright (c) 1995-2017 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -27,7 +27,7 @@ use Date::Manip::Base;
 use Date::Manip::TZ;
 
 our $VERSION;
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 ########################################################################
@@ -58,10 +58,9 @@ sub _init {
       # The date in the parsed timezone
       'date'   => [],        # the parsed date split
       'def'    => [0,0,0,0,0,0],
-
-      # 1 for each field that came from
-      # defaults rather than parsed
-      # '' for an implied field
+                             # 1 for each field that came from
+                             # defaults rather than parsed
+                             # '' for an implied field
       'tz'     => '',        # the timezone of the date
       'isdst'  => '',        # 1 if the date is in DST.
       'offset' => [],        # The offset from GMT
@@ -74,19 +73,15 @@ sub _init {
       # The date in local timezone
       'loc'    => [],        # the date converted to local timezone
      };
+   return;
 }
 
 sub _init_args {
    my($self) = @_;
 
    my @args = @{ $$self{'args'} };
-   if (@args) {
-      if ($#args == 0) {
-         $self->parse($args[0]);
-      } else {
-         warn "WARNING: [new] invalid arguments: @args\n";
-      }
-   }
+   $self->parse(@args);
+   return;
 }
 
 sub input {
@@ -112,6 +107,7 @@ sub parse {
 
    my $dmt = $$self{'tz'};
    my $dmb = $$dmt{'base'};
+   delete $$self{'data'}{'default_time'};
 
    my($done,$y,$m,$d,$h,$mn,$s,$tzstring,$zone,$abb,$off,$dow,$got_time,
       $default_time,$firsterr);
@@ -262,6 +258,20 @@ sub parse {
                $dow = '';
             }
             last PARSE  if ($done);
+
+            # We'll also check the original string to see if it's a valid
+            # delta since some deltas may have interpreted part of it as
+            # a time or timezone.
+
+            ($done,@tmp) =
+              $self->_parse_delta($instring,$dow,$got_time,$h,$mn,$s,\$noupdate);
+            if (@tmp) {
+               ($y,$m,$d,$h,$mn,$s) = @tmp;
+               $got_time = 1;
+               $dow = '';
+               ($tzstring,$zone,$abb,$off) = ();
+            }
+            last PARSE  if ($done);
          }
 
          # Parse holidays
@@ -305,7 +315,10 @@ sub parse {
 
    if (! $got_time) {
       if ($default_time) {
-         if ($dmb->_config('defaulttime') eq 'midnight') {
+         if (exists $$self{'data'}{'default_time'}) {
+            ($h,$mn,$s) = @{ $$self{'data'}{'default_time'} };
+            delete $$self{'data'}{'default_time'};
+         } elsif ($dmb->_config('defaulttime') eq 'midnight') {
             ($h,$mn,$s) = (0,0,0);
          } else {
             ($h,$mn,$s) = $dmt->_now('time',$noupdate);
@@ -471,6 +484,16 @@ sub _parse_date {
 
       unless (exists $opts{'noother'}) {
          (@tmp) = $self->_parse_date_other($string,$dow,$of,$noupdate);
+         if (@tmp) {
+            ($y,$m,$d,$dow) = @tmp;
+            last PARSE;
+         }
+      }
+
+      # Parse truncated dates
+
+      if (! $dow  &&  ! $of) {
+         (@tmp) = $self->_parse_date_truncated($string,$noupdate);
          if (@tmp) {
             ($y,$m,$d,$dow) = @tmp;
             last PARSE;
@@ -961,7 +984,7 @@ sub _parse_check {
       $$self{'err'} = "[$caller] Invalid date";
       return 1;
    }
-   my $date   = [$y,$m,$d,$h,$mn,$s];
+   my $date   = [$y+0,$m+0,$d+0,$h+0,$mn+0,$s+0];
 
    #
    # We need to check that the date is valid in a timezone.  The
@@ -1013,7 +1036,7 @@ sub _parse_check {
    }
 
    if (! @tmp) {
-      $$self{'err'} = "[$caller] Invalid timezone";
+      $$self{'err'} = "[$caller] Invalid date in timezone";
       return 1;
    }
 
@@ -1095,46 +1118,52 @@ sub _iso8601_rx {
       my $yod = '(?<yod>\d)';
       my $cc  = '(?<c>\d\d)';
 
-      my $cdaterx =
-        "${y4}${m}${d}|" .                 # CCYYMMDD
-        "${y4}\\-${m}\\-${d}|" .           # CCYY-MM-DD
-          "\\-${y2}${m}${d}|" .            # -YYMMDD
-          "\\-${y2}\\-${m}\\-${d}|" .      # -YY-MM-DD
-          "\\-?${y2}${m}${d}|" .           # YYMMDD
-          "\\-?${y2}\\-${m}\\-${d}|" .     # YY-MM-DD
-          "\\-\\-${m}\\-?${d}|" .          # --MM-DD   --MMDD
-          "\\-\\-\\-${d}|" .               # ---DD
+      my @cdaterx =
+        (
+         "${y4}${m}${d}",               # CCYYMMDD
+         "${y4}\\-${m}\\-${d}",         # CCYY-MM-DD
+         "\\-${y2}${m}${d}",            # -YYMMDD
+         "\\-${y2}\\-${m}\\-${d}",      # -YY-MM-DD
+         "\\-?${y2}${m}${d}",           # YYMMDD
+         "\\-?${y2}\\-${m}\\-${d}",     # YY-MM-DD
+         "\\-\\-${m}\\-?${d}",          # --MM-DD   --MMDD
+         "\\-\\-\\-${d}",               # ---DD
 
-          "${y4}\\-?${doy}|" .             # CCYY-DoY  CCYYDoY
-          "\\-?${y2}\\-?${doy}|" .         # YY-DoY    -YY-DoY
-                                           # YYDoY     -YYDoY
-          "\\-${doy}|" .                   # -DoY
+         "${y4}\\-?${doy}",             # CCYY-DoY  CCYYDoY
+         "\\-?${y2}\\-?${doy}",         # YY-DoY    -YY-DoY
+                                        # YYDoY     -YYDoY
+         "\\-${doy}",                   # -DoY
 
-          "${y4}W${w}${dow}|" .            # CCYYWwwD
-          "${y4}\\-W${w}\\-${dow}|" .      # CCYY-Www-D
-          "\\-?${y2}W${w}${dow}|" .        # YYWwwD    -YYWwwD
-          "\\-?${y2}\\-W${w}\\-${dow}|" .  # YY-Www-D  -YY-Www-D
+         "${y4}W${w}${dow}",            # CCYYWwwD
+         "${y4}\\-W${w}\\-${dow}",      # CCYY-Www-D
+         "\\-?${y2}W${w}${dow}",        # YYWwwD    -YYWwwD
+         "\\-?${y2}\\-W${w}\\-${dow}",  # YY-Www-D  -YY-Www-D
 
-          "\\-?${yod}W${w}${dow}|" .       # YWwwD     -YWwwD
-          "\\-?${yod}\\-W${w}\\-${dow}|" . # Y-Www-D   -Y-Www-D
-          "\\-W${w}\\-?${dow}|" .          # -Www-D    -WwwD
-          "\\-W\\-${dow}|" .               # -W-D
-          "\\-\\-\\-${dow}";               # ---D
+         "\\-?${yod}W${w}${dow}",       # YWwwD     -YWwwD
+         "\\-?${yod}\\-W${w}\\-${dow}", # Y-Www-D   -Y-Www-D
+         "\\-W${w}\\-?${dow}",          # -Www-D    -WwwD
+         "\\-W\\-${dow}",               # -W-D
+         "\\-\\-\\-${dow}",             # ---D
+        );
+      my $cdaterx = join('|',@cdaterx);
       $cdaterx = qr/(?:$cdaterx)/i;
 
-      my $tdaterx =
-        "${y4}\\-${m}|" .                  # CCYY-MM
-        "${y4}|" .                         # CCYY
-        "\\-${y2}\\-?${m}|" .              # -YY-MM    -YYMM
-        "\\-${y2}|" .                      # -YY
-        "\\-\\-${m}|" .                    # --MM
+      my @tdaterx =
+        (
+         "${y4}\\-${m}",                  # CCYY-MM
+         "${y4}",                         # CCYY
+         "\\-${y2}\\-?${m}",              # -YY-MM    -YYMM
+         "\\-${y2}",                      # -YY
+         "\\-\\-${m}",                    # --MM
 
-        "${y4}\\-?W${w}|" .                # CCYYWww   CCYY-Www
-        "\\-?${y2}\\-?W${w}|" .            # YY-Www    YYWww
-                                           # -YY-Www   -YYWww
-        "\\-?W${w}|" .                     # -Www      Www
+         "${y4}\\-?W${w}",                # CCYYWww   CCYY-Www
+         "\\-?${y2}\\-?W${w}",            # YY-Www    YYWww
+                                          # -YY-Www   -YYWww
+         "\\-?W${w}",                     # -Www      Www
 
-        "${cc}";                           # CC
+         "${cc}",                         # CC
+        );
+      my $tdaterx = join('|',@tdaterx);
       $tdaterx = qr/(?:$tdaterx)/i;
 
       $$dmb{'data'}{'rx'}{'iso'}{'cdate'} = $cdaterx;
@@ -1155,24 +1184,30 @@ sub _iso8601_rx {
 
       my $zrx    = $dmt->_zrx('zrx');
 
-      my $ctimerx =
-        "${hh}${mn}${ss}${fs}?|" .         # HHMNSS[,S+]
-        "${hh}:${mn}:${ss}${fs}?|" .       # HH:MN:SS[,S+]
-        "${hh}:?${mn}${fm}|" .             # HH:MN,M+       HHMN,M+
-        "${hh}${fh}|" .                    # HH,H+
-        "\\-${mn}:?${ss}${fs}?|" .         # -MN:SS[,S+]    -MNSS[,S+]
-        "\\-${mn}${fm}|" .                 # -MN,M+
-        "\\-\\-${ss}${fs}?|" .             # --SS[,S+]
-        "${hh}:?${mn}|" .                  # HH:MN          HHMN
-        "${h24a}|" .                       # 24:00:00       24:00       24
-        "${h24b}|" .                       # 240000         2400
-        "${h}:${mn}:${ss}${fs}?|" .        # H:MN:SS[,S+]
-        "${h}:${mn}${fm}";                 # H:MN,M+
+      my @ctimerx =
+        (
+         "${hh}${mn}${ss}${fs}?",         # HHMNSS[,S+]
+         "${hh}:${mn}:${ss}${fs}?",       # HH:MN:SS[,S+]
+         "${hh}:?${mn}${fm}",             # HH:MN,M+       HHMN,M+
+         "${hh}${fh}",                    # HH,H+
+         "\\-${mn}:?${ss}${fs}?",         # -MN:SS[,S+]    -MNSS[,S+]
+         "\\-${mn}${fm}",                 # -MN,M+
+         "\\-\\-${ss}${fs}?",             # --SS[,S+]
+         "${hh}:?${mn}",                  # HH:MN          HHMN
+         "${h24a}",                       # 24:00:00       24:00       24
+         "${h24b}",                       # 240000         2400
+         "${h}:${mn}:${ss}${fs}?",        # H:MN:SS[,S+]
+         "${h}:${mn}${fm}",               # H:MN,M+
+        );
+      my $ctimerx = join('|',@ctimerx);
       $ctimerx = qr/(?:$ctimerx)(?:\s*$zrx)?/;
 
-      my $ttimerx =
-        "${hh}|" .                         # HH
-        "\\-${mn}";                        # -MN
+      my @ttimerx =
+        (
+         "${hh}",                         # HH
+         "\\-${mn}",                      # -MN
+        );
+      my $ttimerx = join('|',@ttimerx);
       $ttimerx = qr/(?:$ttimerx)/;
 
       $$dmb{'data'}{'rx'}{'iso'}{'ctime'} = $ctimerx;
@@ -1380,41 +1415,51 @@ sub _other_rx {
       # How to express the time
       #  matches = (H, FH, MN, FMN, S, AM, TZSTRING, ZONE, ABB, OFF, ABB)
 
-      my $timerx;
+      my @timerx;
 
       for (my $i=0; $i<=$#hm; $i++) {
          my $hm = $hm[$i];
          my $ms = $ms[$i];
-         $timerx .= "${h12}$hm${mn}$ms${ss}${fs}?${ampm}?|" # H12:MN:SS[,S+] [AM]
-           if ($ampm);
-         $timerx .= "${h24}$hm${mn}$ms${ss}${fs}?|" .       # H24:MN:SS[,S+]
-                    "(?<h>24)$hm(?<mn>00)$ms(?<s>00)|";     # 24:00:00
+         push(@timerx,
+              "${h12}$hm${mn}$ms${ss}${fs}?${ampm}?", # H12:MN:SS[,S+] [AM]
+             )  if ($ampm);
+
+         push(@timerx,
+              "${h24}$hm${mn}$ms${ss}${fs}?",         # H24:MN:SS[,S+]
+              "(?<h>24)$hm(?<mn>00)$ms(?<s>00)",      # 24:00:00
+             );
       }
       for (my $i=0; $i<=$#hm; $i++) {
          my $hm = $hm[$i];
          my $ms = $ms[$i];
-         $timerx .= "${h12}$hm${mn}${fm}${ampm}?|"          # H12:MN,M+ [AM]
-           if ($ampm);
-         $timerx .= "${h24}$hm${mn}${fm}|";                 # H24:MN,M+
+         push(@timerx,
+              "${h12}$hm${mn}${fm}${ampm}?",          # H12:MN,M+ [AM]
+             )  if ($ampm);
+         push(@timerx,
+              "${h24}$hm${mn}${fm}",                  # H24:MN,M+
+             );
       }
       for (my $i=0; $i<=$#hm; $i++) {
          my $hm = $hm[$i];
          my $ms = $ms[$i];
-         $timerx .= "${h12}$hm${mn}${ampm}?|"               # H12:MN [AM]
-           if ($ampm);
-         $timerx .= "${h24}$hm${mn}|" .                     # H24:MN
-                    "(?<h>24)$hm(?<mn>00)|";                # 24:00
+         push(@timerx,
+              "${h12}$hm${mn}${ampm}?",               # H12:MN [AM]
+             )  if ($ampm);
+         push(@timerx,
+              "${h24}$hm${mn}",                       # H24:MN
+              "(?<h>24)$hm(?<mn>00)",                 # 24:00
+             );
       }
 
-      $timerx .= "${h12}${fh}${ampm}|"                      # H12,H+ AM
-        if ($ampm);
+      push(@timerx,
+           "${h12}${fh}${ampm}",                      # H12,H+ AM
+           "${h12}${ampm}",                           # H12 AM
+          )  if ($ampm);
+      push(@timerx,
+           "${h24}${fh}",                             # H24,H+
+          );
 
-      $timerx .= "${h12}${ampm}|"  if ($ampm);              # H12 AM
-
-      $timerx .= "${h24}${fh}|";                            # H24,H+
-
-      chop($timerx);                                        # remove trailing pipe
-
+      my $timerx = join('|',@timerx);
       my $zrx    = $dmt->_zrx('zrx');
       my $at     = $$dmb{'data'}{'rx'}{'at'};
       my $atrx   = qr/(?:^|\s+)(?:$at)\s+/;
@@ -1434,10 +1479,13 @@ sub _other_rx {
       my $d   = '(?<d>\d\d?)';
       my $sep = '(?<sep>[\s\.\/\-])';
 
-      my $daterx =
-        "${m}${sep}${d}\\k<sep>$y4|" .  # M/D/YYYY
-        "${m}${sep}${d}\\k<sep>$y2|" .  # M/D/YY
-        "${m}${sep}${d}";               # M/D
+      my @daterx =
+        (
+         "${m}${sep}${d}\\k<sep>$y4",       # M/D/YYYY
+         "${m}${sep}${d}\\k<sep>$y2",       # M/D/YY
+         "${m}${sep}${d}",                  # M/D
+        );
+      my $daterx = join('|',@daterx);
 
       $daterx = qr/^\s*(?:$daterx)\s*$/;
       $$dmb{'data'}{'rx'}{'other'}{$rx} = $daterx;
@@ -1455,39 +1503,75 @@ sub _other_rx {
       my $mmm = "(?:(?<mmm>$abb)|(?<month>$nam))";
       my $sep = '(?<sep>[\s\.\/\-])';
 
-      my $daterx =
-        "${y4}${sep}${m}\\k<sep>$d|" .        # YYYY/M/D
+      my $format_mmmyyyy = $dmb->_config('format_mmmyyyy');
 
-        "${mmm}\\s*${dd}\\s*${y4}|" .         # mmmDDYYYY
-        "${mmm}\\s*${dd}\\s*${y2}|" .         # mmmDDYY
-        "${mmm}\\s*${d}|" .                   # mmmD
-        "${d}\\s*${mmm}\\s*${y4}|" .          # DmmmYYYY
-        "${d}\\s*${mmm}\\s*${y2}|" .          # DmmmYY
-        "${d}\\s*${mmm}|" .                   # Dmmm
-        "${y4}\\s*${mmm}\\s*${d}|" .          # YYYYmmmD
+      my @daterx = ();
+      push(@daterx,
+           "${y4}${sep}${m}\\k<sep>$d",        # YYYY/M/D
+           "${mmm}\\s*${dd}\\s*${y4}",         # mmmDDYYYY
+          );
+      push(@daterx,
+           "${mmm}\\s*${dd}\\s*${y2}",         # mmmDDYY
+          )  if (! $format_mmmyyyy);
+      push(@daterx,
+           "${mmm}\\s*${d}",                   # mmmD
+           "${d}\\s*${mmm}\\s*${y4}",          # DmmmYYYY
+           "${d}\\s*${mmm}\\s*${y2}",          # DmmmYY
+           "${d}\\s*${mmm}",                   # Dmmm
+           "${y4}\\s*${mmm}\\s*${d}",          # YYYYmmmD
 
-        "${mmm}${sep}${d}\\k<sep>${y4}|" .    # mmm/D/YYYY
-        "${mmm}${sep}${d}\\k<sep>${y2}|" .    # mmm/D/YY
-        "${mmm}${sep}${d}|" .                 # mmm/D
-        "${d}${sep}${mmm}\\k<sep>${y4}|" .    # D/mmm/YYYY
-        "${d}${sep}${mmm}\\k<sep>${y2}|" .    # D/mmm/YY
-        "${d}${sep}${mmm}|" .                 # D/mmm
-        "${y4}${sep}${mmm}\\k<sep>${d}|" .    # YYYY/mmm/D
+           "${mmm}${sep}${d}\\k<sep>${y4}",    # mmm/D/YYYY
+           "${mmm}${sep}${d}\\k<sep>${y2}",    # mmm/D/YY
+           "${mmm}${sep}${d}",                 # mmm/D
+           "${d}${sep}${mmm}\\k<sep>${y4}",    # D/mmm/YYYY
+           "${d}${sep}${mmm}\\k<sep>${y2}",    # D/mmm/YY
+           "${d}${sep}${mmm}",                 # D/mmm
+           "${y4}${sep}${mmm}\\k<sep>${d}",    # YYYY/mmm/D
 
-        "${mmm}${sep}?${d}\\s+${y2}|" .       # mmmD YY      mmm/D YY
-        "${mmm}${sep}?${d}\\s+${y4}|" .       # mmmD YYYY    mmm/D YYYY
-        "${d}${sep}?${mmm}\\s+${y2}|" .       # Dmmm YY      D/mmm YY
-        "${d}${sep}?${mmm}\\s+${y4}|" .       # Dmmm YYYY    D/mmm YYYY
+           "${mmm}${sep}?${d}\\s+${y2}",       # mmmD YY      mmm/D YY
+           "${mmm}${sep}?${d}\\s+${y4}",       # mmmD YYYY    mmm/D YYYY
+           "${d}${sep}?${mmm}\\s+${y2}",       # Dmmm YY      D/mmm YY
+           "${d}${sep}?${mmm}\\s+${y4}",       # Dmmm YYYY    D/mmm YYYY
 
-        "${y2}\\s+${mmm}${sep}?${d}|" .       # YY   mmmD    YY   mmm/D
-        "${y4}\\s+${mmm}${sep}?${d}|" .       # YYYY mmmD    YYYY mmm/D
-        "${y2}\\s+${d}${sep}?${mmm}|" .       # YY   Dmmm    YY   D/mmm
-        "${y4}\\s+${d}${sep}?${mmm}|" .       # YYYY Dmmm    YYYY D/mmm
+           "${y2}\\s+${mmm}${sep}?${d}",       # YY   mmmD    YY   mmm/D
+           "${y4}\\s+${mmm}${sep}?${d}",       # YYYY mmmD    YYYY mmm/D
+           "${y2}\\s+${d}${sep}?${mmm}",       # YY   Dmmm    YY   D/mmm
+           "${y4}\\s+${d}${sep}?${mmm}",       # YYYY Dmmm    YYYY D/mmm
 
-        "${y4}:${m}:${d}";                    # YYYY:MM:DD
+           "${y4}:${m}:${d}",                  # YYYY:MM:DD
+          );
+      my $daterx = join('|',@daterx);
 
       $daterx = qr/^\s*(?:$daterx)\s*$/i;
       $$dmb{'data'}{'rx'}{'other'}{$rx} = $daterx;
+
+   } elsif ($rx eq 'truncated') {
+
+      my $abb = $$dmb{'data'}{'rx'}{'month_abb'}[0];
+      my $nam = $$dmb{'data'}{'rx'}{'month_name'}[0];
+
+      my $y4  = '(?<y>\d\d\d\d)';
+      my $mmm = "(?:(?<mmm>$abb)|(?<month>$nam))";
+      my $sep = '(?<sep>[\s\.\/\-])';
+
+      my $format_mmmyyyy = $dmb->_config('format_mmmyyyy');
+
+      my @daterx = ();
+      push(@daterx,
+           "${mmm}\\s*${y4}",                  # mmmYYYY
+           "${y4}\\s*${mmm}",                  # YYYYmmm
+
+           "${y4}${sep}${mmm}",                # YYYY/mmm
+           "${mmm}${sep}${y4}",                # mmm/YYYY
+          )  if ($format_mmmyyyy);
+
+      if (@daterx) {
+         my $daterx = join('|',@daterx);
+         $daterx = qr/^\s*(?:$daterx)\s*$/i;
+         $$dmb{'data'}{'rx'}{'other'}{$rx} = $daterx;
+      } else {
+         $$dmb{'data'}{'rx'}{'other'}{$rx} = '';
+      }
 
    } elsif ($rx eq 'dow') {
 
@@ -1523,15 +1607,18 @@ sub _other_rx {
       my $offrx    = $dmt->_zrx('offrx');
       my $zrx      = $dmt->_zrx('zrx');
 
-      my $daterx   =
-        "${special}|" .                 # now
-        "${special}\\s+${zrx}|" .       # now EDT
+      my @daterx   =
+        (
+         "${special}",                 # now
+         "${special}\\s+${zrx}",       # now EDT
 
-        "epoch\\s+$secs|" .             # epoch SECS
-        "epoch\\s+$secs\\s+${zrx}|" .   # epoch SECS EDT
+         "epoch\\s+$secs",             # epoch SECS
+         "epoch\\s+$secs\\s+${zrx}",   # epoch SECS EDT
 
-        "${dd}\\/${mmm}\\/${y4}:${h24}:${mn}:${ss}\\s*${offrx}";
+         "${dd}\\/${mmm}\\/${y4}:${h24}:${mn}:${ss}\\s*${offrx}",
                               # Common log format: 10/Oct/2000:13:55:36 -0700
+        );
+      my $daterx   = join('|',@daterx);
 
       $daterx = qr/^\s*(?:$daterx)\s*$/i;
       $$dmb{'data'}{'rx'}{'other'}{$rx} = $daterx;
@@ -1563,38 +1650,40 @@ sub _other_rx {
       $nth_wom     = "(?<nth>$nth_wom)";
       $special     = "(?<special>$special)";
 
-      my $daterx   =
-        "${mmm}\\s+${nth}\\s*$y?|" .    # Dec 1st [1970]
-        "${nth}\\s+${mmm}\\s*$y?|" .    # 1st Dec [1970]
-        "$y\\s+${mmm}\\s+${nth}|" .     # 1970 Dec 1st
-        "$y\\s+${nth}\\s+${mmm}|" .     # 1970 1st Dec
+      my @daterx   =
+        (
+         "${mmm}\\s+${nth}\\s*$y?",       # Dec 1st [1970]
+         "${nth}\\s+${mmm}\\s*$y?",       # 1st Dec [1970]
+         "$y\\s+${mmm}\\s+${nth}",        # 1970 Dec 1st
+         "$y\\s+${nth}\\s+${mmm}",        # 1970 1st Dec
 
-        "${next}\\s+${fld}|" .          # next year, next month, next week
-        "${next}|" .                    # next friday
+         "${next}\\s+${fld}",             # next year, next month, next week
+         "${next}",                       # next friday
 
-        "${last}\\s+${mmm}\\s*$y?|" .   # last friday in october 95
-        "${last}\\s+${df}\\s+${mmm}\\s*$y?|" .
-                                        # last day in october 95
-        "${last}\\s*$y?|" .             # last friday in 95
+         "${last}\\s+${mmm}\\s*$y?",      # last friday in october 95
+         "${last}\\s+${df}\\s+${mmm}\\s*$y?",
+                                          # last day in october 95
+         "${last}\\s*$y?",                # last friday in 95
 
-        "${nth_wom}\\s+${mmm}\\s*$y?|" .
-                                        # nth DoW in MMM [YYYY]
-        "${nth}\\s*$y?|" .              # nth DoW in [YYYY]
+         "${nth_wom}\\s+${mmm}\\s*$y?",   # nth DoW in MMM [YYYY]
+         "${nth}\\s*$y?",                 # nth DoW in [YYYY]
 
-        "${nth}\\s+$df\\s+${mmm}\\s*$y?|" .
-                                        # nth day in MMM [YYYY]
+         "${nth}\\s+$df\\s+${mmm}\\s*$y?",
+                                          # nth day in MMM [YYYY]
 
-        "${nth}\\s+${wf}\\s*$y?|" .     # DoW Nth week [YYYY]
-        "${wf}\\s+(?<n>\\d+)\\s*$y?|" . # DoW week N [YYYY]
+         "${nth}\\s+${wf}\\s*$y?",        # DoW Nth week [YYYY]
+         "${wf}\\s+(?<n>\\d+)\\s*$y?",    # DoW week N [YYYY]
 
-        "${special}|" .                 # today, tomorrow
-        "${special}\\s+${wf}|" .        # today week
-                                        #   British: same as 1 week from today
+         "${special}",                    # today, tomorrow
+         "${special}\\s+${wf}",           # today week
+                                          #   British: same as 1 week from today
 
-        "${nth}|" .                     # nth
+         "${nth}",                        # nth
 
-        "${wf}";                        # monday week
-                                        #   British: same as 'in 1 week on monday'
+         "${wf}",                         # monday week
+                                          #   British: same as 'in 1 week on monday'
+        );
+      my $daterx = join('|',@daterx);
 
       $daterx = qr/^\s*(?:$daterx)\s*$/i;
       $$dmb{'data'}{'rx'}{'other'}{$rx} = $daterx;
@@ -1740,6 +1829,57 @@ sub _parse_date_common {
    return ();
 }
 
+# Parse truncated dates
+sub _parse_date_truncated {
+   my($self,$string,$noupdate) = @_;
+   my $dmt = $$self{'tz'};
+   my $dmb = $$dmt{'base'};
+
+   my $daterx = (exists $$dmb{'data'}{'rx'}{'other'}{'truncated'} ?
+                 $$dmb{'data'}{'rx'}{'other'}{'truncated'} :
+                 $self->_other_rx('truncated'));
+
+   return ()  if (! $daterx);
+
+   # Since we want whitespace to be used as a separator, turn all
+   # whitespace into single spaces. This is necessary since the
+   # regexps do backreferences to make sure that separators are
+   # not mixed.
+   $string =~ s/\s+/ /g;
+
+   if ($string =~ $daterx) {
+      my($y,$mmm,$month) = @+{qw(y mmm month)};
+
+      my ($m,$d);
+      if ($mmm) {
+         $m = $$dmb{'data'}{'wordmatch'}{'month_abb'}{lc($mmm)};
+      } elsif ($month) {
+         $m = $$dmb{'data'}{'wordmatch'}{'month_name'}{lc($month)};
+      }
+
+      # Handle all of the mmmYYYY formats
+
+      if ($y  &&  $m) {
+
+         my $format_mmmyyyy = $dmb->_config('format_mmmyyyy');
+         if ($format_mmmyyyy eq 'first') {
+            $d=1;
+            $$self{'data'}{'default_time'} = [0,0,0];
+         } else {
+            $d=$dmb->days_in_month($y,$m);
+            $$self{'data'}{'default_time'} = [23,59,59];
+         }
+
+         $$self{'data'}{'def'}[0] = '';
+         $$self{'data'}{'def'}[1] = '';
+         $$self{'data'}{'def'}[2] = 1;
+         return($y,$m,$d);
+      }
+   }
+
+   return ();
+}
+
 sub _parse_tz {
    my($self,$string,$noupdate) = @_;
    my $dmt = $$self{'tz'};
@@ -1816,22 +1956,18 @@ sub _parse_holidays {
       $y = $dmt->_now('y',$noupdate)  if (! $y);
       $y += 0;
 
-      $self->_holidays($y,2);
-      return (0)  if (! exists $$dmb{'data'}{'holidays'}{'dates'}{$y});
-      foreach my $m (keys %{ $$dmb{'data'}{'holidays'}{'dates'}{$y} }) {
-         foreach my $d (keys %{ $$dmb{'data'}{'holidays'}{'dates'}{$y}{$m} }) {
-            foreach my $nam (@{ $$dmb{'data'}{'holidays'}{'dates'}{$y}{$m}{$d} }) {
-               if (lc($nam) eq lc($hol)) {
-                  return(1,$y,$m,$d);
-               }
-            }
-         }
-      }
+      $self->_holidays($y-1);
+      $self->_holidays($y);
+      $self->_holidays($y+1);
+      return (0)  if (! exists $$dmb{'data'}{'holidays'}{'yhols'}{$y+0}{$hol});
+      my ($y,$m,$d) = @{ $$dmb{'data'}{'holidays'}{'yhols'}{$y+0}{$hol} };
+      return(1,$y,$m,$d);
    }
 
    return (0);
 }
 
+no integer;
 sub _parse_delta {
    my($self,$string,$dow,$got_time,$h,$mn,$s,$noupdate) = @_;
    my $dmt = $$self{'tz'};
@@ -1845,6 +1981,17 @@ sub _parse_delta {
 
    if (! $err) {
       my($dy,$dm,$dw,$dd,$dh,$dmn,$ds) = @{ $$delta{'data'}{'delta'} };
+
+      # We can't handle a delta longer than 10000 years
+      if (abs($dy)  > 10000       ||
+          abs($dm)  > 12000       ||   # 10000*12
+          abs($dw)  > 53000       ||   # 10000*53
+          abs($dh)  > 87840000    ||   # 10000*366*24
+          abs($dmn) > 5270400000  ||   # 10000*366*24*60
+          abs($ds)  > 316224000000) {  # 10000*366*24*60*60
+         $$self{'err'} = '[parse] Delta too large';
+         return (1);
+      }
 
       if ($got_time  &&
           ($dh != 0  ||  $dmn != 0  ||  $ds != 0)) {
@@ -1888,6 +2035,7 @@ sub _parse_delta {
 
    return (0);
 }
+use integer;
 
 sub _parse_datetime_other {
    my($self,$string,$noupdate) = @_;
@@ -2598,8 +2746,10 @@ BEGIN {
          } else {
             $err = 1;
          }
-         for (my $i=0; $i<=5; $i++) {
-            $def[$i] = 0  if ($def[$i]);
+         if ($$self{'data'}{'set'} != 2) {
+            for (my $i=0; $i<=5; $i++) {
+               $def[$i] = 0  if ($def[$i]);
+            }
          }
          $tz = $dmt->_now('tz',1)  if (! $new_tz);
 
@@ -3182,6 +3332,7 @@ sub __calc_date_date {
    return [ $dy,$dm,$dw,$dd,$dh,$dmn,$ds ];
 }
 
+no integer;
 sub _calc_date_delta {
    my($self,$delta,$subtract) = @_;
    my $ret                    = $self->new_date();
@@ -3205,12 +3356,26 @@ sub _calc_date_delta {
    my $tz        = $$self{'data'}{'tz'};
    my $isdst     = $$self{'data'}{'isdst'};
 
+   # We can't handle a delta longer than 10000 years
+   my($dy,$dm,$dw,$dd,$dh,$dmn,$ds) = @delta;
+   if (abs($dy)  > 10000       ||
+       abs($dm)  > 12000       ||   # 10000*12
+       abs($dw)  > 53000       ||   # 10000*53
+       abs($dh)  > 87840000    ||   # 10000*366*24
+       abs($dmn) > 5270400000  ||   # 10000*366*24*60
+       abs($ds)  > 316224000000) {  # 10000*366*24*60*60
+      $$ret{'err'} = '[calc] Delta too large';
+      return $ret;
+   }
+
    my($err,$date2,$offset,$abbrev);
    ($err,$date2,$offset,$isdst,$abbrev) =
      $self->__calc_date_delta([@date],[@delta],$subtract,$business,$tz,$isdst);
 
    if ($err) {
       $$ret{'err'} = '[calc] Unable to perform calculation';
+   } elsif ($$date2[0]<0 || $$date2[0]>9999) {
+      $$ret{'err'} = '[calc] Delta produces date outside valid range';
    } else {
       $$ret{'data'}{'set'}   = 1;
       $$ret{'data'}{'date'}  = $date2;
@@ -3221,6 +3386,7 @@ sub _calc_date_delta {
    }
    return $ret;
 }
+use integer;
 
 sub __calc_date_delta {
    my($self,$date,$delta,$subtract,$business,$tz,$isdst) = @_;
@@ -3265,7 +3431,7 @@ sub __calc_date_delta {
       # so this can be written:
       #    DATE - DELTA(exact) = RET'
       #
-      # So the inverse subtract only needs include the approximate
+      # So the inverse subtract only needs to include the approximate
       # portion of the delta.
 
       ($err,$date2,$offset,$isdst,$abbrev) =
@@ -3725,6 +3891,11 @@ sub secs_since_1970_GMT {
       return 0;
    }
 
+   if ($$self{'err'}  ||  ! $$self{'data'}{'set'}) {
+      warn "WARNING: [secs_since_1970_GMT] Object must contain a valid date\n";
+      return undef;
+   }
+
    my @date = $self->value('gmt');
    $secs    = $dmb->secs_since_1970(\@date);
    return $secs;
@@ -3886,7 +4057,11 @@ sub __is_business_day {
 
    # Check for holidays
 
-   $self->_holidays($y,2)  unless ($$dmb{'data'}{'init_holidays'});
+   if (! $$dmb{'data'}{'init_holidays'}) {
+      $self->_holidays($y-1);
+      $self->_holidays($y);
+      $self->_holidays($y+1);
+   }
 
    return 0  if (exists $$dmb{'data'}{'holidays'}{'dates'}  &&
                  exists $$dmb{'data'}{'holidays'}{'dates'}{$y+0}  &&
@@ -3902,7 +4077,9 @@ sub list_holidays {
    my $dmb = $$dmt{'base'};
 
    $y = $dmt->_now('y',1)  if (! $y);
-   $self->_holidays($y,2);
+   $self->_holidays($y-1);
+   $self->_holidays($y);
+   $self->_holidays($y+1);
 
    my @ret;
    my @m = sort { $a <=> $b } keys %{ $$dmb{'data'}{'holidays'}{'dates'}{$y+0} };
@@ -3928,12 +4105,19 @@ sub holiday {
    my $dmb = $$dmt{'base'};
 
    my($y,$m,$d) = @{ $$self{'data'}{'date'} };
-   $self->_holidays($y,2);
+   $self->_holidays($y-1);
+   $self->_holidays($y);
+   $self->_holidays($y+1);
 
    if (exists $$dmb{'data'}{'holidays'}{'dates'}{$y+0}  &&
        exists $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}  &&
        exists $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0}) {
       my @tmp = @{ $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0} };
+
+      foreach my $tmp (@tmp) {
+         $tmp = ''  if ($tmp =~ /DMunnamed/);
+      }
+
       if (wantarray) {
          return ()  if (! @tmp);
          return @tmp;
@@ -3955,6 +4139,7 @@ sub next_business_day {
 
    $date = $self->__nextprev_business_day(0,$off,$checktime,$date);
    $self->set('date',$date);
+   return;
 }
 
 sub prev_business_day {
@@ -3967,6 +4152,7 @@ sub prev_business_day {
 
    $date = $self->__nextprev_business_day(1,$off,$checktime,$date);
    $self->set('date',$date);
+   return;
 }
 
 sub __nextprev_business_day {
@@ -4024,6 +4210,7 @@ sub nearest_business_day {
    return  if (! defined($date));
 
    $self->set('date',$date);
+   return;
 }
 
 sub __nearest_business_day {
@@ -4077,11 +4264,19 @@ sub _holiday_objs {
    # Go through all of the strings from the config file.
    #
    my (@str)      = @{ $$dmb{'data'}{'sections'}{'holidays'} };
-   $$dmb{'data'}{'holidays'}{'hols'} = [];
+   $$dmb{'data'}{'holidays'}{'defs'} = [];
 
+   # Keep track of the holiday names
+   my $unnamed    = 0;
+
+   LINE:
    while (@str) {
       my($string) = shift(@str);
       my($name)   = shift(@str);
+      if (! $name) {
+         $unnamed++;
+         $name    = "DMunnamed $unnamed";
+      }
 
       # If $string is a parse_date string AND it contains a year, we'll
       # store the date as a holiday, but not store the holiday description
@@ -4089,19 +4284,41 @@ sub _holiday_objs {
 
       my $date  = $self->new_date();
       my $err   = $date->parse_date($string);
+
       if (! $err) {
+         my($y,$m,$d) = @{ $$date{'data'}{'date'} };
+
          if ($$date{'data'}{'def'}[0] eq '') {
-            push(@{ $$dmb{'data'}{'holidays'}{'hols'} },$string,$name);
+            # Lines of the form:  Jun 12
+            #
+            # We will NOT cache this holiday because we want to only
+            # cache holidays from lines like 'Jun 12 1972' during this
+            # phase so we find conflicts.
+
+            push(@{ $$dmb{'data'}{'holidays'}{'defs'} },$name,$string);
+
          } else {
-            my($y,$m,$d) = @{ $$date{'data'}{'date'} };
+            # Lines of the form:  Jun 12 1972
+            #
+            # We'll cache these to make sure we don't have two lines:
+            #    Jun 12 1972 = Some Holiday
+            #    Jun 13 1972 = Some Holiday
+
+            if (exists $$dmb{'data'}{'holidays'}{'hols'}{$name}{$y+0}) {
+               warn "WARNING: Holiday defined twice for one year: $name [$y]\n";
+               next LINE;
+            }
+
+            $$dmb{'data'}{'holidays'}{'yhols'}{$y+0}{$name} = [$y,$m,$d];
+            $$dmb{'data'}{'holidays'}{'hols'}{$name}{$y+0}  = [$y,$m,$d];
+
             if (exists $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0}) {
                push @{ $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0} },$name;
             } else {
                $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0} = [ $name ];
             }
          }
-
-         next;
+         next LINE;
       }
       $date->err(1);
 
@@ -4109,116 +4326,104 @@ sub _holiday_objs {
       # only have to do once) and store it.
 
       my $recur = $self->new_recur();
-      $recur->_holiday();
       $err      = $recur->parse($string);
       if (! $err) {
-         push(@{ $$dmb{'data'}{'holidays'}{'hols'} },$recur,$name);
-         next;
+         push(@{ $$dmb{'data'}{'holidays'}{'defs'} },$name,$recur);
+         next LINE;
       }
       $recur->err(1);
 
       warn "WARNING: invalid holiday description: $string\n";
    }
+   return;
 }
 
-# Make sure that holidays are set for a given year.
-#
-#   $$dmb{'data'}{'holidays'}{'years'}{$year} = 0   nothing done
-#                                               1   this year done
-#                                               2   both adjacent years done
+# Make sure that holidays are done for a given year.
 #
 sub _holidays {
-   my($self,$year,$level) = @_;
+   my($self,$year) = @_;
 
    my $dmt = $$self{'tz'};
    my $dmb = $$dmt{'base'};
-   $self->_holiday_objs($year)  if (! $$dmb{'data'}{'holidays'}{'init'});
 
-   $$dmb{'data'}{'holidays'}{'years'}{$year} = 0
-     if (! exists $$dmb{'data'}{'holidays'}{'years'}{$year});
-
-   my $curr_level = $$dmb{'data'}{'holidays'}{'years'}{$year};
-   return  if ($curr_level >= $level);
-   $$dmb{'data'}{'holidays'}{'years'}{$year} = $level;
+   return  if ($$dmb{'data'}{'holidays'}{'ydone'}{$year+0});
+   $self->_holiday_objs()  if (! $$dmb{'data'}{'holidays'}{'init'});
 
    # Parse the year
-
-   if ($curr_level == 0) {
-      $self->_holidays_year($year);
-
-      return  if ($level == 1);
-   }
-
-   # Parse the years around it.
-
-   $self->_holidays($year-1,1);
-   $self->_holidays($year+1,1);
-}
-
-sub _holidays_year {
-   my($self,$y) = @_;
-
-   my $dmt = $$self{'tz'};
-   my $dmb = $$dmt{'base'};
 
    # Get the objects and set them to use the new year. Also, get the
    # range for recurrences.
 
-   my @hol      = @{ $$dmb{'data'}{'holidays'}{'hols'} };
+   my @hol      = @{ $$dmb{'data'}{'holidays'}{'defs'} };
 
-   my $beg      = $self->new_date();
-   $beg->set('date',[$y-1,12,1,0,0,0]);
-   my $end      = $self->new_date();
-   $end->set('date',[$y+1,2,1,0,0,0]);
+   my $beg      = "$year-01-01-00:00:00";
+   my $end      = "$year-12-31-23:59:59";
 
    # Get the date for each holiday.
 
    $$dmb{'data'}{'init_holidays'} = 1;
+   $$dmb{'data'}{'tmpnow'}        = [$year,1,1,0,0,0];
 
+   HOLIDAY:
    while (@hol) {
 
-      my($obj)  = shift(@hol);
-      my($name) = shift(@hol);
+      my $name  = shift(@hol);
+      my $obj   = shift(@hol);
 
-      $$dmb{'data'}{'tmpnow'} = [$y,1,1,0,0,0];
+      # Each holiday only gets defined once per year
+      next  if (exists $$dmb{'data'}{'holidays'}{'hols'}{$name}{$year+0});
+
       if (ref($obj)) {
          # It's a recurrence
+
+         # We have to initialize the recurrence as it may contain idates
+         # and dates outside of this range that are not correct.
+
+         $obj->_init_dates();
 
          # If the recurrence has a date range built in, we won't override it.
          # Otherwise, we'll only look for dates in this year.
 
+         my @dates;
          if ($obj->start()  &&  $obj->end()) {
-            $obj->dates();
+            @dates = $obj->dates();
          } else {
-            $obj->dates($beg,$end);
+            @dates = $obj->dates($beg,$end,1);
          }
 
-         foreach my $i (keys %{ $$obj{'data'}{'dates'} }) {
-            next  if ($$obj{'data'}{'saved'}{$i});
-            my $date     = $$obj{'data'}{'dates'}{$i};
+         foreach my $date (@dates) {
             my($y,$m,$d) = @{ $$date{'data'}{'date'} };
+
+            $$dmb{'data'}{'holidays'}{'yhols'}{$year+0}{$name} = [$y,$m,$d];
+            $$dmb{'data'}{'holidays'}{'hols'}{$name}{$year+0}  = [$y,$m,$d];
+
             if (exists $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0}) {
                push @{ $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0} },$name;
             } else {
                $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0} = [$name];
             }
-            $$obj{'data'}{'saved'}{$i} = 1;
          }
 
       } else {
          my $date = $self->new_date();
          $date->parse_date($obj);
          my($y,$m,$d) = @{ $$date{'data'}{'date'} };
+
+         $$dmb{'data'}{'holidays'}{'yhols'}{$year+0}{$name} = [$y,$m,$d];
+         $$dmb{'data'}{'holidays'}{'hols'}{$name}{$year+0}  = [$y,$m,$d];
+
          if (exists $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0}) {
             push @{ $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0} },$name;
          } else {
             $$dmb{'data'}{'holidays'}{'dates'}{$y+0}{$m+0}{$d+0} = [$name];
          }
       }
-      $$dmb{'data'}{'tmpnow'} = [];
    }
 
-   $$dmb{'data'}{'init_holidays'} = 0;
+   $$dmb{'data'}{'init_holidays'}              = 0;
+   $$dmb{'data'}{'tmpnow'}                     = [];
+   $$dmb{'data'}{'holidays'}{'ydone'}{$year+0} = 1;
+   return;
 }
 
 ########################################################################
@@ -4787,6 +4992,8 @@ sub _events_year {
          $$dmb{'data'}{'events'}{$i}{$y} = [ $d0,$d1 ];
       }
    }
+
+   return;
 }
 
 # This parses the raw event list.  It only has to be done once.
@@ -5036,6 +5243,8 @@ sub _event_objs {
          next;
       }
    }
+
+   return;
 }
 
 1;

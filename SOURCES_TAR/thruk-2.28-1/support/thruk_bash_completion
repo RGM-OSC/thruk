@@ -1,0 +1,164 @@
+_thruk_cmd_options() {
+    cmd=$1
+    echo "help"
+    thruk $cmd help 2>&1 | grep ^\ *- | awk '{print $2 }'
+    return
+}
+
+_thruk_sub_commands() {
+    thruk | grep ^Enabled | awk -F: '{ print $2 }' | tr -d ','
+    return
+}
+
+_thruk_mangle () {
+  printf '%q ' "${@}"
+}
+
+_thruk()
+{
+    COMPREPLY=()
+
+    local subcmd
+    local opts=""
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+
+    # check if first arg is thruk
+    if [[ ${COMP_WORDS[0]} != thruk ]]; then
+        COMPREPLY=( $(compgen -o default -- ${cur}) )
+        return 0
+    fi
+
+    # parse args up to COMP_CWORD
+    subcmdargs=()
+    local i=1
+    while [ $i -lt $COMP_CWORD ]; do
+        local arg=${COMP_WORDS[$i]}
+        case "$arg" in
+            -b)
+                i=$((i + 1))
+            ;;
+            -*)
+                :
+            ;;
+            *)
+                if [ "x$subcmd" = "x" ]; then
+                    subcmd=$arg
+                else
+                    subcmdargs+=($arg)
+                fi
+            ;;
+        esac
+        i=$((i + 1))
+    done
+
+    # simply expland files and folders if current item starts with . or /
+    if [[ $cur =~ ^/|^\. ]] && ! [[ $subcmd =~ r|rest ]]; then
+        COMPREPLY=( $(compgen -o default -- ${cur}) )
+        return 0
+    fi
+
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    # thruk ...
+    if [ "x$subcmd" = "x" ]; then
+        opts="-V -A -b -l --list-backends --local -y --yes -f --force -v -vv -vvv "$(_thruk_sub_commands)
+
+    # thruk plugin ...
+    elif [[ $subcmd =~ plugin ]]; then
+        # thruk plugin ...
+        if [ ${#subcmdargs[@]} -eq 0 ]; then
+            opts="$(_thruk_cmd_options $subcmd)"
+
+        # thruk plugin disable ...
+        elif [ ${subcmdargs[0]} = "disable" ]; then
+            opts=$(thruk plugin list | grep ^E | awk '{print $2 }' | grep -v ^Name)
+
+        # thruk plugin enable ...
+        elif [ ${subcmdargs[0]} = "enable" ]; then
+            opts=$(thruk plugin list | grep -v ^E | awk '{print $2 }' | grep -v ^Name)
+
+        # thruk plugin remove|update ...
+        elif [[ ${subcmdargs[0]} =~ remove|update ]]; then
+            opts=$(thruk plugin list | awk '{print $2}' | grep -v Name)
+        fi
+
+    # thruk command ...
+    elif [[ $subcmd =~ command ]]; then
+
+        # thruk command ...
+        if [ ${#subcmdargs[@]} -eq 0 ]; then
+            opts="$(thruk host list)"
+
+        # thruk command <host> ...
+        elif [ ${#subcmdargs[@]} -eq 1 ]; then
+            opts="$(thruk service ${subcmdargs[0]})"
+        fi
+
+    # thruk service ...
+    elif [[ $subcmd =~ service ]]; then
+
+        # thruk service ...
+        if [ ${#subcmdargs[@]} -eq 0 ]; then
+            opts="$(thruk host list)"
+        fi
+
+    # thruk find ...
+    elif [[ $subcmd =~ find ]]; then
+
+        # thruk find ...
+        if [ ${#subcmdargs[@]} -eq 0 ]; then
+            opts="host hostgroup service servicegroup contact"
+
+        # thruk find contact ...
+        elif [ ${subcmdargs[0]} = "contact" ]; then
+            opts="$(thruk contact list)"
+
+        # thruk find host ...
+        elif [ ${subcmdargs[0]} = "host" ]; then
+            opts="$(thruk host list)"
+
+        # thruk find hostgroup ...
+        elif [ ${subcmdargs[0]} = "hostgroup" ]; then
+            opts="$(thruk hostgroup list)"
+
+        elif [ ${subcmdargs[0]} = "service" -a ${#subcmdargs[@]} -eq 1 ]; then
+            opts="$(thruk host list)"
+
+        # thruk find service <host> ...
+        elif [ ${subcmdargs[0]} = "service" -a ${#subcmdargs[@]} -eq 2 ]; then
+            opts="$(thruk service ${subcmdargs[1]})"
+
+        # thruk find servicegroup ...
+        elif [ ${subcmdargs[0]} = "servicegroup" ]; then
+            opts="$(thruk servicegroup list)"
+        fi
+
+    # thruk r|rest ...
+    elif [[ $subcmd =~ r|rest ]]; then
+        export COMP_WORD_JOINED="${COMP_WORDS[*]}";
+        export COMP_CWORD;
+        export COMP_LINE;
+        local cur=${COMP_WORDS[COMP_CWORD]}
+        mapfile -t opts < <( thruk bash_complete )
+        mapfile -t COMPREPLY < <( compgen -W "$(_thruk_mangle "${opts[@]}")" -- "$cur" )
+
+        # if there are more than one completion or it does end with a /, expand without spaces
+        if [ ${#COMPREPLY[@]} -gt 1 ] || [ "${COMPREPLY: -1}" = "/" ]; then
+            compopt -o nospace;
+        fi
+        return 0
+
+    else
+        local SUBCOMMANDS=$(_thruk_sub_commands | tr ' ' '|')
+        if [[ $subcmd =~ $SUBCOMMANDS ]]; then
+            opts="$(_thruk_cmd_options $subcmd)"
+        fi
+    fi
+
+    if [ "x$opts" != "x" ]; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+}
+
+complete -o default -F _thruk thruk

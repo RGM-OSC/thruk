@@ -1,5 +1,5 @@
 package Date::Manip::Base;
-# Copyright (c) 1995-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 1995-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -11,21 +11,22 @@ package Date::Manip::Base;
 # ABSOLUTELY NO USER SUPPORT IS OFFERED FOR THESE ROUTINES!
 ###############################################################################
 
-use Date::Manip::Obj;
-use Date::Manip::TZ_Base;
-our @ISA = qw(Date::Manip::Obj Date::Manip::TZ_Base);
-
 require 5.010000;
 use strict;
 use warnings;
 use integer;
 use utf8;
 #use re 'debug';
+
+use Date::Manip::Obj;
+use Date::Manip::TZ_Base;
+our @ISA = qw(Date::Manip::Obj Date::Manip::TZ_Base);
+
 use Encode qw(encode_utf8 from_to find_encoding decode _utf8_off _utf8_on is_utf8);
 require Date::Manip::Lang::index;
 
 our $VERSION;
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 ###############################################################################
@@ -41,6 +42,8 @@ sub _init {
    $self->_init_events();
    $self->_init_holidays();
    $self->_init_now();
+
+   return;
 }
 
 # The base object has some config-independant information which is
@@ -54,9 +57,11 @@ sub _init_cache {
    # ds1_mon     => {Y}{M} = N    days since 1BC for Y/M/1
    # dow_mon     => {Y}{M} = DOW  day of week of Y/M/1
 
-   $$self{'cache'}{'ly'}      = {}  if (! exists $$self{'cache'}{'ly'});
-   $$self{'cache'}{'ds1_mon'} = {}  if (! exists $$self{'cache'}{'ds1_mon'});
-   $$self{'cache'}{'dow_mon'} = {}  if (! exists $$self{'cache'}{'dow_mon'});
+   $$self{'cache'}{'ly'}      = {};
+   $$self{'cache'}{'ds1_mon'} = {};
+   $$self{'cache'}{'dow_mon'} = {};
+
+   return;
 }
 
 # Config dependent data. Needs to be reset every time the config is reset.
@@ -65,6 +70,8 @@ sub _init_data {
    return  if (exists $$self{'data'}{'calc'}  &&  ! $force);
 
    $$self{'data'}{'calc'}     = {};     # Calculated values
+
+   return;
 }
 
 # Initializes config dependent data
@@ -163,6 +170,10 @@ sub _init_config {
 
       'periodtimesep'    => 0,
 
+      # How to parse mmm#### strings
+
+      'format_mmmyyyy'   => '',
+
       # *** DEPRECATED ***
 
       'tz'               => '',
@@ -205,6 +216,8 @@ sub _init_config {
    # Set OS specific defaults
 
    my $os = $self->_os();
+
+   return;
 }
 
 sub _calc_workweek {
@@ -214,6 +227,8 @@ sub _calc_workweek {
    $end = $self->_config('workweekend')  if (! $end);
 
    $$self{'data'}{'len'}{'workweek'} = $end - $beg + 1;
+
+   return;
 }
 
 sub _calc_bdlength {
@@ -224,6 +239,8 @@ sub _calc_bdlength {
 
    $$self{'data'}{'len'}{'bdlength'} =
      ($end[0]-$beg[0])*3600 + ($end[1]-$beg[1])*60 + ($end[2]-$beg[2]);
+
+   return;
 }
 
 sub _init_business_length {
@@ -240,6 +257,8 @@ sub _init_business_length {
                                   'wl' => $w_to_d * $d_to_s,
                                   'dl' => $d_to_s,
                                 };
+
+   return;
 }
 
 # Events and holidays are reset only when they are read in.
@@ -274,6 +293,8 @@ sub _init_events {
    $$self{'data'}{'sections'}{'events'} = [];
    $$self{'data'}{'eventyears'}         = {};
    $$self{'data'}{'eventobjs'}          = 0;
+
+   return;
 }
 
 sub _init_holidays {
@@ -282,25 +303,23 @@ sub _init_holidays {
 
    # {data}{sections}{holidays} = [ STRING, HOLIDAY_NAME, ... ]
    #
-   # {data}{holidays}{YEAR}     = 1  if this year has been parsed
-   #                              2  if YEAR-1 and YEAR+1 have been parsed
-   #                                 (both must be done before holidays can
-   #                                 be known so that New Years can be
-   #                                 celebrated on Dec 31 if Jan 1 is weekend)
-   #                 {date}     = DATE_OBJ
-   #                                 a Date::Manip::Date object to use for holidays
-   #                 {hols}     = [ RECUR_OBJ|DATE_STRING, HOLIDAY_NAME, ... ]
-   #                                 DATE_STRING is suitable for parse_date
-   #                                 using DATE_OBJ.  RECUR_OBJ is a
-   #                                 Date::Manip::Recur object that can be used
-   #                                 once the start and end date is set.
+   # {data}{holidays}{init}     = 1  if holidays have been initialized
+   #                 {ydone}    = { Y => 1 }
+   #                 {yhols}    = { Y => NAME => [Y,M,D] }
+   #                 {hols}     = { NAME => Y => [Y,M,D] }
    #                 {dates}    = { Y => M => D => NAME }
-   #
+   #                 {defs}     = [ NAME DEF NAME DEF ... ]
+   #                                 NAME is the name of a holiday (it will
+   #                                 be 'DMunnamed I' for the Ith unnamed
+   #                                 holiday)
+   #                                 DEF is a string or a Recur
    # {data}{init_holidays}      = 1  if currently initializing holidays
 
    $$self{'data'}{'holidays'}             = {};
    $$self{'data'}{'sections'}{'holidays'} = [];
    $$self{'data'}{'init_holidays'}        = 0;
+
+   return;
 }
 
 sub _init_now {
@@ -328,6 +347,8 @@ sub _init_now {
    $$self{'data'}{'now'}{'force'} = 0;
    $$self{'data'}{'now'}{'set'}   = 0;
    $$self{'data'}{'tmpnow'}       = [];
+
+   return;
 }
 
 # Language information only needs to be initialized if the language changes.
@@ -339,6 +360,8 @@ sub _init_language {
    $$self{'data'}{'rx'}        = {};     # Regexps generated from language
    $$self{'data'}{'words'}     = {};     # Types of words in the language
    $$self{'data'}{'wordval'}   = {};     # Value of words in the language
+
+   return;
 }
 
 ###############################################################################
@@ -354,7 +377,8 @@ sub leapyear {
    $$self{'cache'}{'ly'}{$y} = 0, return 0 unless ($y %   4 == 0);
    $$self{'cache'}{'ly'}{$y} = 1, return 1 unless ($y % 100 == 0);
    $$self{'cache'}{'ly'}{$y} = 0, return 0 unless ($y % 400 == 0);
-   $$self{'cache'}{'ly'}{$y} = 1, return 1;
+   $$self{'cache'}{'ly'}{$y} = 1;
+   return 1;
 }
 
 sub days_in_year {
@@ -701,7 +725,7 @@ sub _weeks_in_year {
 sub week_of_year {
    my($self,@args) = @_;
    my $firstday    = $self->_config('firstday');
-   $self->_week_of_year($firstday,@args);
+   return $self->_week_of_year($firstday,@args);
 }
 
 sub _week_of_year {
@@ -1135,6 +1159,10 @@ sub _config_var_base {
       # We have to redo the time regexp
       delete $$self{'data'}{'rx'}{'time'};
 
+   } elsif ($var eq 'format_mmmyyyy') {
+      my $err = $self->_config_var_format_mmmyyyy($val);
+      return  if ($err);
+
    } elsif ($var eq 'dateformat'    ||
             $var eq 'jan1week1'     ||
             $var eq 'printable'     ||
@@ -1330,6 +1358,18 @@ sub _config_var_defaulttime {
    return 1;
 }
 
+sub _config_var_format_mmmyyyy {
+   my($self,$val) = @_;
+
+   if (lc($val) eq 'first'  ||
+       lc($val) eq 'last'   ||
+       lc($val) eq '') {
+      return 0;
+   }
+   warn "ERROR: [config_var] invalid: Format_MMMYYYY: $val\n";
+   return 1;
+}
+
 ###############################################################################
 # Language functions
 
@@ -1426,6 +1466,8 @@ sub _rx_simple {
    } else {
       $$self{'data'}{'rx'}{$ele} = undef;
    }
+
+   return;
 }
 
 # We need to quote strings that will be used in regexps, but we don't
@@ -1465,6 +1507,8 @@ sub _rx_wordlist {
    } else {
       $$self{'data'}{'rx'}{$ele} = undef;
    }
+
+   return;
 }
 
 no strict 'vars';
@@ -1500,6 +1544,8 @@ sub _rx_replace {
    my $rx = join('|',@key);
 
    $$self{'data'}{'rx'}{$ele}[0] = qr/(?:^|\b)(?:$rx)(?:\b|$)/i;
+
+   return;
 }
 
 # This takes a list of values, each of which can be expressed in multiple
@@ -1538,22 +1584,25 @@ sub _rx_wordlists {
    } else {
       $$self{'data'}{'rx'}{$subset} = undef;
    }
+
+   return;
 }
 
 ###############################################################################
 # Year functions
 #
-# $self->_method(METHOD)       use METHOD as the method for YY->YYYY
+# $self->_method(METHOD)      use METHOD as the method for YY->YYYY
 #                             conversions
 #
 # YEAR = _fix_year(YR)        converts a 2-digit to 4-digit year
+#                             _fix_year is in TZ_Base
 
 sub _method {
    my($self,$method) = @_;
    $self->_config('yytoyyyy',$method);
-}
 
-# _fix_year is in TZ_Base
+   return;
+}
 
 ###############################################################################
 # $self->_mod_add($N,$add,\$val,\$rem);
@@ -1594,6 +1643,8 @@ sub _mod_add {
          $$val = ($N-1)-(-($$val+1)%$N);
       }
    }
+
+   return;
 }
 
 # $flag = $self->_is_int($string [,$low, $high]);

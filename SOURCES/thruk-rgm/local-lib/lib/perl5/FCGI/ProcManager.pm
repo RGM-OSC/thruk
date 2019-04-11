@@ -13,7 +13,8 @@ use POSIX qw(:signal_h);
 
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS $Q $SIG_CODEREF);
 BEGIN {
-  $VERSION = '0.25';
+  $VERSION = '0.28';
+  $VERSION = eval $VERSION;
   @ISA = qw(Exporter);
   @EXPORT_OK = qw(pm_manage pm_die pm_wait
           pm_write_pid_file pm_remove_pid_file
@@ -144,7 +145,7 @@ sub new {
   $this->{PIDS} = {};
 
   # initialize signal constructions.
-  unless ($this->no_signals()) {
+  unless ($this->no_signals() or $^O eq 'MSWin32') {
     $this->{sigaction_no_sa_restart} =
     POSIX::SigAction->new('FCGI::ProcManager::sig_sub');
     $this->{sigaction_sa_restart} =
@@ -152,6 +153,18 @@ sub new {
   }
 
   return $this;
+}
+
+sub _set_signal_handler {
+  my ($this, $signal, $restart) = @_;
+
+  if ($^O eq 'MSWin32') {
+    $SIG{$signal} = 'FCGI::ProcManager::sig_sub';
+  } else {
+    no strict 'refs';
+    sigaction(&{"POSIX::SIG$signal"}(), $restart ? $this->{sigaction_sa_restart} : $this->{sigaction_no_sa_restart})
+      or $this->pm_warn("sigaction: SIG$signal: $!");
+  }
 }
 
 =head1 Manager methods
@@ -258,10 +271,8 @@ sub managing_init {
   # We do NOT want SA_RESTART in the process manager.
   # -- we want start the shutdown sequence immediately upon SIGTERM.
   unless ($this->no_signals()) {
-    sigaction(SIGTERM, $this->{sigaction_no_sa_restart}) or
-    $this->pm_warn("sigaction: SIGTERM: $!");
-    sigaction(SIGHUP,  $this->{sigaction_no_sa_restart}) or
-    $this->pm_warn("sigaction: SIGHUP: $!");
+    $this->_set_signal_handler('TERM', 0);
+    $this->_set_signal_handler('HUP', 0);
     $SIG_CODEREF = sub { $this->sig_manager(@_) };
   }
 
@@ -449,8 +460,8 @@ sub handling_init {
   # begin to handle signals.
   # We'll want accept(2) to return -1(EINTR) on caught signal..
   unless ($this->no_signals()) {
-    sigaction(SIGTERM, $this->{sigaction_no_sa_restart}) or $this->pm_warn("sigaction: SIGTERM: $!");
-    sigaction(SIGHUP,  $this->{sigaction_no_sa_restart}) or $this->pm_warn("sigaction: SIGHUP: $!");
+    $this->_set_signal_handler('TERM', 0);
+    $this->_set_signal_handler('HUP', 0);
     $SIG_CODEREF = sub { $this->sig_handler(@_) };
   }
 
@@ -476,8 +487,8 @@ sub pm_pre_dispatch {
 
   # Now, we want the request to continue unhindered..
   unless ($this->no_signals()) {
-    sigaction(SIGTERM, $this->{sigaction_sa_restart}) or $this->pm_warn("sigaction: SIGTERM: $!");
-    sigaction(SIGHUP,  $this->{sigaction_sa_restart}) or $this->pm_warn("sigaction: SIGHUP: $!");
+    $this->_set_signal_handler('TERM', 1);
+    $this->_set_signal_handler('HUP', 1);
   }
 }
 
@@ -503,8 +514,8 @@ sub pm_post_dispatch {
   }
   # We'll want accept(2) to return -1(EINTR) on caught signal..
   unless ($this->no_signals()) {
-    sigaction(SIGTERM, $this->{sigaction_no_sa_restart}) or $this->pm_warn("sigaction: SIGTERM: $!");
-    sigaction(SIGHUP,  $this->{sigaction_no_sa_restart}) or $this->pm_warn("sigaction: SIGHUP: $!");
+    $this->_set_signal_handler('TERM', 0);
+    $this->_set_signal_handler('HUP', 0);
   }
 }
 

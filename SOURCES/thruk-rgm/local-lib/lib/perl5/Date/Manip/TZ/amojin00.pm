@@ -1,14 +1,14 @@
 package #
 Date::Manip::TZ::amojin00;
-# Copyright (c) 2008-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'tzdata' is run.
-#    Generated on: Wed Feb 18 16:55:34 GMT 2015
-#    Data version: tzdata2015a
-#    Code version: tzcode2015a
+#    Generated on: Tue May 30 10:43:18 EDT 2017
+#    Data version: tzdata2017b
+#    Code version: tzcode2017b
 
 # This module contains data from the zoneinfo time zone database.  The original
 # data was obtained from the URL:
@@ -25,7 +25,7 @@ END {
 }
 
 our ($VERSION);
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 %Dates         = (
@@ -697,6 +697,24 @@ END { undef $VERSION; }
         [ [2065,11,1,8,0,0],[2065,11,1,1,0,0],'-07:00:00',[-7,0,0],
           'MST',0,[2066,3,14,8,59,59],[2066,3,14,1,59,59],
           '2065110108:00:00','2065110101:00:00','2066031408:59:59','2066031401:59:59' ],
+     ],
+   2066 =>
+     [
+        [ [2066,3,14,9,0,0],[2066,3,14,3,0,0],'-06:00:00',[-6,0,0],
+          'MDT',1,[2066,11,7,7,59,59],[2066,11,7,1,59,59],
+          '2066031409:00:00','2066031403:00:00','2066110707:59:59','2066110701:59:59' ],
+        [ [2066,11,7,8,0,0],[2066,11,7,1,0,0],'-07:00:00',[-7,0,0],
+          'MST',0,[2067,3,13,8,59,59],[2067,3,13,1,59,59],
+          '2066110708:00:00','2066110701:00:00','2067031308:59:59','2067031301:59:59' ],
+     ],
+   2067 =>
+     [
+        [ [2067,3,13,9,0,0],[2067,3,13,3,0,0],'-06:00:00',[-6,0,0],
+          'MDT',1,[2067,11,6,7,59,59],[2067,11,6,1,59,59],
+          '2067031309:00:00','2067031303:00:00','2067110607:59:59','2067110601:59:59' ],
+        [ [2067,11,6,8,0,0],[2067,11,6,1,0,0],'-07:00:00',[-7,0,0],
+          'MST',0,[2068,3,11,8,59,59],[2068,3,11,1,59,59],
+          '2067110608:00:00','2067110601:00:00','2068031108:59:59','2068031101:59:59' ],
      ],
 );
 

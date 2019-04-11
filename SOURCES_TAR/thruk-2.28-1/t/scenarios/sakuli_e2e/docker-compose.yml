@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+  omd:
+    build: omd/
+    ports:
+        - "127.0.0.3:60080:80"
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ../../../:/thruk:ro
+  sakuli:
+    image: consol/sakuli-ubuntu-xfce:dev
+    #build: sakuli/
+    environment:
+        - JVM_HEAP_XMX=512
+        - TZ=Europe/Berlin
+    ports:
+        - "127.0.0.3:5901:5901"
+    volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ./:/thruk:ro
+        - ./_run:/cases:rw
+    command: --tail-log

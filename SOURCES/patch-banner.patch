@@ -1,0 +1,12 @@
+--- templates/_infobox.tt.old	2019-03-29 10:28:24.000000000 +0100
++++ templates/_infobox.tt	2019-04-11 07:31:50.360401617 +0200
+@@ -3,9 +3,6 @@
+   <tr>
+     <td class='infoBox'>
+       <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
+-      Last Update: <span id="infoboxdate">[% format_date(date.now, datetime_format_long) %]</span>[% IF ! no_auto_reload %]<span title="page with automatically refresh every [% refresh_rate %] seconds"> (&infin;[% refresh_rate %]s)</span>[% END %]<br />
+-      <a href='http://www.thruk.org' target='_blank' class='homepageURL'>Thruk [% version %][% IF branch %]-[% branch %][% END %]</a>[% IF c.config.extra_version %]<span class="infoboxlinks"> - <a href='[% c.config.extra_version_link %]' target='_blank' class='homepageURL'>[% c.config.extra_version %]</a></span>[% END %]<br />
+-      Logged in as <i>[% remote_user %]</i><br />
+       [% IF has_proc_info %]
+       [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
+       [% IF pi.keys.size > 0 && pi.enable_notifications == -1 %]<div class='infoBoxBadProcStatus'> - Notifications are partially disabled</div>[% END %]

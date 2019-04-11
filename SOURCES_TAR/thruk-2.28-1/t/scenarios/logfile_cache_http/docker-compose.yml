@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+  omd:
+    build: omd/
+    ports:
+        - "127.0.0.3:60080:80"
+        - "127.0.0.3:60443:443"
+        - "127.0.0.3:60557:6557"
+    volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - ../../../:/thruk:ro
+  backend:
+    build: backend/
+    ports: []
+  db:
+     image: mysql:5
+     restart: always
+     environment:
+        MYSQL_ROOT_PASSWORD: thruk
+        MYSQL_DATABASE: thruk
+        MYSQL_USER: thruk
+        MYSQL_PASSWORD: thruk
+     ports:
+        - "127.0.0.3:63306:3306"
+

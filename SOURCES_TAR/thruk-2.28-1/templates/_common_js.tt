@@ -1,0 +1,104 @@
+﻿<script type="text/javascript">
+<!--
+  jQuery.noConflict();
+  [% PROCESS _header_initial_states.tt %]
+  var backend_chooser     = '[% backend_chooser %]';
+  [% IF refresh_rate +%]
+  var refresh_rate        = [% refresh_rate %];
+  [% END +%]
+  [% IF auto_reload_fn +%]
+  var auto_reload_fn      = function(cb) { return([% auto_reload_fn %](cb)) };
+  var datetime_format_long = '[% datetime_format_long %]';
+  [% END +%]
+  var enable_shinken_features = [% enable_shinken_features %];
+  [% IF enable_shinken_features +%]
+  var priorities          = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
+  [% END +%]
+  var url_prefix          = '[% url_prefix %]';
+  var product_prefix      = '[% product_prefix %]';
+  var cookie_path         = '[% cookie_path %]';
+  var theme               = '[% theme %]';
+  var has_expire_acks     = [% IF has_expire_acks %]true[% ELSE %]false[% END %];
+  var fav_counter         = [% IF fav_counter +%]true[% ELSE %]false[% END %];
+  var perf_bar_mode       = '[% perf_bar_mode %]';
+  var perf_bar_pnp_popup  = '[% perf_bar_pnp_popup %]';
+  var internetExplorer    = false;
+  var has_jquery_ui       = [% has_jquery_ui %];
+  var jquery_ui_url       = '[% url_prefix %]vendor/jquery-ui-[% jquery_ui %]/js/jquery-ui-[% jquery_ui %].custom.min.js';
+  var jquery_ui_css       = '[% url_prefix %]vendor/jquery-ui-[% jquery_ui %]/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css';
+  var thruk_debug_js      = [% IF thruk_debug %]1[% ELSE %]0[% END %];
+  var minimal             = [% IF minimal %]true[% ELSE %]false[% END %];
+  var user_token          = '[% get_user_token(c) %]';
+  var remote_user         = '[% remote_user %]';
+  var omd_site            = '[% omd_site %]';
+  var referer             = '[% escape_js(uri_with(c, '_' => 'undef' )) %]';
+  var full_uri            = '[% escape_html(full_uri(c)).replace('&amp;', '&').replace('&amp;', '&') %]';
+  var original_uri        = '[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% END %]';
+  var show_sitepanel      = '[% show_sitepanel %]';
+  var param_backend       = [% json_encode(param_backend.list) %];
+  var backend_chooser     = '[% backend_chooser %]';
+  var info_popup_options  = [[% c.config.info_popup_options %]];
+  var downtime_duration   = [% downtime_duration %];
+  var has_debug_options   = [% has_debug_options %];
+  var maximum_search_boxes = [% c.config.maximum_search_boxes %];
+  [% PROCESS _common_js_bugs.tt %]
+
+  [% IF disable_backspace %]
+  jQuery(document).on("keydown", function (e) {
+    if(e.which === 8 && !jQuery(e.target).is("input, textarea")) {
+      e.preventDefault();
+    }
+  });
+  [% END %]
+
+  [% IF original_url %]
+  var history_url = '[% original_url %]';
+  history_url     = history_url.replace(/&amp;/g, '&');
+  if(history.replaceState) {
+    history.replaceState({}, "", history_url);
+  }
+  [% END %]
+  [% IF use_frames && use_dynamic_titles %]
+  if(window.parent.frames && !String(window.parent.location.href).match(/\/panorama\.cgi/)) {
+    try {
+      window.parent.document.title = '[% escape_quotes(title_prefix) %][% escape_quotes(title) %]';
+    } catch(e) { debug(e) }
+  }
+  [% END %]
+
+  [% IF bodyonload %]
+  jQuery(document).ready(function() {
+    bodyOnLoad([% IF refresh_rate %][% refresh_rate %][% END %]);
+  });
+  [% END %]
+  init_page();
+
+  try {
+      if(window.parent.frames && top.frames['side']) {
+          top.frames['side'].is_reloading = undefined;
+          top.frames['side'].load_errors  = 0;
+      }
+  }
+  catch(e) { debug(e); }
+  /* favicon counter */
+  [%+ IF fav_counter +%]
+  [% totals = set_favicon_counter(c) %]
+    [%+ IF totals.red > 0 && totals.yellow == 0 && totals.orange == 0 +%]
+      updateFaviconCounter([% totals.red %], '#FF5B33');
+    [%+ ELSIF totals.red == 0 && totals.yellow > 0 && totals.orange == 0 +%]
+      updateFaviconCounter([% totals.yellow %], '#FFDE00');
+    [%+ ELSIF totals.red == 0 && totals.yellow == 0 && totals.orange > 0 +%]
+      updateFaviconCounter([% totals.orange %], '#FF9E00');
+    [%+ ELSE +%]
+      updateFaviconCounter([% totals.red + totals.yellow + totals.orange %], '#FF9E00');
+    [%+ END +%]
+  [%+ END +%]
+
+-->
+</script>
+<!--[if IE]><script type="text/javascript">internetExplorer = true;</script><![endif]-->
+
+[% IF show_sitepanel == 'tree' %]
+<link href="[% url_prefix %]vendor/fancytree-2.30.2/skin-win8/ui.fancytree.min.css" rel="stylesheet">
+<script src="[% url_prefix %]vendor/fancytree-2.30.2/jquery.fancytree-all-deps.min.js"></script>
+[% END %]

@@ -1,25 +1,25 @@
 package #
 Date::Manip::Offset::off131;
-# Copyright (c) 2008-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'tzdata' is run.
-#    Generated on: Wed Feb 18 18:24:53 GMT 2015
-#    Data version: tzdata2015a
-#    Code version: tzcode2015a
+#    Generated on: Tue May 30 10:44:03 EDT 2017
+#    Data version: tzdata2017b
+#    Code version: tzcode2017b
 
 # This module contains data from the zoneinfo time zone database.  The original
 # data was obtained from the URL:
-#    ftp://ftp.iana.orgtz
+#    ftp://ftp.iana.org/tz
 
 use strict;
 use warnings;
 require 5.010000;
 
 our ($VERSION);
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 our ($Offset,%Offset);
@@ -28,40 +28,11 @@ END {
    undef %Offset;
 }
 
-$Offset        = '+07:00:00';
+$Offset        = '+06:11:26';
 
 %Offset        = (
    0 => [
-      'indian/christmas',
-      'asia/ho_chi_minh',
-      'asia/bangkok',
-      'asia/novokuznetsk',
-      'asia/novosibirsk',
-      'asia/jakarta',
-      'asia/hovd',
-      'asia/pontianak',
-      'asia/omsk',
       'asia/krasnoyarsk',
-      'etc/gmt+7',
-      't',
-      'antarctica/davis',
-      'asia/irkutsk',
-      'asia/choibalsan',
-      'asia/ulaanbaatar',
-      'asia/kuala_lumpur',
-      'asia/singapore',
-      ],
-   1 => [
-      'asia/omsk',
-      'asia/novokuznetsk',
-      'asia/novosibirsk',
-      'asia/dhaka',
-      'asia/almaty',
-      'asia/qyzylorda',
-      'asia/krasnoyarsk',
-      'asia/bishkek',
-      'asia/dushanbe',
-      'asia/tashkent',
       ],
 );
 

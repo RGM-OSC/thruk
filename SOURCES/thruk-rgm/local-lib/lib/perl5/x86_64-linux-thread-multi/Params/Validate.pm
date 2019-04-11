@@ -5,7 +5,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-our $VERSION = '1.18';
+our $VERSION = '1.29';
 
 use Exporter;
 use Module::Implementation;
@@ -69,13 +69,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 Params::Validate - Validate method/function parameters
 
 =head1 VERSION
 
-version 1.18
+version 1.29
 
 =head1 SYNOPSIS
 
@@ -122,10 +124,12 @@ version 1.18
         validate(
             @_,
             {
-                foo => callbacks => {
-                    'is an integer' => sub {
-                        return 1 if $_[0] =~ /^-?[1-9][0-9]*$/;
-                        die "$_[0] is not a valid integer value";
+                foo => {
+                    callbacks => {
+                        'is an integer' => sub {
+                            return 1 if $_[0] =~ /^-?[1-9][0-9]*$/;
+                            die "$_[0] is not a valid integer value";
+                        },
                     },
                 }
             }
@@ -158,10 +162,15 @@ version 1.18
 
 =head1 DESCRIPTION
 
-The Params::Validate module allows you to validate method or function
-call parameters to an arbitrary level of specificity. At the simplest
-level, it is capable of validating the required parameters were given
-and that no unspecified additional parameters were passed in.
+B<< I would recommend you consider using L<Params::ValidationCompiler>
+instead. That module, despite being pure Perl, is I<significantly> faster than
+this one, at the cost of having to adopt a type system such as L<Specio>,
+L<Type::Tiny>, or the one shipped with L<Moose> >>.
+
+This module allows you to validate method or function call parameters to an
+arbitrary level of specificity. At the simplest level, it is capable of
+validating the required parameters were given and that no unspecified
+additional parameters were passed in.
 
 It is also capable of determining that a parameter is of a specific
 type, that it is an object of a certain class hierarchy, that it
@@ -186,8 +195,6 @@ in the section on L<Type Validation|Params::Validate/Type Validation>.
 The constants are available via the export tag C<:types>. There is
 also an C<:all> tag which includes all of the constants as well as the
 C<validation_options()> function.
-
-=encoding UTF-8
 
 =head1 PARAMETER VALIDATION
 
@@ -510,8 +517,8 @@ the presence of one or more other optional parameters.
                 optional => 1,
                 depends  => [ 'cc_expiration', 'cc_holder_name' ],
             },
-            cc_expiration  { type => SCALAR, optional => 1 },
-            cc_holder_name { type => SCALAR, optional => 1 },
+            cc_expiration  => { type => SCALAR, optional => 1 },
+            cc_holder_name => { type => SCALAR, optional => 1 },
         }
     );
 
@@ -800,10 +807,19 @@ expect validation to be on when they execute. For example:
 But if you want to shoot yourself in the foot and just turn it off, go
 ahead!
 
+=head1 SPECIFYING AN IMPLEMENTATION
+
+This module ships with two equivalent implementations, one in XS and one in
+pure Perl. By default, it will try to load the XS version and fall back to the
+pure Perl implementation as needed. If you want to request a specific version,
+you can set the C<PARAMS_VALIDATE_IMPLEMENTATION> environment variable to
+either C<XS> or C<PP>. If the implementation you ask for cannot be loaded,
+then this module will die when loaded.
+
 =head1 TAINT MODE
 
 The XS implementation of this module has some problems Under taint mode with
-version of Perl before 5.14. If validation I<fails>, then instead of getting
+versions of Perl before 5.14. If validation I<fails>, then instead of getting
 the expected error message you'll get a message like "Insecure dependency in
 eval_sv". This can be worked around by either untainting the arguments
 yourself, using the pure Perl implementation, or upgrading your Perl.
@@ -820,32 +836,30 @@ figures out how to do this, please let me know.
 
 =head1 SUPPORT
 
-Please submit bugs and patches to the CPAN RT system at
-http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Params%3A%3AValidate or
-via email at bug-params-validate@rt.cpan.org.
+Bugs may be submitted at L<http://rt.cpan.org/Public/Dist/Display.html?Name=Params-Validate> or via email to L<bug-params-validate@rt.cpan.org|mailto:bug-params-validate@rt.cpan.org>.
 
-Support questions can be sent to Dave at autarch@urth.org.
+I am also usually active on IRC as 'autarch' on C<irc://irc.perl.org>.
+
+=head1 SOURCE
+
+The source code repository for Params-Validate can be found at L<https://github.com/houseabsolute/Params-Validate>.
 
 =head1 DONATIONS
 
-If you'd like to thank me for the work I've done on this module,
-please consider making a "donation" to me via PayPal. I spend a lot of
-free time creating free software, and would appreciate any support
-you'd care to offer.
+If you'd like to thank me for the work I've done on this module, please
+consider making a "donation" to me via PayPal. I spend a lot of free time
+creating free software, and would appreciate any support you'd care to offer.
 
-Please note that B<I am not suggesting that you must do this> in order
-for me to continue working on this particular software. I will
-continue to do so, inasmuch as I have in the past, for as long as it
-interests me.
+Please note that B<I am not suggesting that you must do this> in order for me
+to continue working on this particular software. I will continue to do so,
+inasmuch as I have in the past, for as long as it interests me.
 
-Similarly, a donation made in this way will probably not make me work
-on this software much more, unless I get so many donations that I can
-consider working on free software full time, which seems unlikely at
-best.
+Similarly, a donation made in this way will probably not make me work on this
+software much more, unless I get so many donations that I can consider working
+on free software full time (let's all have a chuckle at that together).
 
-To donate, log into PayPal and send money to autarch@urth.org or use
-the button on this page:
-L<http://www.urth.org/~autarch/fs-donation.html>
+To donate, log into PayPal and send money to autarch@urth.org, or use the
+button at L<http://www.urth.org/~autarch/fs-donation.html>.
 
 =head1 AUTHORS
 
@@ -863,9 +877,21 @@ Ilya Martynov <ilya@martynov.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords J.R. Mash Olivier Mengué
+=for stopwords Andy Grundman E. Choroba Ivan Bessarabov J.R. Mash Karen Etheridge Noel Maddy Olivier Mengué Tony Cook Vincent Pit
 
 =over 4
+
+=item *
+
+Andy Grundman <andyg@activestate.com>
+
+=item *
+
+E. Choroba <choroba@matfyz.cz>
+
+=item *
+
+Ivan Bessarabov <ivan@bessarabov.ru>
 
 =item *
 
@@ -873,16 +899,35 @@ J.R. Mash <jmash.code@gmail.com>
 
 =item *
 
+Karen Etheridge <ether@cpan.org>
+
+=item *
+
+Noel Maddy <zhtwnpanta@gmail.com>
+
+=item *
+
 Olivier Mengué <dolmen@cpan.org>
+
+=item *
+
+Tony Cook <tony@develop-help.com>
+
+=item *
+
+Vincent Pit <perl@profvince.com>
 
 =back
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2001 - 2015 by Dave Rolsky and Ilya Martynov.
+This software is Copyright (c) 2001 - 2017 by Dave Rolsky and Ilya Martynov.
 
 This is free software, licensed under:
 
   The Artistic License 2.0 (GPL Compatible)
+
+The full text of the license can be found in the
+F<LICENSE> file included with this distribution.
 
 =cut

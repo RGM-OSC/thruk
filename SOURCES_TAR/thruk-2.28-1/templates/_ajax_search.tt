@@ -1,0 +1,12 @@
+﻿[% IF use_frames %]
+  <div style="display:none;" id="search-results"></div>
+[% END %]
+<script type="text/javascript">
+<!--
+  var input = document.getElementById('s0_value');
+  if(input) {
+    input.onclick    = ajax_search.init;
+    input.ondblclick = ajax_search.init;
+  }
+-->
+</script>

@@ -5,10 +5,10 @@
 %global __perllib_provides /bin/false
 
 %define lname thruk
-%define lver  -3
+%define lver  -1
 
 Name: thruk
-Version: 2.12
+Version: 2.28
 Release: 1.rgm
 Summary: Thruk Monitoring Webinterface
 
@@ -18,9 +18,10 @@ URL: http://www.thruk.org/
 Source0: %{lname}-%{version}%{lver}.tar.gz
 Source1: %{name}-rgm.tar.gz
 Patch0:  %{name}-%{version}.patch
+Patch1:  patch-banner.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
-Requires: httpd, mk-livestatus, mod_fcgid, perl, cairo >= 1.8.8
+Requires: httpd, mk-livestatus, mod_fcgid, perl, cairo >= 1.8.8, perl-Cpanel-JSON-XS
 Requires: xorg-x11-server-Xvfb
 Requires: systemd
 
@@ -36,6 +37,7 @@ It is designed to be a "dropin" replacement. The target is to cover 100% of the 
 %prep
 %setup -T -b 0 -n %{lname}-%{version}%{lver}
 %patch0 -p1
+%patch1 -p1
 %setup -T -b 1 -n %{name}-rgm
 
 %install
@@ -103,6 +105,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Wed Apr 20 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-1.rgm
+- New release
+
 * Tue Mar 19 2019 Eric Belhomme <ebelhomme@fr.scc.com> - 2.12-3-1.rgm
 - use of rpm-macros-rgm
 - fix config files

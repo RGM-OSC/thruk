@@ -1,0 +1,136 @@
+diff -Naur thruk-2.28-1.orig/lib/Thruk/Utils/Avail.pm thruk-2.28-1/lib/Thruk/Utils/Avail.pm
+--- thruk-2.28-1.orig/lib/Thruk/Utils/Avail.pm	2016-12-20 02:45:07.000000000 +0100
++++ thruk-2.28-1/lib/Thruk/Utils/Avail.pm	2017-02-25 10:42:04.157326131 +0100
+@@ -883,11 +883,15 @@
+     my $time = {
+         'available'                             => 0,
+         'unavailable'                           => 0,
++        'downtime'                              => 0,
++        'indeterminate'                         => 0,
+         'time_indeterminate_notrunning'         => $t->{'time_indeterminate_notrunning'}         || 0,
+         'time_indeterminate_nodata'             => $t->{'time_indeterminate_nodata'}             || 0,
+         'time_indeterminate_outside_timeperiod' => $t->{'time_indeterminate_outside_timeperiod'} || 0,
+     };
+ 
++    $time->{'indeterminate'} = $time->{'time_indeterminate_notrunning'}+$time->{'time_indeterminate_nodata'} + $time->{'time_indeterminate_outside_timeperiod'};
++
+     for my $s ( keys %{$t} ) {
+         for my $state (qw/ok warning critical unknown up down unreachable/) {
+             if($s eq 'time_'.$state) {
+@@ -898,6 +902,7 @@
+                 }
+             }
+             elsif($s eq 'scheduled_time_'.$state) {
++		$time->{'downtime'} += $t->{'scheduled_time_'.$state};
+                 if(defined $u->{$state.'_downtime'}) {
+                     $time->{'unavailable'} += $t->{'scheduled_time_'.$state};
+                 } else {
+diff -Naur thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/reports/comp/pnp_multiple_graph_page.tt thruk-2.28-1/plugins/plugins-available/reports2/templates/reports/comp/pnp_multiple_graph_page.tt
+--- thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/reports/comp/pnp_multiple_graph_page.tt	2016-12-20 02:45:07.000000000 +0100
++++ thruk-2.28-1/plugins/plugins-available/reports2/templates/reports/comp/pnp_multiple_graph_page.tt	2017-02-25 10:42:04.158326150 +0100
+@@ -10,7 +10,7 @@
+   [% source = get_graph_source(c.req.parameters.host, c.req.parameters.service) + 1 %][%# start at default source + 1 because the first graph is added in sla_graph_page.tt already #%]
+   [% WHILE page <= nb_page %]
+     [% nb_graph = 0 %]
+-    [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 400, 100, source) %]
++    [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 420, 100, source) %]
+     [% IF pnpdata %]
+       [% nb_graph = nb_graph + 1 %]
+       [% WRAPPER 'reports/comp/page_standard.tt' pagetitle="" %]
+@@ -22,7 +22,7 @@
+           [% nb_graph = 3 %]
+         [% END %]
+         [% WHILE nb_graph < 3 %]
+-          [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 400, 100, source) %]
++          [% pnpdata = get_pnp_image(c.req.parameters.host, c.req.parameters.service, start, end, 420, 100, source) %]
+           [% IF pnpdata %]
+             [% nb_graph = nb_graph + 1 %]
+             <div align="center">
+diff -Naur thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/reports/comp/sla_total_table.tt thruk-2.28-1/plugins/plugins-available/reports2/templates/reports/comp/sla_total_table.tt
+--- thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/reports/comp/sla_total_table.tt	2016-12-20 02:45:07.000000000 +0100
++++ thruk-2.28-1/plugins/plugins-available/reports2/templates/reports/comp/sla_total_table.tt	2017-02-25 10:42:04.158326150 +0100
+@@ -9,9 +9,17 @@
+     <td>[% duration(data.time.available) %]</td>
+   </tr>
+   <tr>
+-    <th>[% loc("Total Downtime") %]</th>
++    <th>[% loc("Total Down") %]</th>
+     <td>[% duration(data.time.unavailable) %]</td>
+   </tr>
++  <tr>
++    <th>[% loc("Total Downtime") %]</th>
++    <td>[% duration(data.time.downtime) %]</td>
++  </tr>
++  <tr>
++    <th>[% loc("Total Indeterminated") %]</th>
++    <td>[% duration(data.time.indeterminate) %]</td>
++  </tr>
+   [% IF data.time.time_indeterminate_outside_timeperiod > 0 %]
+   <tr>
+     <th>[% loc("Out of Scope") %]</th>
+diff -Naur thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/reports/locale/fr.tt thruk-2.28-1/plugins/plugins-available/reports2/templates/reports/locale/fr.tt
+--- thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/reports/locale/fr.tt	2016-12-20 02:45:07.000000000 +0100
++++ thruk-2.28-1/plugins/plugins-available/reports2/templates/reports/locale/fr.tt	2017-02-25 10:42:04.158326150 +0100
+@@ -35,7 +35,9 @@
+     'Availability'                          => 'Disponibilité',
+     'Service: %s on %s'                     => 'Service: %s sur %s',
+     'Average Availability'                  => 'Disponibilité moyenne',
+-    'Total Uptime'                          => 'Temps en ligne',
++    'Total Uptime'                          => 'Temps de disponibilité',
++    'Total Down'                            => 'Temps d\'indisponibilité',
++    'Total Indeterminated'                  => 'Temps indéterminé',
+     'Total Downtime'                        => 'Temps en maintenance',
+     'no outages during this timeperiod'     => 'Pas d\'interruption durant cette période.',
+     'Worst Outages'                         => 'Plus importante interruption',
+diff -Naur thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/reports/style/css.tt thruk-2.28-1/plugins/plugins-available/reports2/templates/reports/style/css.tt
+--- thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/reports/style/css.tt	2016-12-20 02:45:07.000000000 +0100
++++ thruk-2.28-1/plugins/plugins-available/reports2/templates/reports/style/css.tt	2017-02-25 10:42:04.158326150 +0100
+@@ -151,13 +151,13 @@
+   float: right;
+ }
+ TABLE.availability_details {
+-  margin-top: 30px;
++  margin-top: 10px;
+   margin-left: 10px;
+   border-collapse: collapse;
+   font-size: 10px;
+ }
+ TABLE.availability_details.totals {
+-  margin-top: 15px;
++  margin-top: 10px;
+ }
+ TABLE.availability_details TD, TABLE.availability_details TH {
+   border: 1px solid grey;
+@@ -212,7 +212,9 @@
+   text-align: right;
+ }
+ IMG.pnpimage {
+-  margin-top: 5px;
++  position: absolute;
++  left: 50px;
++  bottom: 70px;
+ }
+ IMG.grafanaimage {
+   margin-top: 35px;
+diff -Naur thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/reports/style/custom.tt thruk-2.28-1/plugins/plugins-available/reports2/templates/reports/style/custom.tt
+--- thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/reports/style/custom.tt	2016-12-20 02:45:07.000000000 +0100
++++ thruk-2.28-1/plugins/plugins-available/reports2/templates/reports/style/custom.tt	2017-02-25 10:42:04.158326150 +0100
+@@ -1 +1,18 @@
+ ﻿[%# see https://thruk.org/documentation/reporting.html#customized-reports #%]
++
++<style type="text/css">
++.logo_eon {
++    position: absolute;
++    right: 10px;
++    top: 20px;
++    width: 250px;
++    height: 48px;
++}
++</style>
++
++<script language="javascript" type="text/javascript">
++/* add complete new elements by javascript */
++  jQuery(document).ready(function() {
++    jQuery('<br><img class="logo_eon" src="/thruk/themes/RGM/images/logos/logo_eon.png"><br>').insertAfter('DIV.page.cover DIV.titletext');
++  });
++</script>

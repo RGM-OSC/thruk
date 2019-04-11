@@ -2,7 +2,7 @@ package FCGI;
 use strict;
 
 BEGIN {
-    our $VERSION = '0.77';
+    our $VERSION = '0.78';
 
     require XSLoader;
     XSLoader::load(__PACKAGE__, $VERSION);
@@ -252,6 +252,13 @@ exception by using the C<bytes> pragma.
 =head1 AUTHOR
 
 Sven Verdoolaege <skimo@kotnet.org>
+
+=head1 COPYRIGHT AND LICENCE
+
+This software is copyrighted (c) 1996 by by Open Market, Inc.
+
+See the LICENSE file in this distribution for information on usage and
+redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 =cut
 

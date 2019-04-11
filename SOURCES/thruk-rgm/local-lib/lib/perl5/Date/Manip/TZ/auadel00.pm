@@ -1,14 +1,14 @@
 package #
 Date::Manip::TZ::auadel00;
-# Copyright (c) 2008-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'tzdata' is run.
-#    Generated on: Wed Feb 18 16:55:35 GMT 2015
-#    Data version: tzdata2015a
-#    Code version: tzcode2015a
+#    Generated on: Tue May 30 10:43:21 EDT 2017
+#    Data version: tzdata2017b
+#    Code version: tzcode2017b
 
 # This module contains data from the zoneinfo time zone database.  The original
 # data was obtained from the URL:
@@ -25,7 +25,7 @@ END {
 }
 
 our ($VERSION);
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 %Dates         = (
@@ -940,6 +940,24 @@ END { undef $VERSION; }
         [ [2065,10,3,16,30,0],[2065,10,4,3,0,0],'+10:30:00',[10,30,0],
           'ACDT',1,[2066,4,3,16,29,59],[2066,4,4,2,59,59],
           '2065100316:30:00','2065100403:00:00','2066040316:29:59','2066040402:59:59' ],
+     ],
+   2066 =>
+     [
+        [ [2066,4,3,16,30,0],[2066,4,4,2,0,0],'+09:30:00',[9,30,0],
+          'ACST',0,[2066,10,2,16,29,59],[2066,10,3,1,59,59],
+          '2066040316:30:00','2066040402:00:00','2066100216:29:59','2066100301:59:59' ],
+        [ [2066,10,2,16,30,0],[2066,10,3,3,0,0],'+10:30:00',[10,30,0],
+          'ACDT',1,[2067,4,2,16,29,59],[2067,4,3,2,59,59],
+          '2066100216:30:00','2066100303:00:00','2067040216:29:59','2067040302:59:59' ],
+     ],
+   2067 =>
+     [
+        [ [2067,4,2,16,30,0],[2067,4,3,2,0,0],'+09:30:00',[9,30,0],
+          'ACST',0,[2067,10,1,16,29,59],[2067,10,2,1,59,59],
+          '2067040216:30:00','2067040302:00:00','2067100116:29:59','2067100201:59:59' ],
+        [ [2067,10,1,16,30,0],[2067,10,2,3,0,0],'+10:30:00',[10,30,0],
+          'ACDT',1,[2068,3,31,16,29,59],[2068,4,1,2,59,59],
+          '2067100116:30:00','2067100203:00:00','2068033116:29:59','2068040102:59:59' ],
      ],
 );
 

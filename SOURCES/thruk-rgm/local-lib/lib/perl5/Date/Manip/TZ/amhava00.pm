@@ -1,14 +1,14 @@
 package #
 Date::Manip::TZ::amhava00;
-# Copyright (c) 2008-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'tzdata' is run.
-#    Generated on: Wed Feb 18 16:55:42 GMT 2015
-#    Data version: tzdata2015a
-#    Code version: tzcode2015a
+#    Generated on: Tue May 30 10:43:19 EDT 2017
+#    Data version: tzdata2017b
+#    Code version: tzcode2017b
 
 # This module contains data from the zoneinfo time zone database.  The original
 # data was obtained from the URL:
@@ -25,7 +25,7 @@ END {
 }
 
 our ($VERSION);
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 %Dates         = (
@@ -994,6 +994,24 @@ END { undef $VERSION; }
         [ [2065,11,1,5,0,0],[2065,11,1,0,0,0],'-05:00:00',[-5,0,0],
           'CST',0,[2066,3,14,4,59,59],[2066,3,13,23,59,59],
           '2065110105:00:00','2065110100:00:00','2066031404:59:59','2066031323:59:59' ],
+     ],
+   2066 =>
+     [
+        [ [2066,3,14,5,0,0],[2066,3,14,1,0,0],'-04:00:00',[-4,0,0],
+          'CDT',1,[2066,11,7,4,59,59],[2066,11,7,0,59,59],
+          '2066031405:00:00','2066031401:00:00','2066110704:59:59','2066110700:59:59' ],
+        [ [2066,11,7,5,0,0],[2066,11,7,0,0,0],'-05:00:00',[-5,0,0],
+          'CST',0,[2067,3,13,4,59,59],[2067,3,12,23,59,59],
+          '2066110705:00:00','2066110700:00:00','2067031304:59:59','2067031223:59:59' ],
+     ],
+   2067 =>
+     [
+        [ [2067,3,13,5,0,0],[2067,3,13,1,0,0],'-04:00:00',[-4,0,0],
+          'CDT',1,[2067,11,6,4,59,59],[2067,11,6,0,59,59],
+          '2067031305:00:00','2067031301:00:00','2067110604:59:59','2067110600:59:59' ],
+        [ [2067,11,6,5,0,0],[2067,11,6,0,0,0],'-05:00:00',[-5,0,0],
+          'CST',0,[2068,3,11,4,59,59],[2068,3,10,23,59,59],
+          '2067110605:00:00','2067110600:00:00','2068031104:59:59','2068031023:59:59' ],
      ],
 );
 

@@ -127,7 +127,7 @@ C<init_valid_attributes> to your db class:
 	};
 	$dbh->{foo_readonly_attrs} = {
 	    foo_version 	=> 1,	# ensure no-one modifies the driver version
-	    foo_valid_attrs	=> 1,	# do not permit to add more valid attributes ...
+	    foo_valid_attrs	=> 1,	# do not permit one to add more valid attributes ...
 	    foo_readonly_attrs	=> 1,	# ... or make the immutable mutable
 	    foo_manager		=> 1,	# manager is set internally only
 	};
@@ -194,10 +194,10 @@ DBI::DBD::SqlEngine provides only readonly access to this structure,
 modifications are still allowed.
 
 Primarily DBI::DBD::SqlEngine provides access via the setters
-C<get_sql_engine_meta>, C<get_single_table_meta>, C<set_single_table_meta>,
-C<set_sql_engine_meta> and C<clear_sql_engine_meta>. Those methods are
-easily accessible by the users via the C<< $dbh->func () >> interface
-provided by DBI. Well, many users don't feel comfortize when calling
+C<new_sql_engine_meta>, C<get_sql_engine_meta>, C<get_single_table_meta>,
+C<set_single_table_meta>, C<set_sql_engine_meta> and C<clear_sql_engine_meta>.
+Those methods are easily accessible by the users via the C<< $dbh->func () >>
+interface provided by DBI. Well, many users don't feel comfortize when calling
 
     # don't require extension for tables cars
     $dbh->func ("cars", "f_ext", ".csv", "set_sql_engine_meta");
@@ -234,7 +234,7 @@ C<init_valid_attributes> (re-capture L</Deal with own attributes>):
 	};
 	$dbh->{foo_readonly_attrs} = {
 	    foo_version 	=> 1,	# ensure no-one modifies the driver version
-	    foo_valid_attrs	=> 1,	# do not permit to add more valid attributes ...
+	    foo_valid_attrs	=> 1,	# do not permit one to add more valid attributes ...
 	    foo_readonly_attrs	=> 1,	# ... or make the immutable mutable
 	    foo_manager		=> 1,	# manager is set internally only
 	    foo_meta            => 1,   # ensure public interface to modify table meta attributes are immutable

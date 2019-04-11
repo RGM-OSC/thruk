@@ -1,5 +1,5 @@
 package Date::Manip::DM5;
-# Copyright (c) 1995-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 1995-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -220,8 +220,8 @@ use IO::File;
 our($Abbrevs);
 use Date::Manip::DM5abbrevs;
 
-$VERSION='6.49';
-our $DM5_VERSION = '5.65';
+$VERSION='6.60';
+our $DM5_VERSION = '5.66';
 
 ########################################################################
 ########################################################################
@@ -3326,9 +3326,9 @@ sub Date_ConvTZ {
   Date_Init()  if (! $Curr{"InitDone"});
   my($gmt)=();
 
-  if (! defined $from) {
+  if ((! defined $from) or ($from eq '')) {
 
-    if (! defined $to) {
+    if ((! defined $to) or ($to eq '')) {
       # TZ -> ConvTZ
       return $date  if ($Cnf{"ConvTZ"} eq "IGNORE" or ! $Cnf{"ConvTZ"});
       $from=$Cnf{"TZ"};
@@ -3337,16 +3337,16 @@ sub Date_ConvTZ {
     } else {
       # ConvTZ,TZ -> $to
       $from=$Cnf{"ConvTZ"};
-      $from=$Cnf{"TZ"}  if (! defined $from);
+      $from=$Cnf{"TZ"}  if ((! defined $from) or ($from eq ''));
     }
 
   } else {
 
-    if (! defined $to) {
+    if ((! defined $to) or ($to eq '')) {
       # $from -> ConvTZ,TZ
       return $date  if ($Cnf{"ConvTZ"} eq "IGNORE");
       $to=$Cnf{"ConvTZ"};
-      $to=$Cnf{"TZ"}  if (! $to);
+      $to=$Cnf{"TZ"}  if ((! defined $to) or ($to eq ''));
 
     } else {
       # $from -> $to
@@ -4472,7 +4472,7 @@ sub _Date_Recur_WoM {
     $date1=_DateCalc_DateDelta($date0,"+0:1:0:0:0:0:0");
 
     foreach $d (@d) {
-      # Find 1st occurence of DOW (in both months)
+      # Find 1st occurrence of DOW (in both months)
       $d0=Date_GetNext($date0,$d,1);
       $d1=Date_GetNext($date1,$d,1);
 

@@ -1,6 +1,6 @@
 package common::sense;
 
-our $VERSION = 3.73;
+our $VERSION = 3.74;
 
 # overload should be included
 

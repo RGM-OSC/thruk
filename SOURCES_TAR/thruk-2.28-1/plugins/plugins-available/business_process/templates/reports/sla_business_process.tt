@@ -1,0 +1,78 @@
+﻿[%# EDIT #%]
+[% IF block == 'edit' %]
+  [%
+    required_fields = [
+        { 'language'                     => [ 'Language',              'language',        'en'                  ,'', 1 ] },
+
+        { 'businessprocess'              => [ 'Business Process',      'business process',''                    ,'', 1 ] },
+
+        { 'timeperiod'                   => [ 'Timeperiod',            'rptimeperiod',    'last12months'               ] },
+        { 'breakdown'                    => [ 'Breakdown by',          'breakdowns',      'months'                     ] },
+        { 'rpttimeperiod'                => [ 'Report Timeperiod',     'rpttimeperiod',   ''                           ] },
+        { 'sla'                          => [ 'SLA %',                 'int',             '98'                  ,'', 1 ] },
+        { 'graph_min_sla'                => [ 'Graph SLA %',           'int',             '90'                  ,'', 1 ] },
+        { 'decimals'                     => [ 'Decimal Points',        'int',             '2'                   ,'', 1 ] },
+        { 'dateformat'                   => [ 'Dateformat',                 'dateformat', ''                                   ] },
+        { 'datetimeformat'               => [ 'Datetimeformat',             'datetimeformat', ''                               ] },
+        { 'assumeinitialstates'          => [ 'Assume Initial States', 'yes_no',          'yes'                        ] },
+        { 'initialassumedservicestate'   => [ 'Initial Assumed State', 'svc_initialassumedstate',          '0'         ] },
+        { 'includesoftstates'            => [ 'Include Soft States',   'yes_no',          'no'                         ] },
+        { 'unavailable'                  => [ 'Unavailable States',    'svc_unavailable', ['critical', 'unknown'], '', 1  ] },
+        { 'mail_max_level'               => [ 'Mail SLA %',                 'int_box',         '-1', 'cancel mail if no object breaks this sla', 0, 100] },
+        { 'max_worst_pages'              => [ 'Worst Outages',              'int_box',          '1'          ,'max. # pages', 1, 1 ] },
+        { 'max_outages_pages'            => [ 'Latest Outages',             'int_box',         '-1'          ,'max. # pages', 1, 1 ] },
+        { 'attach_json'                  => [ 'Attach Json',                'yes_no',           'no', 'attach json raw data'  ] },
+    ];
+  %]
+[% END %]
+[% IF block == 'edit_types' %]
+  [% IF type == 'business process' %]
+    <input type="text" id="params.[% key %]" name="params.[% key %]" value="[% value | html %]" onfocus="this.click()" onclick="ajax_search.init(this, '[% type | html %]', { url: 'bp.cgi?view_mode=json&format=search', autosubmit:false })">
+    [% key = '' %]
+  [% END %]
+[% END %]
+
+[%# MAIL LAYOUT #%]
+[% PROCESS 'reports/comp/mail.tt' %]
+
+[%# PREPARE REPORT #%]
+[% IF block == 'prepare' %]
+[% c.req.parameters.host    = param.businessprocess %]
+[% c.req.parameters.service = param.businessprocess %]
+[% PROCESS 'reports/comp/sla_prepare.tt' %]
+[% END %]
+
+[%# REPORT LAYOUT #%]
+[% IF block == 'render' %]
+  [% PROCESS 'reports/comp/sla_render_settings.tt' %]
+  [%
+    title        = loc('SLA Report')
+    subtitle     = r.name
+    coverdetails = [ loc('Report Timeperiod:'), get_report_timeperiod(start, end, reportDateFormat),
+                     loc('Business Process:'),  param.businessprocess,
+                   ]
+  %]
+
+  [% WRAPPER 'reports/comp/report.tt' %]
+    [% WRAPPER 'reports/comp/page_cover.tt' %][% END %]
+
+    [% FOREACH hst = avail_data.services.keys.sort %]
+      [% FOREACH svc = avail_data.services.$hst.keys.sort %]
+        [% c.req.parameters.host    = hst %]
+        [% c.req.parameters.service = svc %]
+        [% available = get_availability_percents() %]
+        [% p = available.total.percent;
+           IF p == -1; p = 100; END;
+           IF param.exists('mail_max_level') && param.mail_max_level != -1 && p < param.mail_max_level; param.mail_max_level_count = param.mail_max_level_count + 1; END;
+        %]
+        [% pagetitle                    = loc("Business Process: %s", hst) %]
+
+        [% WRAPPER 'reports/comp/page_standard.tt'  %]
+          [% PROCESS 'reports/comp/sla_graph_page.tt' %]
+        [% END %]
+        [% PROCESS 'reports/comp/sla_outages.tt' %]
+      [% END %]
+    [% END %]
+
+  [% END %][%# report wrapper #%]
+[% END %][%# render block #%]

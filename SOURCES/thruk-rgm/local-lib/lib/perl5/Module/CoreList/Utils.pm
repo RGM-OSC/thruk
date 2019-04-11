@@ -2,11 +2,10 @@ package Module::CoreList::Utils;
 
 use strict;
 use warnings;
-use vars qw[$VERSION %utilities];
 use Module::CoreList;
-use Module::CoreList::TieHashDelta;
 
-$VERSION = '5.20150420';
+our $VERSION = '5.20180120';
+our %utilities;
 
 sub utilities {
     my $perl = shift;
@@ -1045,15 +1044,319 @@ my %delta = (
         removed => {
         }
     },
+    5.022000 => {
+        delta_from => 5.021011,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.023000 => {
+        delta_from => 5.022000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.023001 => {
+        delta_from => 5.023,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.023002 => {
+        delta_from => 5.023001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.020003 => {
+        delta_from => 5.020002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.023003 => {
+        delta_from => 5.023002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.023004 => {
+        delta_from => 5.023003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.023005 => {
+        delta_from => 5.023004,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.022001 => {
+        delta_from => 5.022,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.023006 => {
+        delta_from => 5.023005,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.023007 => {
+        delta_from => 5.023006,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.023008 => {
+        delta_from => 5.023007,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.023009 => {
+        delta_from => 5.023008,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.022002 => {
+        delta_from => 5.022001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.024000 => {
+        delta_from => 5.023009,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025000 => {
+        delta_from => 5.024000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025001 => {
+        delta_from => 5.025000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025002 => {
+        delta_from => 5.025001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025003 => {
+        delta_from => 5.025002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025004 => {
+        delta_from => 5.025003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025005 => {
+        delta_from => 5.025004,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025006 => {
+        delta_from => 5.025005,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025007 => {
+        delta_from => 5.025006,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025008 => {
+        delta_from => 5.025007,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.022003 => {
+        delta_from => 5.022002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.024001 => {
+        delta_from => 5.024000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025009 => {
+        delta_from => 5.025008,
+        changed => {
+        },
+        removed => {
+            'c2ph'                  => 1,
+            'pstruct'               => 1,
+        }
+    },
+    5.025010 => {
+        delta_from => 5.025009,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025011 => {
+        delta_from => 5.025010,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025012 => {
+        delta_from => 5.025011,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.026000 => {
+        delta_from => 5.025012,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027000 => {
+        delta_from => 5.026000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027001 => {
+        delta_from => 5.027000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.022004 => {
+        delta_from => 5.022003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.024002 => {
+        delta_from => 5.024001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027002 => {
+        delta_from => 5.027001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027003 => {
+        delta_from => 5.027002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027004 => {
+        delta_from => 5.027003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.024003 => {
+        delta_from => 5.024002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.026001 => {
+        delta_from => 5.026000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027005 => {
+        delta_from => 5.027004,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027006 => {
+        delta_from => 5.027005,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027007 => {
+        delta_from => 5.027006,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.027008 => {
+        delta_from => 5.027007,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
-for my $version (sort { $a <=> $b } keys %delta) {
-    my $data = $delta{$version};
-
-    tie %{$utilities{$version}}, 'Module::CoreList::TieHashDelta',
-        $data->{changed}, $data->{removed},
-        $data->{delta_from} ? $utilities{$data->{delta_from}} : undef;
-}
+%utilities = Module::CoreList::_undelta(\%delta);
 
 # Create aliases with trailing zeros for $] use
 
@@ -1091,8 +1394,11 @@ Module::CoreList::Utils - what utilities shipped with versions of perl
 
  print $Module::CoreList::Utils::utilities{5.009003}{ptar}; # prints 1
 
- print Module::CoreList::Utils->first_release('corelist');           # prints 5.008009
- print Module::CoreList::Utils->first_release_by_date('corelist');   # prints 5.009002
+ print Module::CoreList::Utils->first_release('corelist');
+ # prints 5.008009
+
+ print Module::CoreList::Utils->first_release_by_date('corelist');
+ # prints 5.009002
 
 =head1 DESCRIPTION
 

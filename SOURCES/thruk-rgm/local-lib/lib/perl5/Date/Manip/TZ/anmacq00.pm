@@ -1,14 +1,14 @@
 package #
 Date::Manip::TZ::anmacq00;
-# Copyright (c) 2008-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'tzdata' is run.
-#    Generated on: Wed Feb 18 16:55:34 GMT 2015
-#    Data version: tzdata2015a
-#    Code version: tzcode2015a
+#    Generated on: Tue May 30 10:43:29 EDT 2017
+#    Data version: tzdata2017b
+#    Code version: tzcode2017b
 
 # This module contains data from the zoneinfo time zone database.  The original
 # data was obtained from the URL:
@@ -25,14 +25,14 @@ END {
 }
 
 our ($VERSION);
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 %Dates         = (
    1    =>
      [
         [ [1,1,2,0,0,0],[1,1,2,0,0,0],'+00:00:00',[0,0,0],
-          'zzz',0,[1899,10,31,23,59,59],[1899,10,31,23,59,59],
+          '-00',0,[1899,10,31,23,59,59],[1899,10,31,23,59,59],
           '0001010200:00:00','0001010200:00:00','1899103123:59:59','1899103123:59:59' ],
      ],
    1899 =>
@@ -56,7 +56,7 @@ END { undef $VERSION; }
    1919 =>
      [
         [ [1919,3,31,14,0,0],[1919,3,31,14,0,0],'+00:00:00',[0,0,0],
-          'zzz',0,[1948,3,24,23,59,59],[1948,3,24,23,59,59],
+          '-00',0,[1948,3,24,23,59,59],[1948,3,24,23,59,59],
           '1919033114:00:00','1919033114:00:00','1948032423:59:59','1948032423:59:59' ],
      ],
    1948 =>
@@ -452,7 +452,7 @@ END { undef $VERSION; }
    2010 =>
      [
         [ [2010,4,3,16,0,0],[2010,4,4,3,0,0],'+11:00:00',[11,0,0],
-          'MIST',0,[9999,12,31,0,0,0],[9999,12,31,11,0,0],
+          '+11',0,[9999,12,31,0,0,0],[9999,12,31,11,0,0],
           '2010040316:00:00','2010040403:00:00','9999123100:00:00','9999123111:00:00' ],
      ],
 );

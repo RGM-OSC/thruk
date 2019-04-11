@@ -1,5 +1,5 @@
 package Date::Manip::TZ;
-# Copyright (c) 2008-2015 Sullivan Beck. All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -22,9 +22,10 @@ use strict;
 use IO::File;
 require Date::Manip::Zones;
 use Date::Manip::Base;
+use Data::Dumper;
 
 our $VERSION;
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 # To get rid of a 'used only once' warnings.
@@ -98,12 +99,13 @@ sub _init {
    if ($os eq 'Unix') {
       $$self{'data'}{'path'}    = '/bin:/usr/bin';
       $$self{'data'}{'methods'} = [
-                                   qw(main TZ
-                                      env  zone TZ
-                                      file /etc/TIMEZONE
-                                      file /etc/timezone
-                                      file /etc/sysconfig/clock
-                                      file /etc/default/init
+                                   qw(main   TZ
+                                      env    zone TZ
+                                      file   /etc/TIMEZONE
+                                      file   /etc/timezone
+                                      file   /etc/sysconfig/clock
+                                      file   /etc/default/init
+                                      tzdata /etc/localtime /usr/share/zoneinfo
                                     ),
                                    'command',  '/bin/date +%Z',
                                    'command',  '/usr/bin/date +%Z',
@@ -411,61 +413,73 @@ sub _get_curr_zone {
       my $method = shift(@methods);
       my @zone   = ();
 
+      print "*** DEBUG *** METHOD: $method ["  if ($debug);
+
       if ($method eq 'main') {
 
          if (! @methods) {
+            print "]\n"  if ($debug);
             warn "ERROR: [_set_curr_zone] main requires argument\n";
             return;
          }
          my $var = shift(@methods);
-         push(@zone,$$::var)  if (defined $$::var);
-
-         if ($debug) {
-            print "*** DEBUG ***  main $var = " .
-                  (defined $$::var ? $$::var : 'undef') . "\n";
+         print "$var] "  if ($debug);
+         no strict "refs";
+         my $val = ${ "::$var" };
+         use strict "refs";
+         if (defined $val) {
+            push(@zone,$val);
+            print "$val\n"  if ($debug);
+         } else {
+            print "undef\n"  if ($debug);
          }
 
       } elsif ($method eq 'env') {
          if (@methods < 2) {
+            print "]\n"  if ($debug);
             warn "ERROR: [_set_curr_zone] env requires 2 argument\n";
             return;
          }
          my $type = lc( shift(@methods) );
+         print "$type,"  if ($debug);
+
          if ($type ne 'zone'  &&
              $type ne 'offset') {
-            warn "ERROR: [_set_curr_zone] env requires 'offset' or 'zone' as the first argument\n";
+            print "?]\n"  if ($debug);
+            warn "ERROR: [_set_curr_zone] env requires 'offset' or 'zone' " .
+                 "as the first argument\n";
             return;
          }
          my $var  = shift(@methods);
+         print "$var] "  if ($debug);
          if (exists $ENV{$var}) {
             if ($type eq 'zone') {
                push(@zone,$ENV{$var});
+               print "$ENV{$var}\n"  if ($debug);
             } else {
                my $off = $ENV{$var};
+               print "$ENV{$var} = "  if ($debug);
                $off    = $dmb->_delta_convert('time',"0:0:$off");
                $off    = $dmb->_delta_convert('offset',$off);
+               print "$off\n"  if ($debug);
                push(@zone,$off);
             }
-         }
-
-         if ($debug) {
-            print "*** DEBUG *** env $type $var ";
-            if (exists $ENV{$var}) {
-               print $ENV{$var};
-               print $zone[$#zone]  if ($type eq 'offset');
-               print "\n";
-            } else {
-               print "-no result-\n";
-            }
+         } else {
+            print "undef\n"  if ($debug);
          }
 
       } elsif ($method eq 'file') {
          if (! @methods) {
+            print "]\n"  if ($debug);
             warn "ERROR: [_set_curr_zone] file requires argument\n";
             return;
          }
          my $file = shift(@methods);
-         next  if (! -f $file);
+         print "$file] "  if ($debug);
+         if (! -f $file) {
+            print "not found\n"  if ($debug);
+            next;
+         }
 
          my $in = new IO::File;
          $in->open($file)  ||  next;
@@ -474,13 +488,25 @@ sub _get_curr_zone {
          my @z;
          while (! $in->eof) {
             my $line = <$in>;
+            chomp($line);
             next  if ($line =~ /^\s*\043/  ||
                       $line =~ /^\s*$/);
+            if ($firstline) {
+               $firstline = 0;
+               $line      =~ s/^\s*//;
+               $line      =~ s/\s*$//;
+               $line      =~ s/["']//g;  # "
+               $line      =~ s/\s+/_/g;
+               @z         = ($line);
+            }
 
             # We're looking for lines of the form:
             #   TZ = string
             #   TIMEZONE = string
             #   ZONE = string
+            # Alternately, we may use a 1-line file (ignoring comments and
+            # whitespace) which contains only the zone name (it may be
+            # quoted or contain embedded whitespace).
             #
             # 'string' can be:
             #   the name of a timezone enclosed in single/double quotes
@@ -523,75 +549,88 @@ sub _get_curr_zone {
 
                last;
             }
-            if ($firstline) {
-               $firstline = 0;
-               $line      =~ s/^\s*//;
-               $line      =~ s/\s*$//;
-               $line      =~ s/["']//g;  # "
-               $line      =~ s/\s+/_/g;
-               push(@z,$line);
-            }
          }
          close(IN);
 
          push(@zone,@z)  if (@z);
 
          if ($debug) {
-            print "*** DEBUG *** file $file\n";
-            if (@z) {
-               print "              @z\n";
+            if (@zone) {
+               print "@zone\n";
             } else {
-               print "              -no result-\n";
+               print "no result\n";
             }
          }
 
+      } elsif ($method eq 'tzdata') {
+         if (@methods < 2) {
+            print "]\n"  if ($debug);
+            warn "ERROR: [_set_curr_zone] tzdata requires two arguments\n";
+            return;
+         }
+         my $file    = shift(@methods);
+         my $dir     = shift(@methods);
+
+         my $z;
+         if (-f $file  &&  -d $dir) {
+            $z = _get_zoneinfo_zone($file,$dir);
+         }
+ 	 if (defined($z)) {
+ 	    push @zone, $z;
+ 	    print "] $z\n"  if ($debug);
+ 	 } elsif ($debug) {
+ 	    print "] no result\n";
+ 	 }
+
       } elsif ($method eq 'command') {
          if (! @methods) {
+            print "]\n"  if ($debug);
             warn "ERROR: [_set_curr_zone] command requires argument\n";
             return;
          }
          my $command = shift(@methods);
+         print "$command] "  if ($debug);
          my ($out)   = _cmd($command);
          push(@zone,$out)  if ($out);
 
          if ($debug) {
-            print "*** DEBUG *** command $command\n";
             if ($out) {
-               print "              $out\n";
+               print "$out\n";
             } else {
-               print "              -no result-\n";
+               print "no output\n";
             }
          }
 
       } elsif ($method eq 'cmdfield') {
          if ($#methods < 1) {
+            print "]\n"  if ($debug);
             warn "ERROR: [_set_curr_zone] cmdfield requires 2 arguments\n";
             return;
          }
          my $command = shift(@methods);
          my $n       = shift(@methods);
+         print "$command,$n]\n"  if ($debug);
          my ($out)   = _cmd($command);
-         my @z;
+         my $val;
 
          if ($out) {
             $out    =~ s/^\s*//;
             $out    =~ s/\s*$//;
             my @out = split(/\s+/,$out);
-            push(@z,$out[$n])  if (defined $out[$n]);
+            $val    = $out[$n]  if (defined $out[$n]);
+            push(@zone,$val);
          }
 
-         push(@zone,@z)  if (@z);
-
          if ($debug) {
-            print "*** DEBUG *** cmdfield $command $n\n";
-            if (@z) {
-               print "              @z\n";
+            if ($val) {
+               print "$val\n";
             } else {
-               print "              -no result-\n";
+               print "no result\n";
             }
          }
 
       } elsif ($method eq 'gmtoff') {
+         print "] "  if ($debug);
          my($secUT,$minUT,$hourUT,$mdayUT,$monUT,$yearUT,$wdayUT,$ydayUT,
             $isdstUT) = gmtime($t);
          if ($mdayUT>($mday+1)) {
@@ -608,26 +647,27 @@ sub _get_curr_zone {
          $off    = $dmb->_delta_convert('time',"0:0:$off");
          $off    = $dmb->_delta_convert('offset',$off);
          push(@zone,$off);
-
-         if ($debug) {
-            print "*** DEBUG *** gmtoff $off\n";
-         }
+         print "$off\n"  if ($debug);
 
       } elsif ($method eq 'registry') {
+         print "] "  if ($debug);
          my $z = $self->_windows_registry_val();
-         push(@zone,$z)  if ($z);
-
-         if ($debug) {
-            print "*** DEBUG *** registry $z\n";
+         if ($z) {
+            push(@zone,$z);
+            print "$z\n"  if ($debug);
+         } else {
+            print "no result\n"  if ($debug);
          }
 
       } else {
+         print "]\n"  if ($debug);
          warn "ERROR: [_set_curr_zone] invalid method: $method\n";
          return;
       }
 
-      foreach my $zone (@zone) {
-         $zone = lc($zone);
+      while (@zone) {
+         my $zone = lc(shift(@zone));
+
          # OpenUNIX puts a colon at the start
          $zone =~ s/^://;
 
@@ -656,8 +696,82 @@ sub _get_curr_zone {
    return $currzone;
 }
 
-# This comes from the DateTime-TimeZone module
-#
+#######################
+# The following section comes from the DateTime-TimeZone module
+
+{
+   my $want_content;
+   my $want_size;
+   my $zoneinfo;
+
+   sub _get_zoneinfo_zone {
+      my($localtime,$z) = @_;
+      $zoneinfo = $z;
+
+      # /etc/localtime should be either a link to a tzdata file in
+      # /usr/share/zoneinfo or a copy of one of the files there.
+
+      return ''  if (! -d $zoneinfo || ! -f $localtime);
+
+      require Cwd;
+      if (-l $localtime) {
+         return _zoneinfo_file_name_to_zone(
+                                            Cwd::abs_path($localtime),
+                                            $zoneinfo,
+                                           );
+      }
+
+      $want_content = _zoneinfo_file_slurp($localtime);
+      $want_size    = -s $localtime;
+
+      # File::Find can't bail in the middle of a find, and we only want the
+      # first match, so we'll call it in an eval.
+
+      local $@ = undef;
+      eval {
+         require File::Find;
+         File::Find::find
+             ({
+               wanted      => \&_zoneinfo_find_file,
+               no_chdir    => 1,
+              },
+              $zoneinfo,
+           );
+           1;
+      } and return;
+      ref $@
+        and return $@->{zone};
+      die $@;
+   }
+
+   sub _zoneinfo_find_file {
+      my $zone;
+      defined($zone = _zoneinfo_file_name_to_zone($File::Find::name,
+                                                  $zoneinfo))
+        and -f $_
+        and $want_size == -s _
+        and ($want_content eq _zoneinfo_file_slurp($File::Find::name))
+        and die { zone => $zone };
+   }
+}
+
+sub _zoneinfo_file_name_to_zone {
+   my($file,$zoneinfo) = @_;
+   require File::Spec;
+   my $zone = File::Spec->abs2rel($file,$zoneinfo);
+   return $zone  if (exists $Date::Manip::Zones::ZoneNames{lc($zone)});
+   return;
+}
+
+sub _zoneinfo_file_slurp {
+   my($file) = @_;
+   open my $fh, '<', $file
+     or return;
+   binmode $fh;
+   local $/ = undef;
+   return <$fh>;
+}
+
 sub _windows_registry_val {
    my($self) = @_;
 
@@ -714,6 +828,9 @@ sub _windows_registry_val {
       return $z  if ($znam eq $stdnam);
    }
 }
+
+# End of DateTime-TimeZone section
+#######################
 
 # We will be testing commands that don't exist on all architectures,
 # so disable warnings.
@@ -850,10 +967,25 @@ sub __zone {
          @isdst = (0,1);
       }
 
+      # We may pass in $zone and not $abbrev when it really should be
+      # $abbrev.
+
+      if ($zone  &&  ! $abbrev) {
+         if (exists $$self{'data'}{'Alias'}{$zone}) {
+            # no change
+         } elsif (exists $$self{'data'}{'MyAbbrev'}{$zone}  ||
+                  exists $$self{'data'}{'Abbrev'}{$zone}) {
+            $abbrev = $zone;
+            $zone   = '';
+         }
+      }
+
       # $zone
 
       if ($zone) {
-         @zone = ($zone);
+         my $z = (exists $$self{'data'}{'Alias'}{$zone} ?
+                  $$self{'data'}{'Alias'}{$zone} : $zone);
+         @zone = ($z);
       }
 
       # $abbrev

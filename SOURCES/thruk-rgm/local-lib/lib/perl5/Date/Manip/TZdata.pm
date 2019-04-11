@@ -1,5 +1,5 @@
 package Date::Manip::TZdata;
-# Copyright (c) 2008-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -13,7 +13,7 @@ use integer;
 use warnings;
 
 our $VERSION;
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 ###############################################################################
@@ -910,6 +910,8 @@ sub _tzd_Zone {
 sub _tzd_DeleteZone {
    my($self,$zone) = @_;
    delete $$self{'zone'}{$zone};
+
+   return;
 }
 
 sub _tzd_ZoneKeys {
@@ -942,6 +944,8 @@ sub _tzd_CheckZones {
       }
       $self->_tzd_DeleteZone($zone)  if ($Error);
    }
+
+   return;
 }
 
 # TZdata file:
@@ -1301,6 +1305,8 @@ sub _tzd_ZoneLines {
       $lastdstend = $dstend;
    }
    $$self{'zonelines'}{$zone}{'numlines'} = $i;
+
+   return;
 }
 
 # Parses date information from  a single rule and returns a date.

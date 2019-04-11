@@ -1,5 +1,5 @@
 package Date::Manip::DM6;
-# Copyright (c) 1995-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 1995-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -54,7 +54,7 @@ use integer;
 use warnings;
 
 our $VERSION;
-$VERSION='6.49';
+$VERSION='6.60';
 
 ###########################################################################
 
@@ -94,12 +94,13 @@ sub Date_Init {
       }
    }
    $date->config(@args2);
+   return $date->err();
 }
 
 sub ParseDateString {
-   my($string) = @_;
+   my($string,@opts) = @_;
    $string = ''  if (! defined($string));
-   my $err = $date->parse($string);
+   my $err = $date->parse($string,@opts);
    return ''  if ($err);
    my $ret = $date->value('local');
    return $ret;
@@ -115,25 +116,20 @@ sub ParseDateFormat {
 }
 
 sub ParseDate {
-   my(@a) = @_;
+   my($arg,@opts) = @_;
 
-   if ($#a!=0) {
-      print "ERROR:  Invalid number of arguments to ParseDate.\n";
-      return '';
-   }
-   my @args;
-   my $args = $a[0];
-   $args    = ''  if (! defined($args));
-   my $ref  = ref($args);
+   $arg     = ''  if (! defined($arg));
+   my $ref  = ref($arg);
    my $list = 0;
 
+   my @args;
    if (! $ref) {
-      @args = ($args);
+      @args = ($arg);
    } elsif ($ref eq 'ARRAY') {
-      @args = @$args;
+      @args = @$arg;
       $list = 1;
    } elsif ($ref eq 'SCALAR') {
-      @args = ($$args);
+      @args = ($$arg);
    } else {
       print "ERROR:  Invalid arguments to ParseDate.\n";
       return '';
@@ -141,9 +137,9 @@ sub ParseDate {
 
    while (@args) {
       my $string = join(' ',@args);
-      my $err = $date->parse($string);
+      my $err = $date->parse($string,@opts);
       if (! $err) {
-         splice(@$args,0,$#args+1)  if ($list);
+         splice(@$arg,0,$#args+1)  if ($list);
          my $ret = $date->value('local');
          return $ret;
       }
@@ -272,6 +268,11 @@ sub _Delta_Format_old {
       while ($in) {
          if ($in =~ s/^([^%]+)//) {
             $out .= $1;
+
+         } elsif ($in =~ /^%[yMwdhms][yMwdhms][yMwdhms]/) {
+            # It's one of the new formats so don't modify it.
+            $in   =~ s/^%//;
+            $out .= '%';
 
          } elsif ($in =~ s/^%([yMwdhms])([dht])//) {
             my($field,$scope) = ($1,$2);
@@ -446,16 +447,26 @@ sub DateCalc {
 
    my $obj3;
    if ($usemode) {
-      $mode = 0  if (! $mode);
-      if     ($mode == 3) {
-          $mode = 'business';
-      } elsif ($mode == 2) {
-         $mode = 'bapprox';
-      } elsif ($mode) {
-         $mode = 'approx';
+      $mode = 'exact'  if (! $mode);
+      my %tmp = ('0'       => 'exact',
+                 '1'       => 'approx',
+                 '2'       => 'bapprox',
+                 '3'       => 'business',
+                 'exact'   => 'exact',
+                 'semi'    => 'semi',
+                 'approx'  => 'approx',
+                 'business'=> 'business',
+                 'bsemi'   => 'bsemi',
+                 'bapprox' => 'bapprox',
+                );
+
+      if (exists $tmp{$mode}) {
+         $mode = $tmp{$mode};
       } else {
-         $mode = 'exact';
+         $$errref = 3  if ($ref);
+         return '';
       }
+
       $obj3 = $obj1->calc($obj2,$mode);
    } else {
       $obj3 = $obj1->calc($obj2);

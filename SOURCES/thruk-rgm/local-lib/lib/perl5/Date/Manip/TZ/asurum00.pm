@@ -1,14 +1,14 @@
 package #
 Date::Manip::TZ::asurum00;
-# Copyright (c) 2008-2015 Sullivan Beck.  All rights reserved.
+# Copyright (c) 2008-2017 Sullivan Beck.  All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'tzdata' is run.
-#    Generated on: Wed Feb 18 16:55:33 GMT 2015
-#    Data version: tzdata2015a
-#    Code version: tzcode2015a
+#    Generated on: Tue May 30 10:43:25 EDT 2017
+#    Data version: tzdata2017b
+#    Code version: tzcode2017b
 
 # This module contains data from the zoneinfo time zone database.  The original
 # data was obtained from the URL:
@@ -25,7 +25,7 @@ END {
 }
 
 our ($VERSION);
-$VERSION='6.49';
+$VERSION='6.60';
 END { undef $VERSION; }
 
 %Dates         = (
@@ -38,7 +38,7 @@ END { undef $VERSION; }
    1927 =>
      [
         [ [1927,12,31,18,9,40],[1928,1,1,0,9,40],'+06:00:00',[6,0,0],
-          'XJT',0,[9999,12,31,0,0,0],[9999,12,31,6,0,0],
+          '+06',0,[9999,12,31,0,0,0],[9999,12,31,6,0,0],
           '1927123118:09:40','1928010100:09:40','9999123100:00:00','9999123106:00:00' ],
      ],
 );

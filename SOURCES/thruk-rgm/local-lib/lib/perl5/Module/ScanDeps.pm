@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use vars qw( $VERSION @EXPORT @EXPORT_OK @ISA $CurrentPackage @IncludeLibs $ScanFileRE );
 
-$VERSION   = '1.18';
+$VERSION   = '1.24';
 @EXPORT    = qw( scan_deps scan_deps_runtime );
 @EXPORT_OK = qw( scan_line scan_chunk add_deps scan_deps_runtime path_to_inc_name );
 
@@ -222,78 +222,79 @@ my $SeenTk;
 my %SeenRuntimeLoader;
 
 # Pre-loaded module dependencies {{{
-my %Preload;
-%Preload = (
-    'AnyDBM_File.pm'  => [qw( SDBM_File.pm )],
-    'Authen/SASL.pm'  => 'sub',
-    'B/Hooks/EndOfScope.pm' => [qw( B/Hooks/EndOfScope/PP.pm B/Hooks/EndOfScope/XS.pm )],
-    'Bio/AlignIO.pm'  => 'sub',
-    'Bio/Assembly/IO.pm'  => 'sub',
-    'Bio/Biblio/IO.pm'  => 'sub',
-    'Bio/ClusterIO.pm'  => 'sub',
-    'Bio/CodonUsage/IO.pm'  => 'sub',
-    'Bio/DB/Biblio.pm'  => 'sub',
-    'Bio/DB/Flat.pm'  => 'sub',
-    'Bio/DB/GFF.pm'  => 'sub',
-    'Bio/DB/Taxonomy.pm'  => 'sub',
-    'Bio/Graphics/Glyph.pm'  => 'sub',
-    'Bio/MapIO.pm'  => 'sub',
-    'Bio/Matrix/IO.pm'  => 'sub',
-    'Bio/Matrix/PSM/IO.pm'  => 'sub',
-    'Bio/OntologyIO.pm'  => 'sub',
-    'Bio/PopGen/IO.pm'  => 'sub',
-    'Bio/Restriction/IO.pm'  => 'sub',
-    'Bio/Root/IO.pm'  => 'sub',
-    'Bio/SearchIO.pm'  => 'sub',
-    'Bio/SeqIO.pm'  => 'sub',
-    'Bio/Structure/IO.pm'  => 'sub',
-    'Bio/TreeIO.pm'  => 'sub',
-    'Bio/LiveSeq/IO.pm'  => 'sub',
-    'Bio/Variation/IO.pm'  => 'sub',
-    'Catalyst.pm' => sub {
+my %Preload = (
+    'AnyDBM_File.pm'                    => [qw( SDBM_File.pm )],
+    'AnyEvent.pm'                       => 'sub',
+    'Authen/SASL.pm'                    => 'sub',
+    'B/Hooks/EndOfScope.pm'             => 
+        [qw( B/Hooks/EndOfScope/PP.pm B/Hooks/EndOfScope/XS.pm )],
+    'Bio/AlignIO.pm'                    => 'sub',
+    'Bio/Assembly/IO.pm'                => 'sub',
+    'Bio/Biblio/IO.pm'                  => 'sub',
+    'Bio/ClusterIO.pm'                  => 'sub',
+    'Bio/CodonUsage/IO.pm'              => 'sub',
+    'Bio/DB/Biblio.pm'                  => 'sub',
+    'Bio/DB/Flat.pm'                    => 'sub',
+    'Bio/DB/GFF.pm'                     => 'sub',
+    'Bio/DB/Taxonomy.pm'                => 'sub',
+    'Bio/Graphics/Glyph.pm'             => 'sub',
+    'Bio/MapIO.pm'                      => 'sub',
+    'Bio/Matrix/IO.pm'                  => 'sub',
+    'Bio/Matrix/PSM/IO.pm'              => 'sub',
+    'Bio/OntologyIO.pm'                 => 'sub',
+    'Bio/PopGen/IO.pm'                  => 'sub',
+    'Bio/Restriction/IO.pm'             => 'sub',
+    'Bio/Root/IO.pm'                    => 'sub',
+    'Bio/SearchIO.pm'                   => 'sub',
+    'Bio/SeqIO.pm'                      => 'sub',
+    'Bio/Structure/IO.pm'               => 'sub',
+    'Bio/TreeIO.pm'                     => 'sub',
+    'Bio/LiveSeq/IO.pm'                 => 'sub',
+    'Bio/Variation/IO.pm'               => 'sub',
+    'Catalyst.pm'                       => sub {
         return ('Catalyst/Runtime.pm',
                 'Catalyst/Dispatcher.pm',
                 _glob_in_inc('Catalyst/DispatchType', 1));
     },
-    'Catalyst/Engine.pm' => 'sub',
-    'CGI/Application/Plugin/Authentication.pm' => [qw( CGI/Application/Plugin/Authentication/Store/Cookie.pm )],
+    'Catalyst/Engine.pm'                => 'sub',
+    'CGI/Application/Plugin/Authentication.pm' => 
+        [qw( CGI/Application/Plugin/Authentication/Store/Cookie.pm )],
     'CGI/Application/Plugin/AutoRunmode.pm' => [qw( Attribute/Handlers.pm )],
-    'charnames.pm' => sub {
-        _find_in_inc('unicore/Name.pl') ? 'unicore/Name.pl' : 'unicode/Name.pl'
-    },
-    'Class/Load.pm' => [qw( Class/Load/PP.pm )],
-    'Class/MakeMethods.pm' => 'sub',
-    'Class/MethodMaker.pm' => 'sub',
-    'Config/Any.pm' =>'sub',
-    'Crypt/Random.pm' => sub {
+    'charnames.pm'                      => \&_unicore,
+    'Class/Load.pm'                     => [qw( Class/Load/PP.pm )],
+    'Class/MakeMethods.pm'              => 'sub',
+    'Class/MethodMaker.pm'              => 'sub',
+    'Config/Any.pm'                     =>'sub',
+    'Crypt/Random.pm'                   => sub {
         _glob_in_inc('Crypt/Random/Provider', 1);
     },
-    'Crypt/Random/Generator.pm' => sub {
+    'Crypt/Random/Generator.pm'         => sub {
         _glob_in_inc('Crypt/Random/Provider', 1);
     },
-    'Date/Manip.pm' => [qw( Date/Manip/DM5.pm Date/Manip/DM6.pm )],
-    'Date/Manip/Base.pm' => sub {
+    'Date/Manip.pm'                     => 
+        [qw( Date/Manip/DM5.pm Date/Manip/DM6.pm )],
+    'Date/Manip/Base.pm'                => sub {
         _glob_in_inc('Date/Manip/Lang', 1);
     },
-    'Date/Manip/TZ.pm' => sub {
+    'Date/Manip/TZ.pm'                  => sub {
         return (_glob_in_inc('Date/Manip/TZ', 1),
                 _glob_in_inc('Date/Manip/Offset', 1));
     },
     'DateTime/Format/Builder/Parser.pm' => 'sub',
-    'DateTime/Locale.pm' => 'sub',
-    'DateTime/TimeZone.pm' => 'sub',
-    'DBI.pm' => sub {
+    'DateTime/Format/Natural.pm'        => 'sub',
+    'DateTime/Locale.pm'                => 'sub',
+    'DateTime/TimeZone.pm'              => 'sub',
+    'DBI.pm'                            => sub {
         grep !/\bProxy\b/, _glob_in_inc('DBD', 1);
     },
-    'DBIx/Class.pm' => 'sub',
-    'DBIx/SearchBuilder.pm' => 'sub',
-    'DBIx/Perlish.pm' => [qw( attributes.pm )],
-    'DBIx/ReportBuilder.pm' => 'sub',
-    'Device/ParallelPort.pm' => 'sub',
-    'Device/SerialPort.pm' => [ qw(
-        termios.ph asm/termios.ph sys/termiox.ph sys/termios.ph sys/ttycom.ph
-    ) ],
-    'diagnostics.pm' => sub {
+    'DBIx/Class.pm'                     => 'sub',
+    'DBIx/SearchBuilder.pm'             => 'sub',
+    'DBIx/Perlish.pm'                   => [qw( attributes.pm )],
+    'DBIx/ReportBuilder.pm'             => 'sub',
+    'Device/ParallelPort.pm'            => 'sub',
+    'Device/SerialPort.pm'              => 
+        [qw( termios.ph asm/termios.ph sys/termiox.ph sys/termios.ph sys/ttycom.ph )],
+    'diagnostics.pm'                    => sub {
         # shamelessly taken and adapted from diagnostics.pm
         use Config;
         my($privlib, $archlib) = @Config{qw(privlibexp archlibexp)};
@@ -324,202 +325,202 @@ my %Preload;
 
         return 'pod/perldiag.pod';
     },
-    'Email/Send.pm' => 'sub',
-    'Event.pm' => [ map "Event/$_.pm", qw(idle io signal timer var)],
-    'ExtUtils/MakeMaker.pm' => sub {
+    'Email/Send.pm'                     => 'sub',
+    'Event.pm'                          => sub {
+        map "Event/$_.pm", qw( idle io signal timer var );
+    },
+    'ExtUtils/MakeMaker.pm'             => sub {
         grep /\bMM_/, _glob_in_inc('ExtUtils', 1);
     },
-    'File/Basename.pm' => [qw( re.pm )],
-    'File/HomeDir.pm' => 'sub',
-    'File/Spec.pm'     => sub {
+    'File/Basename.pm'                  => [qw( re.pm )],
+    'File/BOM.pm'                       => [qw( Encode/Unicode.pm )],
+    'File/HomeDir.pm'                   => 'sub',
+    'File/Spec.pm'                      => sub {
         require File::Spec;
         map { my $name = $_; $name =~ s!::!/!g; "$name.pm" } @File::Spec::ISA;
     },
-    'Gtk2.pm' => [qw( Cairo.pm )], # Gtk2.pm does: eval "use Cairo;"
-    'HTTP/Message.pm' => [ qw(
-        URI/URL.pm          URI.pm
-    ) ],
-    'Image/ExifTool.pm' => sub {
+    'Gtk2.pm'                           => [qw( Cairo.pm )], # Gtk2.pm does: eval "use Cairo;"
+    'HTTP/Message.pm'                   => [qw( URI/URL.pm URI.pm )],
+    'Image/ExifTool.pm'                 => sub {
         return(
           (map $_->{name}, _glob_in_inc('Image/ExifTool', 0)), # also *.pl files
           qw( File/RandomAccess.pm ),
         );
     },
-    'Image/Info.pm' => sub {
+    'Image/Info.pm'                     => sub {
         return(
           _glob_in_inc('Image/Info', 1),
           qw( Image/TIFF.pm ),
         );
     },
-    'IO.pm' => [ qw(
+    'IO.pm'                             => [qw(
         IO/Handle.pm        IO/Seekable.pm      IO/File.pm
         IO/Pipe.pm          IO/Socket.pm        IO/Dir.pm
-    ) ],
-    'IO/Socket.pm'     => [qw( IO/Socket/UNIX.pm )],
-    'JSON.pm' => sub {
+    )],
+    'IO/Socket.pm'                      => [qw( IO/Socket/UNIX.pm )],
+    'JSON.pm'                           => sub {
         # add JSON/PP*.pm, JSON/PP/*.pm
         # and ignore other JSON::* modules (e.g. JSON/Syck.pm, JSON/Any.pm);
         # but accept JSON::XS, too (because JSON.pm might use it if present)
         return( grep /^JSON\/(PP|XS)/, _glob_in_inc('JSON', 1) );
     },
-    'Locale/Maketext/Lexicon.pm'    => 'sub',
-    'Locale/Maketext/GutsLoader.pm' => [qw( Locale/Maketext/Guts.pm )],
-    'Log/Any.pm' => 'sub',
-    'Log/Log4perl.pm' => 'sub',
-    'Log/Report/Dispatcher.pm' => 'sub',
-    'LWP/Parallel.pm' => sub {
+    'List/MoreUtils.pm'                 => 'sub',
+    'List/SomeUtils.pm'                 => 'sub',
+    'Locale/Maketext/Lexicon.pm'        => 'sub',
+    'Locale/Maketext/GutsLoader.pm'     => [qw( Locale/Maketext/Guts.pm )],
+    'Log/Any.pm'                        => 'sub',
+    'Log/Dispatch.pm'                   => 'sub',
+    'Log/Log4perl.pm'                   => 'sub',
+    'Log/Report/Dispatcher.pm'          => 'sub',
+    'LWP/MediaTypes.pm'                 => [qw( LWP/media.types )],
+    'LWP/Parallel.pm'                   => sub {
         _glob_in_inc( 'LWP/Parallel', 1 ),
         qw(
             LWP/ParallelUA.pm       LWP/UserAgent.pm
             LWP/RobotPUA.pm         LWP/RobotUA.pm
         ),
     },
-    'LWP/Parallel/UserAgent.pm' => sub {
-        qw( LWP/Parallel.pm ),
-        @{ _get_preload('LWP/Parallel.pm') }
-    },
-    'LWP/UserAgent.pm' => sub {
+    'LWP/Parallel/UserAgent.pm'         => [qw( LWP/Parallel.pm )],
+    'LWP/UserAgent.pm'                  => sub {
         return( 
           qw( URI/URL.pm URI/http.pm LWP/Protocol/http.pm ),
           _glob_in_inc("LWP/Authen", 1),
           _glob_in_inc("LWP/Protocol", 1),
         );
     },
-    'Mail/Audit.pm'                => 'sub',
-    'Math/BigInt.pm'                => 'sub',
-    'Math/BigFloat.pm'              => 'sub',
-    'Math/Symbolic.pm'              => 'sub',
-    'MIME/Decoder.pm'               => 'sub',
-    'Module/Build.pm'               => 'sub',
-    'Module/Pluggable.pm'           => sub {
+    'Mail/Audit.pm'                     => 'sub',
+    'Math/BigInt.pm'                    => 'sub',
+    'Math/BigFloat.pm'                  => 'sub',
+    'Math/Symbolic.pm'                  => 'sub',
+    'MIME/Decoder.pm'                   => 'sub',
+    'MIME/Types.pm'                     => [qw( MIME/types.db )],
+    'Module/Build.pm'                   => 'sub',
+    'Module/Pluggable.pm'               => sub {
         _glob_in_inc('$CurrentPackage/Plugin', 1);
     },
-    'Moose.pm'                      => sub {
+    'Moose.pm'                          => sub {
         _glob_in_inc('Moose', 1),
         _glob_in_inc('Class/MOP', 1),
     },
-    'MooseX/AttributeHelpers.pm'    => 'sub',
-    'MooseX/POE.pm'                 => sub {
+    'MooseX/AttributeHelpers.pm'        => 'sub',
+    'MooseX/POE.pm'                     => sub {
         _glob_in_inc('MooseX/POE', 1),
         _glob_in_inc('MooseX/Async', 1),
     },
-    'Mozilla/CA.pm'                 => [qw( Mozilla/CA/cacert.pem )],
-    'MozRepl.pm'                    => sub {
+    'Mozilla/CA.pm'                     => [qw( Mozilla/CA/cacert.pem )],
+    'MozRepl.pm'                        => sub {
         qw( MozRepl/Log.pm MozRepl/Client.pm Module/Pluggable/Fast.pm ),
         _glob_in_inc('MozRepl/Plugin', 1),
     },
-    'Module/Implementation.pm'      => \&_warn_of_runtime_loader,
-    'Module/Runtime.pm'             => \&_warn_of_runtime_loader,
-    'Net/DNS/RR.pm'                 => 'sub',
-    'Net/FTP.pm'                    => 'sub',
-    'Net/HTTPS.pm'                  => [qw( IO/Socket/SSL.pm Net/SSL.pm )],
-    'Net/Server.pm'                 => 'sub',
-    'Net/SSH/Perl.pm'               => 'sub',
-    'Package/Stash.pm'              => [qw( Package/Stash/PP.pm Package/Stash/XS.pm )],
-    'Pango.pm'                      => [qw( Cairo.pm )], # Pango.pm does: eval "use Cairo;"
-    'PAR/Repository.pm'             => 'sub',
-    'PAR/Repository/Client.pm'      => 'sub',
-    'Params/Validate.pm'            => 'sub',
-    'Parse/AFP.pm'                  => 'sub',
-    'Parse/Binary.pm'               => 'sub',
-    'PDF/API2/Resource/Font.pm'     => 'sub',
-    'PDF/API2/Basic/TTF/Font.pm'    => sub {
+    'Module/Implementation.pm'          => \&_warn_of_runtime_loader,
+    'Module/Runtime.pm'                 => \&_warn_of_runtime_loader,
+    'Net/DNS/Resolver.pm'               => 'sub',
+    'Net/DNS/RR.pm'                     => 'sub',
+    'Net/FTP.pm'                        => 'sub',
+    'Net/HTTPS.pm'                      => [qw( IO/Socket/SSL.pm Net/SSL.pm )],
+    'Net/Server.pm'                     => 'sub',
+    'Net/SSH/Perl.pm'                   => 'sub',
+    'Package/Stash.pm'                  => [qw( Package/Stash/PP.pm Package/Stash/XS.pm )],
+    'Pango.pm'                          => [qw( Cairo.pm )], # Pango.pm does: eval "use Cairo;"
+    'PAR/Repository.pm'                 => 'sub',
+    'PAR/Repository/Client.pm'          => 'sub',
+    'Params/Validate.pm'                => 'sub',
+    'Parse/AFP.pm'                      => 'sub',
+    'Parse/Binary.pm'                   => 'sub',
+    'PDF/API2/Resource/Font.pm'         => 'sub',
+    'PDF/API2/Basic/TTF/Font.pm'        => sub {
         _glob_in_inc('PDF/API2/Basic/TTF', 1);
     },
-    'PDF/Writer.pm'                 => 'sub',
-    'Perl/Critic.pm'                => 'sub', #not only Perl/Critic/Policy
-    'PerlIO.pm'                     => [ 'PerlIO/scalar.pm' ],
-    'Pod/Usage.pm'                  => sub {  # from Pod::Usage (as of 1.61)
+    'PDF/Writer.pm'                     => 'sub',
+    'PDL/NiceSlice.pm'                  => 'sub',
+    'Perl/Critic.pm'                    => 'sub', #not only Perl/Critic/Policy
+    'PerlIO.pm'                         => [qw( PerlIO/scalar.pm )],
+    'Pod/Simple/Transcode.pm'           => [qw( Pod/Simple/TranscodeDumb.pm Pod/Simple/TranscodeSmart.pm )],
+    'Pod/Usage.pm'                      => sub {  # from Pod::Usage (as of 1.61)
          $] >= 5.005_58 ? 'Pod/Text.pm' : 'Pod/PlainText.pm'
      },
-    'POE.pm'                        => [qw( POE/Kernel.pm POE/Session.pm )],
-    'POE/Component/Client/HTTP.pm'  => sub {
+    'POE.pm'                            => [qw( POE/Kernel.pm POE/Session.pm )],
+    'POE/Component/Client/HTTP.pm'      => sub {
         _glob_in_inc('POE/Component/Client/HTTP', 1),
         qw( POE/Filter/HTTPChunk.pm POE/Filter/HTTPHead.pm ),
     },
-    'POE/Kernel.pm'                 => sub {
+    'POE/Kernel.pm'                     => sub {
         _glob_in_inc('POE/XS/Resource', 1),
         _glob_in_inc('POE/Resource', 1),
         _glob_in_inc('POE/XS/Loop', 1),
         _glob_in_inc('POE/Loop', 1),
     },
-    'POSIX.pm'                      => sub {
+    'POSIX.pm'                          => sub {
         map $_->{name},
           _glob_in_inc('auto/POSIX/SigAction', 0),      # *.al files
           _glob_in_inc('auto/POSIX/SigRt', 0),          # *.al files
     },
-    'PPI.pm'                        => 'sub',
-    'Regexp/Common.pm'              => 'sub',
-    'RPC/XML/ParserFactory.pm'      => sub {
+    'PPI.pm'                            => 'sub',
+    'Regexp/Common.pm'                  => 'sub',
+    'RPC/XML/ParserFactory.pm'          => sub {
         _glob_in_inc('RPC/XML/Parser', 1);
     },
-    'SerialJunk.pm' => [ qw(
+    'SerialJunk.pm'                     => [qw(
         termios.ph asm/termios.ph sys/termiox.ph sys/termios.ph sys/ttycom.ph
-    ) ],
-    'SOAP/Lite.pm'                  => sub {
-        ($] >= 5.008 ? ('utf8.pm') : ()), 
+    )],
+    'SOAP/Lite.pm'                      => sub {
         _glob_in_inc('SOAP/Transport', 1),
-        _glob_in_inc('SOAP/Lite/Deserializer', 1),
+        _glob_in_inc('SOAP/Lite', 1),
     },
-    'Socket/GetAddrInfo.pm'         => 'sub',
-    'SQL/Parser.pm' => sub {
+    'Socket/GetAddrInfo.pm'             => 'sub',
+    'Specio/PartialDump.pm'             => \&_unicore,
+    'SQL/Parser.pm'                     => sub {
         _glob_in_inc('SQL/Dialects', 1);
     },
-    'SQL/Translator/Schema.pm' => sub {
+    'SQL/Translator/Schema.pm'          => sub {
         _glob_in_inc('SQL/Translator', 1);
     },
-    'Sub/Exporter/Progressive.pm'   => [qw( Sub/Exporter.pm )],
-    'SVK/Command.pm' => sub {
+    'Sub/Exporter/Progressive.pm'       => [qw( Sub/Exporter.pm )],
+    'SVK/Command.pm'                    => sub {
         _glob_in_inc('SVK', 1);
     },
-    'SVN/Core.pm' => sub {
+    'SVN/Core.pm'                       => sub {
         _glob_in_inc('SVN', 1),
         map $_->{name}, _glob_in_inc('auto/SVN', 0),    # *.so, *.bs files
     },
-    'Template.pm'      => 'sub',
-    'Term/ReadLine.pm' => 'sub',
-    'Test/Deep.pm'     => 'sub',
-    'threads/shared.pm' => [qw( attributes.pm )],
+    'Template.pm'                       => 'sub',
+    'Term/ReadLine.pm'                  => 'sub',
+    'Test/Deep.pm'                      => 'sub',
+    'threads/shared.pm'                 => [qw( attributes.pm )],
     # anybody using threads::shared is likely to declare variables
     # with attribute :shared
-    'Tk.pm'            => sub {
+    'Tk.pm'                             => sub {
         $SeenTk = 1;
         qw( Tk/FileSelect.pm Encode/Unicode.pm );
     },
-    'Tk/Balloon.pm'     => [qw( Tk/balArrow.xbm )],
-    'Tk/BrowseEntry.pm' => [qw( Tk/cbxarrow.xbm Tk/arrowdownwin.xbm )],
-    'Tk/ColorEditor.pm' => [qw( Tk/ColorEdit.xpm )],
-    'Tk/DragDrop/Common.pm' => sub {
+    'Tk/Balloon.pm'                     => [qw( Tk/balArrow.xbm )],
+    'Tk/BrowseEntry.pm'                 => [qw( Tk/cbxarrow.xbm Tk/arrowdownwin.xbm )],
+    'Tk/ColorEditor.pm'                 => [qw( Tk/ColorEdit.xpm )],
+    'Tk/DragDrop/Common.pm'             => sub {
         _glob_in_inc('Tk/DragDrop', 1),
     },
-    'Tk/FBox.pm'        => [qw( Tk/folder.xpm Tk/file.xpm )],
-    'Tk/Getopt.pm'      => [qw( Tk/openfolder.xpm Tk/win.xbm )],
-    'Tk/Toplevel.pm'    => [qw( Tk/Wm.pm )],
-    'Unicode/UCD.pm'    => sub { @{ _get_preload('utf8.pm') } },
-    'URI.pm'            => sub { grep !/urn/, _glob_in_inc('URI', 1) },
-    'utf8.pm' => sub {
-        # Perl 5.6.x: "unicode", Perl 5.8.x and up: "unicore"
-        my $unicore = _find_in_inc('unicore/Name.pl') ? 'unicore' : 'unicode';
-        return ('utf8_heavy.pl', map $_->{name}, _glob_in_inc($unicore, 0));
-    },
-    'Win32/EventLog.pm'    => [qw( Win32/IPC.pm )],
-    'Win32/Exe.pm'         => 'sub',
-    'Win32/TieRegistry.pm' => [qw( Win32API/Registry.pm )],
-    'Win32/SystemInfo.pm'  => [qw( Win32/cpuspd.dll )],
-    'Wx.pm'                => [qw( attributes.pm )],
-    'XML/Parser.pm'        => sub {
+    'Tk/FBox.pm'                        => [qw( Tk/folder.xpm Tk/file.xpm )],
+    'Tk/Getopt.pm'                      => [qw( Tk/openfolder.xpm Tk/win.xbm )],
+    'Tk/Toplevel.pm'                    => [qw( Tk/Wm.pm )],
+    'Unicode/Normalize.pm'              => \&_unicore,
+    'Unicode/UCD.pm'                    => \&_unicore,
+    'URI.pm'                            => sub { grep !/urn/, _glob_in_inc('URI', 1) },
+    'utf8_heavy.pl'                     => \&_unicore,
+    'Win32/EventLog.pm'                 => [qw( Win32/IPC.pm )],
+    'Win32/Exe.pm'                      => 'sub',
+    'Win32/TieRegistry.pm'              => [qw( Win32API/Registry.pm )],
+    'Win32/SystemInfo.pm'               => [qw( Win32/cpuspd.dll )],
+    'Wx.pm'                             => [qw( attributes.pm )],
+    'XML/Parser.pm'                     => sub {
         _glob_in_inc('XML/Parser/Style', 1),
         _glob_in_inc('XML/Parser/Encodings', 1),
     },
-    'XML/Parser/Expat.pm' => sub {
-        ($] >= 5.008) ? ('utf8.pm') : ();
+    'XML/SAX.pm'                        => [qw( XML/SAX/ParserDetails.ini ) ],
+    'XMLRPC/Lite.pm'                    => sub {
+        _glob_in_inc('XMLRPC/Transport', 1);
     },
-    'XML/SAX.pm' => [qw( XML/SAX/ParserDetails.ini ) ],
-    'XMLRPC/Lite.pm' => sub {
-        _glob_in_inc('XMLRPC/Transport', 1),;
-    },
-    'YAML.pm'           => [qw( YAML/Loader.pm YAML/Dumper.pm )],
-    'YAML/Any.pm'       => sub { 
+    'YAML.pm'                           => [qw( YAML/Loader.pm YAML/Dumper.pm )],
+    'YAML/Any.pm'                       => sub { 
         # try to figure out what YAML::Any would have used
         my $impl = eval "use YAML::Any; YAML::Any->implementation;";
         unless ($@) 
@@ -684,12 +685,12 @@ sub scan_deps_static {
                      warn_missing => $args->{warn_missing},
                  );
 
-            my $preload = _get_preload($pm) or next;
+            my @preload = _get_preload($pm) or next;
 
             add_deps(
                      used_by => $key,
                      rv      => $args->{rv},
-                     modules => $preload,
+                     modules => \@preload,
                      skip    => $args->{skip},
                      warn_missing => $args->{warn_missing},
                  );
@@ -697,6 +698,9 @@ sub scan_deps_static {
     }
 
     # Top-level recursion handling {{{
+
+    # prevent utf8.pm from being scanned
+    $_skip->{$rv->{"utf8.pm"}{file}}++ if $rv->{"utf8.pm"};
    
     while ($recurse) {
         my $count = keys %$rv;
@@ -709,7 +713,7 @@ sub scan_deps_static {
             recurse  => 0,
             cache_cb => $cache_cb,
             _skip    => $_skip,
-        }) or ($args->{_deep} and return);
+        });
         last if $count == keys %$rv;
     }
 
@@ -720,12 +724,11 @@ sub scan_deps_static {
 
 sub scan_deps_runtime {
     my %args = (
-        perl => $^X,
         rv   => {},
         (@_ and $_[0] =~ /^(?:$Keys)$/o) ? @_ : (files => [@_], recurse => 1)
     );
-    my ($files, $rv, $execute, $compile, $skip, $perl) =
-      @args{qw( files rv execute compile skip perl )};
+    my ($files, $rv, $execute, $compile) =
+      @args{qw( files rv execute compile )};
 
     $files = (ref($files)) ? $files : [$files];
 
@@ -733,20 +736,15 @@ sub scan_deps_runtime {
         foreach my $file (@$files) {
             next unless $file =~ $ScanFileRE;
 
-            my ($inchash, $dl_shared_objects, $incarray) = ({}, [], []);
-            _compile_or_execute($perl, $file, undef,
-                                $inchash, $dl_shared_objects, $incarray);
-
+            my ($inchash, $dl_shared_objects, $incarray) = _compile_or_execute($file);
             _merge_rv(_make_rv($inchash, $dl_shared_objects, $incarray), $rv);
         }
     }
     elsif ($execute) {
         foreach my $file (@$files) {
             $execute = [] unless ref $execute;  # make sure it's an array ref
-            my ($inchash, $dl_shared_objects, $incarray) = ({}, [], []);
-            _compile_or_execute($perl, $file, $execute,
-                                $inchash, $dl_shared_objects, $incarray);
 
+            my ($inchash, $dl_shared_objects, $incarray) = _compile_or_execute($file, $execute);
             _merge_rv(_make_rv($inchash, $dl_shared_objects, $incarray), $rv);
         }
     }
@@ -781,7 +779,7 @@ sub scan_file{
                 next if $file =~ /(?:^|${pathsep})Term${pathsep}ReadLine\.pm$/;
                 next if $file =~ /(?:^|${pathsep})Tcl${pathsep}Tk\W/;
             }
-            $SeenTk || do{$SeenTk = 1 if $pm =~ /Tk\.pm$/;};
+            $SeenTk ||= $pm =~ /Tk\.pm$/;
 
             $found{$pm}++;
         }
@@ -955,12 +953,16 @@ sub scan_chunk {
         # check for stuff like
         #   decode("klingon", ...)
         #   open FH, "<:encoding(klingon)", ...
-        if (my ($io_layer, $encoding) = /(?:(:encoding)|\b(?:en|de)code)\(\s*['"]?([-\w]+)/) {
+        if (my ($args) = /\b(?:open|binmode)\b(.*)/) {
             my @mods;
-            my $mod = _find_encoding($encoding);
-            push @mods, $mod if $mod;           # "external" Encode module
-            push @mods, qw( PerlIO.pm PerlIO/encoding.pm ) if $io_layer;
-            return \@mods;
+            push @mods, qw( PerlIO.pm PerlIO/encoding.pm Encode.pm ), _find_encoding($1)
+                if $args =~ /:encoding\((.*?)\)/;
+            push @mods, qw( PerlIO.pm PerlIO/via.pm )
+                if $args =~ /:via\(/;
+            return \@mods if @mods;
+        }
+        if (/\b(?:en|de)code\(\s*['"]?([-\w]+)/) {
+            return [qw( Encode.pm ), _find_encoding($1)]; 
         }
 
         return $1 if /\b do \s+ ([\w:\.\-\\\/\"\']*)/x;
@@ -1181,6 +1183,39 @@ sub _glob_in_inc {
     return @files;
 }
 
+# like _glob_in_inc, but looks only at the first level
+# (i.e. the children of $subdir)
+# NOTE: File::Find has no public notion of the depth of the traversal
+# in its "wanted" callback, so it's not helpful 
+sub _glob_in_inc_1 {
+    my $subdir  = shift;
+    my $pm_only = shift;
+    my @files;
+
+    $subdir =~ s/\$CurrentPackage/$CurrentPackage/;
+
+    foreach my $inc (grep !/\bBSDPAN\b/, @INC, @IncludeLibs) {
+        my $dir = "$inc/$subdir";
+        next unless -d $dir;
+
+        opendir my $dh, $dir or next; 
+        my @names = map { "$subdir/$_" } grep { -f "$dir/$_" } readdir $dh;
+        closedir $dh;
+
+        push @files, $pm_only
+            ? ( grep { /\.p[mh]$/i } @names )
+            : ( map { { file => "$inc/$_", name => $_ } } @names );
+    }
+
+    return @files;
+}
+
+my $unicore_stuff;
+sub _unicore {
+    $unicore_stuff ||= [ 'utf8_heavy.pl', map $_->{name}, _glob_in_inc('unicore', 0) ];
+    return @$unicore_stuff;
+}
+
 # App::Packer compatibility functions
 
 sub new {
@@ -1278,77 +1313,142 @@ sub get_files {
     return $self->{info};
 }
 
+sub add_preload_rule {
+    my ($pm, $rule) = @_;
+    die qq[a preload rule for "$pm" already exists] if $Preload{$pm};
+    $Preload{$pm} = $rule;
+}
+
 # scan_deps_runtime utility functions
 
 # compile $file if $execute is undef,
 # otherwise execute $file with arguments @$execute
 sub _compile_or_execute {
-    my ($perl, $file, $execute, $inchash, $dl_shared_objects, $incarray) = @_;
+    my ($file, $execute) = @_;
 
-    require Module::ScanDeps::DataFeed; 
-    # ... so we can find it's full pathname in %INC
-
-    my ($feed_fh, $feed_file) = File::Temp::tempfile();
-    my $dump_file = "$feed_file.out";
-
-    require Data::Dumper;
+    my ($ih, $instrumented_file) = File::Temp::tempfile(UNLINK => 1);
 
     # spoof $0 (to $file) so that FindBin works as expected
     # NOTE: We don't directly assign to $0 as it has magic (i.e.
     # assigning has side effects and may actually fail, cf. perlvar(1)).
     # Instead we alias *0 to a package variable holding the correct value.
-    print $feed_fh "BEGIN {\n", 
-                   Data::Dumper->Dump([ $file ], [ "Module::ScanDeps::DataFeed::_0" ]),
-                   "*0 = \\\$Module::ScanDeps::DataFeed::_0;\n",
-                   "}\n";
+    local $ENV{MSD_ORIGINAL_FILE} = $file;
+    print $ih <<'...';
+BEGIN { my $_0 = $ENV{MSD_ORIGINAL_FILE}; *0 = \$_0; }
+...
 
-    print $feed_fh $execute ? "END {\n" : "CHECK {\n" ;
+    my (undef, $data_file) = File::Temp::tempfile(UNLINK => 1);
+    local $ENV{MSD_DATA_FILE} = $data_file;
+
     # NOTE: When compiling the block will run as the last CHECK block;
     # when executing the block will run as the first END block and 
     # the programs continues.
+    print $ih $execute ? "END\n" : "CHECK\n", <<'...';
+{
+    # save %INC etc so that requires below don't pollute them
+    my %_INC = %INC;
+    my @_INC = @INC;
+    my @_dl_shared_objects = @DynaLoader::dl_shared_objects;
+    my @_dl_modules = @DynaLoader::dl_modules;
 
-    # correctly escape strings containing filenames
-    print $feed_fh map { "my $_" } Data::Dumper->Dump(
-                       [ $INC{"Module/ScanDeps/DataFeed.pm"}, $dump_file ],
-                       [ qw( datafeedpm dump_file ) ]);
+    require Cwd;
+    require DynaLoader;
+    require Data::Dumper;
+    require B; 
+    require Config;
 
-    # save %INC etc so that further requires don't pollute them
-    print $feed_fh <<'...';
-    %Module::ScanDeps::DataFeed::_INC = %INC;
-    @Module::ScanDeps::DataFeed::_INC = @INC;
-    @Module::ScanDeps::DataFeed::_dl_shared_objects = @DynaLoader::dl_shared_objects;
-    @Module::ScanDeps::DataFeed::_dl_modules = @DynaLoader::dl_modules;
+    while (my ($k, $v) = each %_INC)
+    {
+        # NOTES:
+        # (1) An unsuccessful "require" may store an undefined value into %INC.
+        # (2) If a key in %INC was located via a CODE or ARRAY ref or
+        #     blessed object in @INC the corresponding value in %INC contains
+        #     the ref from @INC.
+        # (3) Some modules (e.g. Moose) fake entries in %INC, e.g.
+        #     "Class/MOP/Class/Immutable/Moose/Meta/Class.pm" => "(set by Moose)"
+        #     On some architectures (e.g. Windows) Cwd::abs_path() will throw
+        #     an exception for such a pathname.
+        if (defined $v && !ref $v && -e $v)
+        {
+            $_INC{$k} = Cwd::abs_path($v);
+        }
+        else
+        {
+            delete $_INC{$k};
+        }
+    }
 
-    require $datafeedpm;
+    # drop refs from @_INC
+    @_INC = grep { !ref $_ } @_INC;
 
-    Module::ScanDeps::DataFeed::_dump_info($dump_file);
-}
+    my $dlext = $Config::Config{dlext};
+    my @so = grep { defined $_ && -e $_ } Module::ScanDeps::DataFeed::_dl_shared_objects();
+    my @bs = @so;
+    my @shared_objects = ( @so, grep { s/\Q.$dlext\E$/\.bs/ && -e $_ } @bs );
+
+    my $data_file = $ENV{MSD_DATA_FILE};
+    open my $fh, ">", $data_file 
+        or die "Couldn't open $data_file: $!\n";
+    print $fh Data::Dumper->Dump(
+                  [    \%_INC,  \@_INC,   \@shared_objects    ], 
+                  [qw( *inchash *incarray *dl_shared_objects )]);
+    print $fh "1;\n";
+    close $fh;
+
+    sub Module::ScanDeps::DataFeed::_dl_shared_objects {
+        if (@_dl_shared_objects) {
+            return @_dl_shared_objects;
+        }
+        elsif (@_dl_modules) {
+            return map { Module::ScanDeps::DataFeed::_dl_mod2filename($_) } @_dl_modules;
+        }
+        return;
+    }
+
+    sub Module::ScanDeps::DataFeed::_dl_mod2filename {
+        my $mod = shift;
+
+        return if $mod eq 'B';
+        return unless defined &{"$mod\::bootstrap"};
+
+        my $dl_ext = $Config::Config{dlext};
+
+        # cf. DynaLoader.pm
+        my @modparts = split(/::/, $mod);
+        my $modfname = defined &DynaLoader::mod2fname ? DynaLoader::mod2fname(\@modparts) : $modparts[-1];
+        my $modpname = join('/', @modparts);
+
+        foreach my $dir (@_INC) {
+            my $file = "$dir/auto/$modpname/$modfname.$dl_ext";
+            return $file if -r $file;
+        }
+        return;
+    }
+} # END or CHECK
 ...
 
     # append the file to compile or execute
     {
-        open my $fhin, "<", $file or die "Couldn't open $file: $!";
-        print $feed_fh qq[#line 1 "$file"\n], <$fhin>;
-        close $fhin;
+        open my $fh, "<", $file or die "Couldn't open $file: $!";
+        print $ih qq[#line 1 "$file"\n], <$fh>;
+        close $fh;
     }
-    close $feed_fh;
+    close $ih;
 
-    File::Path::rmtree( ['_Inline'], 0, 1); # XXX hack
-    
-    my @cmd = ($perl);
-    push @cmd, "-c" unless $execute;
-    push @cmd, map { "-I$_" } @IncludeLibs;
-    push @cmd, $feed_file;
-    push @cmd, @$execute if $execute;
-    my $rc = system(@cmd);
+    # run the instrumented file
+    my $rc = system(
+        $^X,
+        $execute ? () : ("-c"),
+        (map { "-I$_" } @IncludeLibs),
+        $instrumented_file,
+        $execute ? @$execute : ());
 
-    _extract_info($dump_file, $inchash, $dl_shared_objects, $incarray) 
-        if $rc == 0;
-    unlink($feed_file, $dump_file);
     die $execute
         ? "SYSTEM ERROR in executing $file @$execute: $rc" 
         : "SYSTEM ERROR in compiling $file: $rc" 
         unless $rc == 0;
+    
+    return _extract_info($data_file);
 }
 
 # create a new hashref, applying fixups
@@ -1391,7 +1491,7 @@ sub _make_rv {
 }
 
 sub _extract_info {
-    my ($fname, $inchash, $dl_shared_objects, $incarray) = @_;
+    my ($fname) = @_;
 
     use vars qw(%inchash @dl_shared_objects @incarray);
 
@@ -1400,9 +1500,10 @@ sub _extract_info {
             $@ || "can't read $fname: $!";
     }
 
-    $inchash->{$_} = $inchash{$_} for keys %inchash;
-    @$dl_shared_objects = @dl_shared_objects;
-    @$incarray          = @incarray;
+    my %ih = %inchash;
+    my @dso = @dl_shared_objects;
+    my @ia = @incarray;
+    return (\%ih, \@dso, \@ia);
 }
 
 sub _gettype {
@@ -1492,17 +1593,32 @@ sub _warn_of_missing_module {
       if not -f $module;
 }
 
-sub _get_preload {
+sub _get_preload1 {
     my $pm = shift;
     my $preload = $Preload{$pm} or return();
     if ($preload eq 'sub') {
         $pm =~ s/\.p[mh]$//i;
-        $preload = [ _glob_in_inc($pm, 1) ];
+        return  _glob_in_inc($pm, 1);
     }
     elsif (UNIVERSAL::isa($preload, 'CODE')) {
-        $preload = [ $preload->($pm) ];
+        return $preload->($pm);
     }
-    return $preload;
+    return @$preload;
+}
+
+sub _get_preload {
+    my ($pm, $seen) = @_;
+    $seen ||= {};
+    $seen->{$pm}++;
+    my @preload;
+
+    foreach $pm (_get_preload1($pm))
+    {
+        next if $seen->{$pm};
+        $seen->{$pm}++;
+        push @preload, $pm, _get_preload($pm, $seen);
+    }
+    return @preload;
 }
 
 1;
@@ -1540,8 +1656,7 @@ B<Perl2Exe> by IndigoStar, Inc L<http://www.indigostar.com/>
 
 The B<scan_deps_runtime> function is contributed by Edward S. Peschko.
 
-L<http://par.perl.org/> is the official website for this module.  You
-can write to the mailing list at E<lt>par@perl.orgE<gt>, or send an empty
+You can write to the mailing list at E<lt>par@perl.orgE<gt>, or send an empty
 mail to E<lt>par-subscribe@perl.orgE<gt> to participate in the discussion.
 
 Please submit bug reports to E<lt>bug-Module-ScanDeps@rt.cpan.orgE<gt>.

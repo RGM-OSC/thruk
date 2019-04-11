@@ -1,114 +1,105 @@
+/* exfoliation: a nagios makeover                                          */
+/* Copyright 2010 Matthew Wall, all rights reserved                        */
+/*                                                                         */
+/* Permission to use, copy, modify, and distribute this software for any   */
+/* purpose with or without fee is hereby granted, provided that the above  */
+/* copyright notice and this permission notice appear in all copies.       */
 
-.extinfo { font-family: arial,serif; color: #000; font-size: 8pt; }
+.extinfo { }
 
-a { color: #6e7475;  text-decoration: none; }
-a:hover {  color: #000; border-color: #0055a0 ; }
-table { border: 0 }
-th { text-align: left; font-size: 8pt; text-align: left; padding: 0 5px; border: 0; }
-td { font-size: 8pt; border: 0; }
+.perfTypeTitle { font-size: 12pt; text-align: right; font-weight: bold; }
 
-.errorMessage { text-align: center; color: #ff3300; font-weight: bold; font-size: 10pt; }
-.errorDescription { text-align: center; font-weight: bold; font-size: 10pt; }
-.warningMessage { text-align: center; color: #ff3300; font-weight: bold; font-size: 10pt; }
+.stateInfoPanel { font-size: 11pt; }
+.stateStatisticsPanel { }
+.stateInfoTable1 { background-color: #f4f2f2; border: 1px solid #d0d0d0; }
+.stateInfoTable2 { background-color: #f4f2f2; border: 1px solid #d0d0d0; }
 
-.infoBox { color: #000;  padding: 2;  border: 0;  }
-.infoBoxTitle { font-size: 10pt;  font-weight: bold;  color: #000; }
-.infoBoxBadProcStatus { color: #ff3300; }
-a.homepageURL:Hover { color: #ff3300; }
+.dataVar { font-size: 11pt; font-weight: bold; }
+.dataVal { font-size: 11pt; }
 
-table.linkBox { margin-top: 20px; border: 0; }
-td.linkBox a { margin-left: 5px;  padding-left: 10px;  background: url(../images/interface/menu_li1.gif) 0 0.35em no-repeat;  }
-td.linkBox a:hover { background: url(../images/interface/menu_li2.gif) 0 0.35em no-repeat;  }
+/* FIXME: override the defaults until php/html is fixed */
+/* .data      { font-size: 12pt; font-weight: bold; } */
+div.data   { font-size: 12pt; font-weight: normal; }
+.dataTitle { font-size: 14pt; color: #337ab7; padding-bottom: 5px; }
 
-div.dataTitle { text-align: center; font-weight: bold; font-size: 10pt; margin-bottom: 15px; }
-div.data { text-align: center; font-size: 10pt; }
+.commandTitle { font-size: 12pt; text-align: center; font-weight: bold; padding-bottom: 5px; }
+table.command { background-color: #f4f2f2; border: 1px solid #d0d0d0; }
+.command      { font-size: 11pt; }
+.commandPanel { }
+.commentPanel { }
 
-div.perfTypeTitle { text-align: right; font-weight: bold; }
+table.commandPanel { border:1px #E2DECD outset; }
+table.commandPanel td,td.statusOdd { background-color: #f4f2f2; }
+table.commandPanel td { padding-left: 10px; padding-right: 10px; }
+table.commandPanel th { background-image:none; border:0 none; vertical-align:top; }
 
-table.data { background-color: #f8f8f8; padding: 3px; }
-th.data { font-size: 10pt; background-color: #0055a0 ; color: #fff; }
-.dataOdd { background-color: #f8f8f8; }
-.dataEven { background-color: #e7e7e7; }
+.commandNote { color: red; }
 
-.optionBoxTitle { text-align: center; font-weight: bold; }
-.optionBox { background-color: #f8f8f8; padding: 3px; }
+table.perfdata_human              { border: 1px solid #d0d0d0; }
+table.perfdata_human .statusOdd   { font-size: 11pt; background-color: #e7e7e7; }
+table.perfdata_human .statusEven  { font-size: 11pt; background-color: #f4f2f2; }
 
-div.commandTitle { text-align: center; font-weight: bold; font-size: 10pt; margin-bottom: 15px; }
+.commentTitle  { font-size: 12pt; text-align: center; font-weight: bold; }
+div.commentNav { font-size: 12pt; text-align: center; }
+a.commentNav   { font-size: 12pt; }
 
-table.command { background-color: #f8f8f8; padding: 3px; }
-.command { padding: 2px; }
+table.comment { font-size: 12pt; text-align: center; background-color: white; padding: 2px; max-width: 900px; }
+th.comment    { font-size: 11pt; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; white-space: nowrap; }
+.commentOdd   { font-size: 11pt; background-color: #e7e7e7; }
+.commentEven  { font-size: 11pt; background-color: #f4f2f2; }
+div.comment,a.comment { font-size: 12pt; background-color: white; text-align: center; }
 
-.commentTitle { text-align: center; font-weight: bold; font-size: 10pt; padding-top: 25px; }
-div.commentNav { text-align: center; }
+.downtimeTitle  { font-size: 14pt; text-align: center; font-weight: bold; }
+div.downtimeNav { font-size: 12pt; text-align: center; }
+a.downtimeNav   { font-size: 12pt; }
 
-table.comment { width: 100%; padding: 3px; }
-th.comment { text-align: left; font-size: 10pt; background-color: #0055a0 ; color: #fff; }
-.commentOdd { background-color: #f8f8f8; }
-.commentEven { background-color: #e7e7e7; }
-div.comment,a.comment { text-align: center; }
+table.downtime { font-size: 12pt; text-align: center; background-color: white; padding: 2px; max-width: 900px; }
+th.downtime    { font-size: 11pt; center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; white-space: nowrap; }
+.downtimeOdd   { font-size: 11pt; background-color: #e7e7e7; }
+.downtimeEven  { font-size: 11pt; background-color: #f4f2f2; }
 
-.downtimeTitle { text-align: center; font-weight: bold; font-size: 10pt; }
-div.downtimeNav { text-align: center; }
+.notflapping           { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; float: left; }
+.flapping              { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; float: left; }
+.notificationsENABLED  { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.notificationsDISABLED { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.checksENABLED         { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.checksDISABLED        { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.eventhandlersENABLED  { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; width: 74px; float: left; }
+.eventhandlersDISABLED { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; width: 74px; float: left; }
+.flapdetectionENABLED  { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.flapdetectionDISABLED { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; width: 74px; }
+.downtimeACTIVE        { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; float: left; }
+.downtimeINACTIVE      { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; float: left; }
+.processOK             { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; }
+.processUNKNOWN        { color: #fff; background-color: #6ec2fd; border: 1px solid #777777; font-weight: bold; }
+.processWARNING        { background-color: #ffff00; border: 1px solid #777777; font-weight: bold; }
+.processCRITICAL       { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; }
+.modeACTIVE            { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; }
+.modeSTANDBY           { background-color: #ffff00; border: 1px solid #777777; font-weight: bold; }
 
-table.downtime { width: 100%; padding: 3px; }
-th.downtime { text-align: left; font-size: 10pt;  background-color: #0055a0 ; color: #fff; }
-.downtimeOdd { background-color: #f8f8f8; }
-.downtimeEven { background-color: #e7e7e7; }
+.eventhandlersCOMMAND  { position: absolute; margin-left: 90px; }
 
-.notificationsENABLED { background-color: #00cc33; color: #fff; text-align: center; }
-.notificationsDISABLED { background-color: #ff3300; color: #fff; text-align: center; }
+.hostUP           { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; float: left; }
+.hostDOWN         { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; float: left; }
+.hostUNREACHABLE  { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; float: left; }
 
-.checksENABLED { background-color: #00cc33; color: #fff; text-align: center; }
-.checksDISABLED { background-color: #ff3300; color: #fff; text-align: center; }
+.serviceOK        { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; float: left; }
+.serviceWARNING   { background-color: #ffff00; border: 1px solid #777777; font-weight: bold; float: left; }
+.serviceUNKNOWN   { color: #fff; background-color: #6ec2fd; border: 1px solid #777777; font-weight: bold; float: left; }
+.serviceCRITICAL  { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; float: left; }
 
-.eventhandlersENABLED { background-color: #00cc33; color: #fff; text-align: center; }
-.eventhandlersDISABLED { background-color: #ff3300; color: #fff; text-align: center; }
+.queueTitle    { font-size: 14pt; text-align: center; font-weight: bold; }
+table.queue    { font-size: 11pt; padding: 0; }
+th.queue       { font-size: 11pt; text-align: center; padding: 0 3px 0 3px; background-color: #f0f1ee; border: 1px #e2decd outset; color: #333333; }
+.queueOdd      { font-size: 11pt; background-color: #e7e7e7; padding: 0 4px 0 4px; }
+.queueEven     { font-size: 11pt; background-color: #f4f2f2; padding: 0 4px 0 4px; }
+.queueENABLED  { font-size: 11pt; color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 4px 0 4px; }
+.queueDISABLED { font-size: 11pt; color: #fff; background-color: #ff3300; border: 1px solid #777777; padding: 0 4px 0 4px; }
 
-.flapdetectionENABLED { background-color: #00cc33; color: #fff; text-align: center; }
-.flapdetectionDISABLED { background-color: #ff3300; color: #fff; text-align: center; }
-
-.notflapping { background-color: #00cc33; color: #fff; float: left; }
-.flapping { background-color: #ff3300; color: #fff; float: left; }
-
-.downtimeACTIVE { background-color: #ff3300; color: #fff; float: left; }
-.downtimeINACTIVE { background-color: #00cc33; color: #fff; float: left; }
-
-.processOK { background-color: #00cc33; color: #fff; }
-.processUNKNOWN { background-color: #bf44b2; color: #fff; }
-.processWARNING { background-color: #ffa500; color: #fff; }
-.processCRITICAL { background-color: #ff3300; color: #fff; }
-
-.modeACTIVE { background-color: #00cc33; color: #fff; }
-.modeSTANDBY { background-color: #ffa500; color: #fff; }
-
-div.hostUP, div.hostDOWN, div.hostUNREACHABLE { display: inline; }
-.hostUP { background-color: #00cc33; color: #fff; }
-.hostDOWN { background-color: #ff3300; color: #fff; }
-.hostUNREACHABLE { background-color: #bf44b2; color: #fff; }
-tr.dataEven td.hostUP, tr.dataEven td.hostDOWN, tr.dataEven .hostUNREACHABLE { text-align: center; }
-tr.dataOdd td.hostUP, tr.dataOdd td.hostDOWN, tr.dataOdd .hostUNREACHABLE { text-align: center; }
-
-div.serviceOK, div.serviceWARNING, div.serviceUNKNOWN, div.serviceCRITICAL { display: inline; }
-.serviceOK { background-color: #00cc33; color: #fff; }
-.serviceWARNING { background-color: #ffa500; color: #fff; }
-.serviceUNKNOWN { background-color: #bf44b2; color: #fff; }
-.serviceCRITICAL { background-color: #ff3300; color: #fff; }
-tr.dataEven td.serviceOK, tr.dataEven td.serviceWARNING, tr.dataEven td.serviceUNKNOWN, tr.dataEven td.serviceCRITICAL { text-align: center; }
-tr.dataOdd td.serviceOK, tr.dataOdd td.serviceWARNING, tr.dataOdd td.serviceUNKNOWN, tr.dataOdd td.serviceCRITICAL { text-align: center; }
-
-.commandPanel {  }
-.commentPanel {  }
-
-.stateInfoPanel { }
-.stateStatisticsPanel {  }
-.stateInfoTable1 { background-color: #f8f8f8; }
-.stateInfoTable2 { background-color: #f8f8f8; }
-
-.queueTitle { text-align: center; font-weight: bold; font-size: 10pt; }
-
-table.queue { padding: 2; }
-th.queue { text-align: left; font-size: 10pt; background-color: #0055a0 ; color: #fff; }
-.queueOdd { background-color: #f8f8f8; }
-.queueEven { background-color: #e7e7e7; }
-.queueENABLED { text-align: center; color: #fff; background-color: #00cc33; }
-.queueDISABLED { text-align: center; color: #fff; background-color: #ff3300; }
+table.blockHeadBorder, div.blockHeadBorder {
+  background-color: #f0f1ee;
+  border: 1px #b2a0a0 outset;
+  text-align:center;
+  line-height: 18px;
+  white-space: nowrap;
+}

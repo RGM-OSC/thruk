@@ -15,7 +15,7 @@ our @ISA = qw(DynaLoader);
 # SQL_DRIVER_VER is formatted as dd.dd.dddd
 # for version 5.x please switch to 5.00(_00) version numbering
 # keep $VERSION in Bundle/DBD/mysql.pm in sync
-our $VERSION = '4.033';
+our $VERSION = '4.044';
 
 bootstrap DBD::mysql $VERSION;
 
@@ -898,36 +898,18 @@ DBD::mysql - MySQL driver for the Perl5 Database Interface (DBI)
 
     use DBI;
 
-    $dsn = "DBI:mysql:database=$database;host=$hostname;port=$port";
+    my $dsn = "DBI:mysql:database=$database;host=$hostname;port=$port";
+    my $dbh = DBI->connect($dsn, $user, $password);
 
-    $dbh = DBI->connect($dsn, $user, $password);
-
-
-    $drh = DBI->install_driver("mysql");
-    @databases = DBI->data_sources("mysql");
-       or
-    @databases = DBI->data_sources("mysql",
-      {"host" => $host, "port" => $port, "user" => $user, password => $pass});
-
-    $sth = $dbh->prepare("SELECT * FROM foo WHERE bla");
-       or
-    $sth = $dbh->prepare("LISTFIELDS $table");
-       or
-    $sth = $dbh->prepare("LISTINDEX $table $index");
-    $sth->execute;
-    $numRows = $sth->rows;
-    $numFields = $sth->{'NUM_OF_FIELDS'};
+    my $sth = $dbh->prepare(
+        'SELECT id, first_name, last_name FROM authors WHERE last_name = ?')
+        or die "prepare statement failed: $dbh->errstr()";
+    $sth->execute('Eggers') or die "execution failed: $dbh->errstr()";
+    print $sth->rows . " rows found.\n";
+    while (my $ref = $sth->fetchrow_hashref()) {
+        print "Found a row: id = $ref->{'id'}, fn = $ref->{'first_name'}\n";
+    }
     $sth->finish;
-
-    $rc = $drh->func('createdb', $database, $host, $user, $password, 'admin');
-    $rc = $drh->func('dropdb', $database, $host, $user, $password, 'admin');
-    $rc = $drh->func('shutdown', $host, $user, $password, 'admin');
-    $rc = $drh->func('reload', $host, $user, $password, 'admin');
-
-    $rc = $dbh->func('createdb', $database, 'admin');
-    $rc = $dbh->func('dropdb', $database, 'admin');
-    $rc = $dbh->func('shutdown', 'admin');
-    $rc = $dbh->func('reload', 'admin');
 
 
 =head1 EXAMPLE
@@ -1048,7 +1030,13 @@ But now for a more formal approach:
 
     $dbh = DBI->connect($dsn, $user, $password);
 
-A C<database> must always be specified.
+The C<database> is not a required attribute, but please note that MySQL
+has no such thing as a default database. If you don't specify the database
+at connection time your active database will be null and you'd need to prefix
+your tables with the database name; i.e. 'SELECT * FROM mydb.mytable'.
+
+This is similar to the behavior of the mysql command line client. Also,
+'SELECT DATABASE()' will return the current database active for the handle.
 
 =over
 
@@ -1068,6 +1056,12 @@ separated by a colon ( C<:> ) character or by using the  C<port> argument.
 
 To connect to a MySQL server on localhost using TCP/IP, you must specify the
 hostname as 127.0.0.1 (with the optional port).
+
+When connecting to a MySQL Server with IPv6, a bracketed IPv6 address should be used.
+Example DSN:
+
+  my $dsn = "DBI:mysql:;host=[1a12:2800:6f2:85::f20:8cf];port=3306";
+
 
 =item mysql_client_found_rows
 
@@ -1166,27 +1160,85 @@ location for the socket than that built into the client.
 =item mysql_ssl
 
 A true value turns on the CLIENT_SSL flag when connecting to the MySQL
-database:
+server and enforce SSL encryption.  A false value (which is default)
+disable SSL encryption with the MySQL server.
 
-  mysql_ssl=1
+When enabling SSL encryption you should set also other SSL options,
+at least mysql_ssl_ca_file or mysql_ssl_ca_path.
+
+  mysql_ssl=1 mysql_ssl_verify_server_cert=1 mysql_ssl_ca_file=/path/to/ca_cert.pem
 
 This means that your communication with the server will be encrypted.
 
-If you turn mysql_ssl on, you might also wish to use the following
-flags:
-
-=item mysql_ssl_client_key
-
-=item mysql_ssl_client_cert
+Please note that this can only work if you enabled SSL when compiling
+DBD::mysql; this is the default starting version 4.034.
+See L<DBD::mysql::INSTALL> for more details.
 
 =item mysql_ssl_ca_file
 
+The path to a file in PEM format that contains a list of trusted SSL
+certificate authorities.
+
+When set MySQL server certificate is checked that it is signed by some
+CA certificate in the list.  Common Name value is not verified unless
+C<mysql_ssl_verify_server_cert> is enabled.
+
 =item mysql_ssl_ca_path
+
+The path to a directory that contains trusted SSL certificate authority
+certificates in PEM format.
+
+When set MySQL server certificate is checked that it is signed by some
+CA certificate in the list.  Common Name value is not verified unless
+C<mysql_ssl_verify_server_cert> is enabled.
+
+Please note that this option is supported only if your MySQL client was
+compiled with OpenSSL library, and not with default yaSSL library.
+
+=item mysql_ssl_verify_server_cert
+
+Checks the server's Common Name value in the certificate that the server
+sends to the client.  The client verifies that name against the host name
+the client uses for connecting to the server, and the connection fails if
+there is a mismatch.  For encrypted connections, this option helps prevent
+man-in-the-middle attacks.
+
+Verification of the host name is disabled by default.
+
+=item mysql_ssl_client_key
+
+The name of the SSL key file in PEM format to use for establishing
+a secure connection.
+
+=item mysql_ssl_client_cert
+
+The name of the SSL certificate file in PEM format to use for
+establishing a secure connection.
 
 =item mysql_ssl_cipher
 
-These are used to specify the respective parameters of a call
-to mysql_ssl_set, if mysql_ssl is turned on.
+A list of permissible ciphers to use for connection encryption.  If no
+cipher in the list is supported, encrypted connections will not work.
+
+  mysql_ssl_cipher=AES128-SHA
+  mysql_ssl_cipher=DHE-RSA-AES256-SHA:AES128-SHA
+
+=item mysql_ssl_optional
+
+Setting C<mysql_ssl_optional> to true disables strict SSL enforcement
+and makes SSL connection optional.  This option opens security hole
+for man-in-the-middle attacks.  Default value is false which means
+that C<mysql_ssl> set to true enforce SSL encryption.
+
+This option was introduced in 4.043 version of DBD::mysql.  Due to
+L<The BACKRONYM|http://backronym.fail/> and L<The Riddle|http://riddle.link/>
+vulnerabilities in libmysqlclient library, enforcement of SSL
+encryption was not possbile and therefore C<mysql_ssl_optional=1>
+was effectively set for all DBD::mysql versions prior to 4.043.
+Starting with 4.043, DBD::mysql with C<mysql_ssl=1> could refuse
+connection to MySQL server if underlaying libmysqlclient library is
+vulnerable.  Option C<mysql_ssl_optional> can be used to make SSL
+connection vulnerable.
 
 
 =item mysql_local_infile
@@ -1203,25 +1255,28 @@ Support for multiple statements separated by a semicolon
 (;) may be enabled by using this option. Enabling this option may cause
 problems if server-side prepared statements are also enabled.
 
-=item Prepared statement support (server side prepare)
+=item mysql_server_prepare
 
-As of 3.0002_1, server side prepare statements were on by default (if your
-server was >= 4.1.3). As of 3.0009, they were off by default again due to
-issues with the prepared statement API (all other mysql connectors are
-set this way until C API issues are resolved). The requirement to use
-prepared statements still remains that you have a server >= 4.1.3
+This option is used to enable server side prepared statements.
 
 To use server side prepared statements, all you need to do is set the variable
 mysql_server_prepare in the connect:
 
-$dbh = DBI->connect(
-                    "DBI:mysql:database=test;host=localhost;mysql_server_prepare=1",
-                    "",
-                    "",
-                    { RaiseError => 1, AutoCommit => 1 }
-                    );
+  $dbh = DBI->connect(
+    "DBI:mysql:database=test;host=localhost;mysql_server_prepare=1",
+    "",
+    "",
+    { RaiseError => 1, AutoCommit => 1 }
+  );
 
-* Note: delimiter for this param is ';'
+or:
+
+  $dbh = DBI->connect(
+    "DBI:mysql:database=test;host=localhost",
+    "",
+    "",
+    { RaiseError => 1, AutoCommit => 1, mysql_server_prepare => 1 }
+  );
 
 There are many benefits to using server side prepare statements, mostly if you are
 performing many inserts because of that fact that a single statement is prepared
@@ -1230,8 +1285,19 @@ to accept multiple insert values.
 To make sure that the 'make test' step tests whether server prepare works, you just
 need to export the env variable MYSQL_SERVER_PREPARE:
 
-export MYSQL_SERVER_PREPARE=1
+  export MYSQL_SERVER_PREPARE=1
 
+Please note that mysql server cannot prepare or execute some prepared statements.
+In this case DBD::mysql fallbacks to normal non-prepared statement and tries again.
+
+=item mysql_server_prepare_disable_fallback
+
+This option disable fallback to normal non-prepared statement when mysql server
+does not support execution of current statement as prepared.
+
+Useful when you want to be sure that statement is going to be executed as
+server side prepared. Error message and code in case of failure is propagated
+back to DBI.
 
 =item mysql_embedded_options
 
@@ -1240,9 +1306,9 @@ options to embedded server.
 
 Example:
 
-use DBI;
-$testdsn="DBI:mysqlEmb:database=test;mysql_embedded_options=--help,--verbose";
-$dbh = DBI->connect($testdsn,"a","b");
+  use DBI;
+  $testdsn="DBI:mysqlEmb:database=test;mysql_embedded_options=--help,--verbose";
+  $dbh = DBI->connect($testdsn,"a","b");
 
 This would cause the command line help to the embedded MySQL server library
 to be printed.
@@ -1256,7 +1322,7 @@ If not specified [server] and [embedded] groups will be used.
 
 Example:
 
-$testdsn="DBI:mysqlEmb:database=test;mysql_embedded_groups=embedded_server,common";
+  $testdsn="DBI:mysqlEmb:database=test;mysql_embedded_groups=embedded_server,common";
 
 =item mysql_conn_attrs
 
@@ -1361,70 +1427,6 @@ running on C<$hostname>, port C<$port>. This is a legacy
 method.  Instead, you should use the portable method
 
     @dbs = DBI->data_sources("mysql");
-
-=back
-
-
-=head2 Server Administration
-
-=over
-
-=item admin
-
-    $rc = $drh->func("createdb", $dbname, [host, user, password,], 'admin');
-    $rc = $drh->func("dropdb", $dbname, [host, user, password,], 'admin');
-    $rc = $drh->func("shutdown", [host, user, password,], 'admin');
-    $rc = $drh->func("reload", [host, user, password,], 'admin');
-
-      or
-
-    $rc = $dbh->func("createdb", $dbname, 'admin');
-    $rc = $dbh->func("dropdb", $dbname, 'admin');
-    $rc = $dbh->func("shutdown", 'admin');
-    $rc = $dbh->func("reload", 'admin');
-
-For server administration you need a server connection. For obtaining
-this connection you have two options: Either use a driver handle (drh)
-and supply the appropriate arguments (host, defaults localhost, user,
-defaults to '' and password, defaults to ''). A driver handle can be
-obtained with
-
-    $drh = DBI->install_driver('mysql');
-
-Otherwise reuse the existing connection of a database handle (dbh).
-
-There's only one function available for administrative purposes, comparable
-to the mysqladmin programs. The command being execute depends on the
-first argument:
-
-=over
-
-=item createdb
-
-Creates the database $dbname. Equivalent to "mysqladmin create $dbname".
-
-=item dropdb
-
-Drops the database $dbname. Equivalent to "mysqladmin drop $dbname".
-
-It should be noted that database deletion is
-I<not prompted for> in any way.  Nor is it undo-able from DBI.
-
-    Once you issue the dropDB() method, the database will be gone!
-
-These method should be used at your own risk.
-
-=item shutdown
-
-Silently shuts down the database engine. (Without prompting!)
-Equivalent to "mysqladmin shutdown".
-
-=item reload
-
-Reloads the servers configuration files and/or tables. This can be particularly
-important if you modify access privileges or create new users.
-
-=back
 
 =back
 
@@ -1554,15 +1556,14 @@ stored in the database are utf8.  This feature defaults to off.
 When set, a data retrieved from a textual column type (char, varchar,
 etc) will have the UTF-8 flag turned on if necessary.  This enables
 character semantics on that string.  You will also need to ensure that
-your database / table / column is configured to use UTF8.  See Chapter
-10 of the mysql manual for details.
+your database / table / column is configured to use UTF8. See for more
+information the chapter on character set support in the MySQL manual:
+L<http://dev.mysql.com/doc/refman/5.7/en/charset.html>
 
 Additionally, turning on this flag tells MySQL that incoming data should
 be treated as UTF-8.  This will only take effect if used as part of the
 call to connect().  If you turn the flag on after connecting, you will
 need to issue the command C<SET NAMES utf8> to get the same effect.
-
-This option is experimental and may change in future versions.
 
 =item mysql_enable_utf8mb4
 
@@ -1657,7 +1658,14 @@ or using an existing database handle:
 
   $dbh->{mysql_no_autocommit_cmd} = 1;
 
+=item ping
+
+This can be used to send a ping to the server.
+
+  $rc = $dbh->ping();
+
 =back
+
 
 =head1 STATEMENT HANDLES
 
@@ -1720,10 +1728,14 @@ have impact on the I<max_length> attribute.
 
 =item mysql_insertid
 
-MySQL has the ability to choose unique key values automatically. If this
-happened, the new ID will be stored in this attribute. An alternative
-way for accessing this attribute is via $dbh->{'mysql_insertid'}.
-(Note we are using the $dbh in this case!)
+If the statement you executed performs an INSERT, and there is an AUTO_INCREMENT
+column in the table you inserted in, this attribute holds the value stored into
+the AUTO_INCREMENT column, if that value is automatically generated, by
+storing NULL or 0 or was specified as an explicit value.
+
+Typically, you'd access the value via $sth->{mysql_insertid}. The value can
+also be accessed via $dbh->{mysql_insertid} but this can easily
+produce incorrect results in case one database handle is shared.
 
 =item mysql_is_blob
 
@@ -1946,12 +1958,9 @@ An example would be:
     }
   } until (!$sth->more_results)
 
-For more examples, please see the eg/ directory. This is where helpful
-DBD::mysql code snippets will be added in the future.
-
 =head2 Issues with multiple result sets
 
-Please be aware ther could be issues if your result sets are "jagged",
+Please be aware there could be issues if your result sets are "jagged",
 meaning the number of columns of your results vary. Varying numbers of
 columns could result in your script crashing.
 
