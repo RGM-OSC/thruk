@@ -9,7 +9,7 @@
 
 Name: thruk
 Version: 2.28
-Release: 2.rgm
+Release: 3.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -20,7 +20,8 @@ Source1: %{name}-rgm.tar.gz
 Patch0:  %{name}-%{version}.patch
 Patch1:  patch-banner.patch
 Patch2:  extinfo_type_host.patch
-Patch3:  setting-patch.patch
+Patch3:  extinfo_type_service.patch
+Patch4:  setting-patch.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 Requires: httpd, mk-livestatus, mod_fcgid, perl, cairo >= 1.8.8, perl-Cpanel-JSON-XS
@@ -42,6 +43,7 @@ It is designed to be a "dropin" replacement. The target is to cover 100% of the 
 %patch1 -p0
 %patch2 -p0
 %patch3 -p0
+%patch4 -p0
 %setup -T -b 1 -n %{name}-rgm
 
 %install
@@ -109,10 +111,13 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
-* Wed Apr 20 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-2.rgm
+* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-3.rgm
+- Fix themes issues
+
+* Wed Apr 10 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-2.rgm
 - Update themes
 
-* Wed Apr 20 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-1.rgm
+* Wed Apr 10 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-1.rgm
 - New release
 
 * Tue Mar 19 2019 Eric Belhomme <ebelhomme@fr.scc.com> - 2.12-3-1.rgm

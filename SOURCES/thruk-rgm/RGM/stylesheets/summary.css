@@ -22,9 +22,9 @@ table.data { padding-top: 15px; }
 
 .hostUP          { font-size: 11pt; color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .hostDOWN        { font-size: 11pt; color: #fff; background-color: #ff3300; border: 1px solid #777777; padding: 0 4px 0 4px; }
-.hostUNREACHABLE { font-size: 11pt; color: #fff; background-color: #6ec2fd; border: 1px solid #777777; padding: 0 4px 0 4px; }
+.hostUNREACHABLE { font-size: 11pt; color: #fff; background-color: #CC77C6; border: 1px solid #777777; padding: 0 4px 0 4px; }
 
 .serviceOK       { font-size: 11pt; color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .serviceWARNING  { font-size: 11pt; color: #fff; background-color: #ffa500; border: 1px solid #777777; padding: 0 4px 0 4px; }
-.serviceUNKNOWN  { font-size: 11pt; color: #fff; background-color: #6ec2fd; border: 1px solid #777777; padding: 0 4px 0 4px; }
+.serviceUNKNOWN  { font-size: 11pt; color: #fff; background-color: #CC77C6; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .serviceCRITICAL { font-size: 11pt; color: #fff; background-color: #ff3300; border: 1px solid #777777; padding: 0 4px 0 4px; }
