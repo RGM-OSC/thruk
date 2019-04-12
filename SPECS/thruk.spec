@@ -9,7 +9,7 @@
 
 Name: thruk
 Version: 2.28
-Release: 3.rgm
+Release: 4.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -111,6 +111,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-4.rgm
+- Fix button look
+
 * Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-3.rgm
 - Fix themes issues
 
