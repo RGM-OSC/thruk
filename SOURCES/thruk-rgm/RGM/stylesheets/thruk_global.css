@@ -195,13 +195,14 @@ button.thruk_btn.top_refresh_button {
 }
 
 button.thruk_btn.top_nav_pref_button, button.thruk_btn.top_nav_logout_button {
-  color:#444444;
-  background-color:#EEEEEE;
-  border-style:double;
-  border-color:#999999;
-  border-width:3px;
-  font-size:9px;
-  font-weight:normal;
+  color: #337ab7;   
+  background-color: #EEEEEE;    
+  border-style: double;    
+  border-color: #999999;    
+  border-width: 3px;    
+  font-size: 11px;    
+  font-weight: normal;    
+  font-family: 'Fira Sans';
 }
 input.button_peerUP {
   color:#444444;
