@@ -1,5 +1,5 @@
---- templates/extinfo_type_1.tt.old	2019-04-12 06:29:41.406046359 +0200
-+++ templates/extinfo_type_1.tt	2019-04-12 06:34:46.449510087 +0200
+--- templates/extinfo_type_2.tt.old	2019-04-11 18:18:36.513251996 +0200
++++ templates/extinfo_type_2.tt	2019-04-11 19:16:15.733307949 +0200
 @@ -349,102 +349,6 @@
                              <td class='dataVal'>[% pi_detail.$peer_key.peer_name %]</td>
                            </tr>
@@ -19,7 +19,7 @@
 -                          <tr>
 -                            <td class='dataVar'>Active Checks:</td>
 -                            <td class='dataVal'>
--                              [% IF host.checks_enabled %]
+-                              [% IF service.checks_enabled %]
 -                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
 -                              [% ELSE %]
 -                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
@@ -29,7 +29,7 @@
 -                          <tr>
 -                            <td class='dataVar'>Passive Checks:</td>
 -                            <td class='dataVal'>
--                              [% IF host.accept_passive_checks %]
+-                              [% IF service.accept_passive_checks %]
 -                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
 -                              [% ELSE %]
 -                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
@@ -39,7 +39,7 @@
 -                          <tr>
 -                            <td class='dataVar'>Obsessing:</td>
 -                            <td class='dataVal'>
--                              [% IF host.obsess_over_host %]
+-                              [% IF service.obsess_over_service %]
 -                              <div class='checksENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
 -                              [% ELSE %]
 -                              <div class='checksDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
@@ -49,7 +49,7 @@
 -                          <tr>
 -                            <td class='dataVar'>Notifications:</td>
 -                            <td class='dataVal'>
--                              [% IF host.notifications_enabled %]
+-                              [% IF service.notifications_enabled %]
 -                              <div class='notificationsENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
 -                              [% ELSE %]
 -                              <div class='notificationsDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
@@ -59,14 +59,14 @@
 -                          <tr>
 -                            <td class='dataVar'>Event Handler:</td>
 -                            <td class='dataVal eventHandler'>
--                              [% IF !host.event_handler %]
+-                              [% IF !service.event_handler %]
 -                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;UNUSED&nbsp;&nbsp;</div>
--                              [% ELSIF host.event_handler_enabled %]
+-                              [% ELSIF service.event_handler_enabled %]
 -                              <div class='eventhandlersENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp;</div>
 -                                [% IF   show_full_commandline == 2 ||
 -                                      ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') )
 -                                %]
--                                <div class='eventhandlersCOMMAND'>([% host.event_handler %])</div>
+-                                <div class='eventhandlersCOMMAND'>([% service.event_handler %])</div>
 -                                [% END %]
 -                              [% ELSE %]
 -                              <div class='eventhandlersDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp;</div>
@@ -76,7 +76,7 @@
 -                          <tr>
 -                            <td class='dataVar'>Flap Detection:</td>
 -                            <td class='dataVal'>
--                              [% IF host.flap_detection_enabled %]
+-                              [% IF service.flap_detection_enabled %]
 -                              <div class='flapdetectionENABLED'>&nbsp;&nbsp;ENABLED&nbsp;&nbsp; </div>
 -                              [% ELSE %]
 -                              <div class='flapdetectionDISABLED'>&nbsp;&nbsp;DISABLED&nbsp;&nbsp; </div>
@@ -90,43 +90,42 @@
 -                </td>
 -              </tr>
 -            </table>
--
 -          </td>
 -          <td align="center" valign="top" class="action_menu">
 -            [% IF c.config.use_new_command_box %]
--              [% PROCESS _host_command_box.tt %]
+-              [% PROCESS _service_command_box.tt %]
 -            [% ELSE %]
--              [% PROCESS _host_command_box_full.tt %]
+-              [% PROCESS _service_command_box_full.tt %]
 -            [% END %]
 -          </td>
 -        </tr>
- 
+-
          [% IF pnp_url %]
          <tr>
-@@ -602,6 +506,26 @@
+           <td colspan="2" align="center">
+@@ -600,6 +504,25 @@
            </td>
          </tr>
          [% END %]
-+
-+
-+
 +                        </table>
 +                      </td>
 +                    </tr>
 +                  </table>
 +                </td>
 +              </tr>
-+            </table>
 +
++            </table>
 +          </td>
 +          <td align="center" valign="top" class="action_menu">
 +            [% IF c.config.use_new_command_box %]
-+              [% PROCESS _host_command_box.tt %]
++              [% PROCESS _service_command_box.tt %]
 +            [% ELSE %]
-+              [% PROCESS _host_command_box_full.tt %]
++              [% PROCESS _service_command_box_full.tt %]
 +            [% END %]
 +          </td>
 +        </tr>
++
++
        </table>
      </div>
  
