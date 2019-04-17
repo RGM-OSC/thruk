@@ -10,9 +10,6 @@
       <tr>
         <td align="left" valign="top" width="33%">
           [% PROCESS _infobox.tt %]
-          <table border="1" cellpadding="0" cellspacing="0" class='linkBox'>
-            <tr>
-              <td class='linkBox'>
                 <a href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">View Information For This Host</a><br>
                 <a href="status.cgi?host=[% service.host_name | uri %]">View Status Detail For This Host</a><br>
                 <a href="history.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">View Alert History For This Service</a> (<a href="showlog.cgi?host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]">Logs</a>)<br>
@@ -26,11 +23,8 @@
                 <br><a href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]">View Configuration For This Service</a>
                 [% END %]
                 <br><a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]">View All '[% IF service.description.length > 7; service.description.substr(0, 7) | html %]...[% ELSE; service.description | html; END %]' Services</a> (<a href="status.cgi?s0_op=%3D&amp;s0_type=service&amp;s0_value=[% service.description | uri %]&amp;style=perfmap">As Performance Map</a>)
-                <br>
-              </td>
-            </tr>
-          </table>
-        </td>
+          </div>
+        </td>      
         <td align="center" width="33%" class="ext_head_attributes">
           <div class='data'>Service</div>
           <div class='dataTitle'>[% IF use_service_description %][% service.description | html %][% ELSE %][% service.display_name | html %][% END %]</div>
@@ -166,7 +160,6 @@
       <table border="0" cellpadding="0" cellspacing="0" width="100%" class="extdetails">
         <tr>
           <td align="center" valign="top" class='stateInfoPanel'>
-            <div class='dataTitle'>Service State Information</div>
             <table border="0">
               <tr>
                 <td>
@@ -178,17 +171,31 @@
                             <td class='dataVar'>Current Status:</td>
                             <td class='dataVal'>
                               [% IF service.has_been_checked == 0 %]
-                              <div class='servicePENDING'>&nbsp;&nbsp;PENDING&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-default">Pending</span> 
+                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                </div>
                               [% ELSIF service.state == 0 %]
-                              <div class='serviceOK'>&nbsp;&nbsp;OK&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-success">Ok</span> 
+                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                </div>
                               [% ELSIF service.state == 1 %]
-                              <div class='serviceWARNING'>&nbsp;&nbsp;WARNING&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-warning">Warning</span> 
+                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                </div>
                               [% ELSIF service.state == 2 %]
-                              <div class='serviceCRITICAL'>&nbsp;&nbsp;CRITICAL&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-danger">Critical</span> 
+                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                </div>
                               [% ELSIF service.state == 3 %]
-                              <div class='serviceUNKNOWN'>&nbsp;&nbsp;UNKNOWN&nbsp;&nbsp;</div>
+                                  <div class='status'>
+                                  <span class = "label label-info">Unknown</span> 
+                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                </div>
                               [% END %]
-                              &nbsp;(for [% IF service.last_state_change %][% duration(date.now - service.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])
                               [% IF service.acknowledged %]
                               &nbsp;(Has been acknowledged)
                               [% END %]
@@ -227,10 +234,6 @@
                           <tr>
                             <td class='dataVar'>Last Check Time:</td>
                             <td class='dataVal'>[% last_check(c, service.last_check) %]</td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Check Type:</td>
-                            <td class='dataVal'>[% IF service.check_type == 0 %]ACTIVE[% ELSE %]PASSIVE[% END %]</td>
                           </tr>
                           <tr>
                             <td class='dataVar' nowrap>Check Latency / Duration:</td>
@@ -287,11 +290,14 @@
                             <td class='dataVal'>
                               [% IF service.flap_detection_enabled %]
                                 [% IF service.is_flapping %]
-                                <div class='flapping'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                                   <div class='status'><span class = "label label-warning">Yes</span>
+                                    ([% FILTER format('%.2f') %][% service.percent_state_change %][% END %]% state change)
+                                  </div>
                                 [% ELSE %]
-                                <div class='notflapping'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                                 <div class='status'><span class = "label label-success">No</span>
+                                  ([% FILTER format('%.2f') %][% service.percent_state_change %][% END %]% state change)
+                                 </div>
                                 [% END %]
-                                &nbsp;([% FILTER format('%.2f') %][% service.percent_state_change %][% END %]% state change)
                               [% ELSE %]
                                 N/A
                               [% END %]
@@ -301,9 +307,13 @@
                             <td class='dataVar'>In Scheduled Downtime?</td>
                             <td class='dataVal'>
                               [% IF service.scheduled_downtime_depth > 0 %]
-                              <div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-danger">Yes</span>
+                                </div>
                               [% ELSE %]
-                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-success">No</span>
+                                </div>
                               [% END %]
                             </td>
                           </tr>
@@ -311,9 +321,13 @@
                             <td class='dataVar'>In Check Period?</td>
                             <td class='dataVal'>
                               [% IF service.in_check_period %]
-                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-success">Yes</span>
+                                </div>
                               [% ELSE %]
-                              <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-warning">No</span>
+                                </div>
                               [% END %]
                             </td>
                           </tr>
@@ -321,9 +335,13 @@
                             <td class='dataVar'>In Notification Period?</td>
                             <td class='dataVal'>
                               [% IF service.in_notification_period %]
-                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-success">Yes</span>
+                                </div>
                               [% ELSE %]
-                              <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-warning">No</span>
+                                </div>
                               [% END %]
                             </td>
                           </tr>
@@ -331,18 +349,6 @@
                             <td class='dataVar'>Last Update:</td>
                             <td class='dataVal'>[% date_format(c, date.now) %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
                           </tr>
-                          [% IF show_contacts && c.check_user_roles('authorized_for_configuration_information') %]
-                          <tr>
-                            <td class='dataVar'>Contacts</td>
-                            <td class='dataVal'>[% service.contacts.join(', ') %]</td>
-                          </tr>
-                          [% END %]
-                          [% IF show_modified_attributes %]
-                          <tr>
-                            <td class='dataVar'>Modified Attributes</td>
-                            <td class='dataVal'>[% IF service.modified_attributes_list.size > 0 %]<div class='serviceWARNING' style="padding-right: 4px; padding-left: 4px;">[% service.modified_attributes_list.join(', ') %]</div>[% ELSE %]none[% END %]</td>
-                          </tr>
-                          [% END %]
                           [% IF backends && backends.size > 1 %]
                           <tr>
                             <td class='dataVar'>Monitored by:</td>

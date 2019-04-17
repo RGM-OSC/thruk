@@ -1,0 +1,63 @@
+﻿[%+ UNLESS all_in_one_css %]
+<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- DataTables CSS -->
+<link href="/bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css" rel="stylesheet">
+<!-- DataTables Responsive CSS -->
+<link href="/bower_components/datatables-responsive/css/dataTables.responsive.css" rel="stylesheet">
+<!-- Custom CSS -->
+<link href="/bower_components/startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" rel="stylesheet">
+<!-- Custom Fonts -->
+<link href="/bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<!-- jQuery CSS -->
+<link href="/bower_components/jquery-ui/themes/base/jquery-ui.min.css" rel="stylesheet">
+<!-- DateRangePicker CSS -->
+<link href="/bower_components/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet">
+<!-- BootstrapSelect CSS -->
+<link href="/bower_components/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">
+
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/lb-bootstrap.css' />
+
+
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/common.css' />
+
+[% IF page != "" %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% page %].css' />[% END %]
+[% END %]
+[% IF !all_in_one_css || thruk_debug %]
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_global.css' />
+[%+ END %]
+[% UNLESS use_frames %]
+  [% IF !all_in_one_css || thruk_debug %]
+  <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes.css' />
+  [%+ END %]
+  <!--[if IE 5]>
+  <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
+  <![endif]-->
+  <!--[if IE 6]>
+  <link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/thruk_noframes_ie_fix.css' />
+  <![endif]-->
+[% END %]
+[% IF !all_in_one_css || thruk_debug %]
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css' />
+[%+ END %]
+[% IF all_in_one_css && !thruk_debug %]
+  [% IF use_frames %]
+  <link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-[% version %]-[% filebranch %].css' />
+  [%+ ELSE %]
+  <link rel='stylesheet' type='text/css' href='[% url_prefix %]cache/[% theme %]-noframes-[% version %]-[% filebranch %].css' />
+  [%+ END %]
+[% END %]
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/daterangepicker-3.0.3/daterangepicker.css' />
+[% IF has_jquery_ui %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jquery-ui-[% jquery_ui %]/css/smoothness/jquery-ui-[% jquery_ui %].custom.min.css' />[% END %]
+[% IF css.list.size > 0 %][% FOREACH cs = css.list %]
+<link rel='stylesheet' type='text/css' href='[% url_prefix %][% cs %]' />
+[% END %][% END %]
+[% IF show_sitepanel == 'tree' %]
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jstree-3.3.7/themes/default/style.min.css' />
+[% END %]
+<!--[if IE 8]>
+<style type="text/css">
+.vertical {
+  filter: flipv() fliph(); writing-mode: tb-rl; /* required for IE < 9 */
+}
+</style>
+<![endif]-->

@@ -6,10 +6,7 @@
         <td>
           <table width="470">
             <tr>
-              <th colspan=2 class="separator">Settings</th>
-            </tr>
-            <tr>
-              <th colspan=2 class="separator">Session Settings</th>
+              <th colspan=2 class="separator">Options</th>
             </tr>
             [% IF show_sounds %]
             <tr>

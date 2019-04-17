@@ -1,0 +1,57 @@
+﻿<div class="card">
+  <div class="card-header" style="color: #337ab7;">
+   <a href="status.cgi?hostgroup=all&amp;style=hostdetail"><i class="glyphicon glyphicon-hdd"></i> Hosts </a>
+  </div>
+    <div class="card-body">
+    <p class="card-text">
+      <table class="table bg-white table-sm table-nobordered">
+      <thead class="bg-light">
+      <tr>
+        <th class='hostTotals text-center' style="background-color:white;">
+          <a class='hostTotals text-success' href='[% uri_with(c, hoststatustypes => 2) %]' data-toggle="tooltip" data-placement="top" title="UP">
+            <h3>
+              <span class="label label-success">Up 
+                  <span class="badge ">
+                    [% IF !has_error && host_stats.up %][% host_stats.up %][% ELSE %]0[% END %]
+                  </span>
+              </span>
+            </h3>
+          </a>
+        </th>
+        <th class='hostTotals text-center' style="background-color:white;">
+          <a class='hostTotals text-danger' href='[% uri_with(c, hoststatustypes => 4) %]' data-toggle="tooltip" data-placement="top" title="DOWN">
+            <h3>
+              <span class="label label-danger">Down 
+                <span class="badge ">
+                  [% IF !has_error && host_stats.down %][% host_stats.down %][% ELSE %]0[% END %]
+                </span>
+              </span>
+            </h3>
+          </a>
+        </th>
+        <th class='hostTotals text-center' style="background-color:white;">
+          <a class='hostTotals text-primary' href='[% uri_with(c, hoststatustypes => 8) %]' data-toggle="tooltip" data-placement="top" title="UNREACHED">
+            <h3>
+              <span class="label label-info">Unreached <span class="badge ">
+                [% IF !has_error && host_stats.unreachable %][% host_stats.unreachable %][% ELSE %]0[% END %]
+              </span>
+            </span>
+          </h3>
+        </a>
+      </th>
+      <th class='hostTotals text-center' style="background-color:white;">
+        <a class='hostTotals text-secondary' href='[% uri_with(c, hoststatustypes => 1) %]' data-toggle="tooltip" data-placement="top" title="PENDING">
+          <h3>
+            <span class="label label-default">Pending 
+              <span class="badge ">
+                [% IF !has_error && host_stats.pending %][% host_stats.pending %][% ELSE %]0[% END %]
+              </span>
+            </span>
+          </h3>
+        </a>
+      </th>
+      </tr>
+        </thead>
+      </table>
+  </p>
+</div>

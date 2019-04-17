@@ -14,7 +14,7 @@ th.notifications    { font-size: 11pt; text-align: center; padding: 0 3px 0 3px;
 
 /* these are dark colors */
 .notificationsOK              { color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 4px 0 4px; }
-.notificationsUNKNOWN         { color: #fff; background-color: #CC77C6; border: 1px solid #777777; padding: 0 4px 0 4px; }
+.notificationsUNKNOWN         { color: #fff; background-color: #5bc0de; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .notificationsWARNING         { color: #fff; background-color: #ffa500; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .notificationsCRITICAL        { color: #fff; background-color: #ff3300; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .notificationsACKNOWLEDGEMENT { background-color: #aaaaaa; border: 1px solid #777777; padding: 0 4px 0 4px; }
@@ -23,6 +23,6 @@ th.notifications    { font-size: 11pt; text-align: center; padding: 0 3px 0 3px;
 /* these are dark colors */
 .notificationsHOSTUP              { color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .notificationsHOSTDOWN            { color: #fff; background-color: #ff3300; border: 1px solid #777777; padding: 0 4px 0 4px; }
-.notificationsHOSTUNREACHABLE     { color: #fff; background-color: #CC77C6; border: 1px solid #777777; padding: 0 4px 0 4px; }
+.notificationsHOSTUNREACHABLE     { color: #fff; background-color: #5bc0de; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .notificationsHOSTACKNOWLEDGEMENT { background-color: #aaaaaa; border: 1px solid #777777; padding: 0 4px 0 4px; }
 .notificationsHOSTCUSTOM          { background-color: #778899; border: 1px solid #777777; padding: 0 4px 0 4px; }

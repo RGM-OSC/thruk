@@ -1,8 +1,11 @@
 ﻿[% USE date %]
-<table class='infoBox' border="1" cellspacing="0" cellpadding="0">
-  <tr>
-    <td class='infoBox'>
-      <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
+  <div class="card">
+  <div class="card-header" style="color: #337ab7;">
+   <div class='infoBoxTitle'>[% infoBoxTitle %]</div>
+  </div>
+
+  <div class="card-body">
+     
       [% IF has_proc_info %]
       [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='infoBoxBadProcStatus'> - Notifications are disabled</div>[% END %]
       [% IF pi.keys.size > 0 && pi.enable_notifications == -1 %]<div class='infoBoxBadProcStatus'> - Notifications are partially disabled</div>[% END %]
@@ -11,6 +14,3 @@
       [% IF pi.keys.size > 0 && pi.execute_host_checks == 0 %]<div class='infoBoxBadProcStatus'> - Host checks are disabled </div>[% END %]
       [% IF pi.keys.size > 0 && pi.execute_host_checks == -1 %]<div class='infoBoxBadProcStatus'> - Host checks are partially disabled </div>[% END %]
       [% END %]
-    </td>
-  </tr>
-</table>

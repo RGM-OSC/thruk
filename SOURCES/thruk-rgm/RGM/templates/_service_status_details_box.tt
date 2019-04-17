@@ -1,0 +1,75 @@
+﻿[% SET hoststatustypes = 15 IF ! hoststatustypes %]
+<div class="card">
+  <div class="card-header" style="color: #337ab7;">
+   <a href="/thruk/cgi-bin/status.cgi?host=all"><i class="glyphicon glyphicon-eye-open"></i> Services </a>
+  </div>
+    <div class="card-body">
+    <p class="card-text">
+      <table class="table bg-white table-sm table-nobordered">
+      <thead class="bg-light">
+      	<tr>
+          <th class='serviceTotals text-center' style="background-color:white;">
+            <a class='serviceTotals text-success' data-toggle="tooltip" data-placement="top" title="OK" href='[% uri_with(c, style => 'detail', servicestatustypes => 2,  hoststatustypes => hoststatustypes) %]'>
+              <h3>
+                <span class="label label-success">
+                  Up 
+                  <span class="badge ">
+                    [% IF !has_error && service_stats.ok %][% service_stats.ok %][% ELSE %]0[% END %]
+                  </span>
+                </span>
+              </h3>
+            </a>
+          </th>
+          <th class='serviceTotals text-center' style="background-color:white;">
+            <a class='serviceTotals text-warning' data-toggle="tooltip" data-placement="top" title="WARNING" href='[% uri_with(c, style => 'detail', servicestatustypes => 4,  hoststatustypes => hoststatustypes) %]'>
+              <h3>
+                <span class="label label-warning">
+                  Warning 
+                  <span class="badge ">
+                    [% IF !has_error && service_stats.warning %][% service_stats.warning %][% ELSE %]0[% END %]
+                  </span>
+                </span>
+              </h3>
+            </a>
+          </th>
+          <th class='serviceTotals text-center' style="background-color:white;">
+            <a class='serviceTotals text-unknown' data-toggle="tooltip" data-placement="top" title="CRITICAL" href='[% uri_with(c, style => 'detail', servicestatustypes => 16,  hoststatustypes => hoststatustypes) %]'>
+              <h3>
+                <span class="label label-danger">
+                  Critical 
+                  <span class="badge ">
+                    [% IF !has_error && service_stats.critical %][% service_stats.critical %][% ELSE %]0[% END %]
+                  </span>
+                </span>
+              </h3>
+            </a>
+          </th>
+          <th class='serviceTotals text-center' style="background-color:white;">
+            <a class='serviceTotals text-danger' data-toggle="tooltip" data-placement="top" title="UNKNOWN" href='[% uri_with(c, style => 'detail', servicestatustypes => 8, hoststatustypes => hoststatustypes) %]'>
+              <h3>
+                <span class="label label-info">
+                  Unknown 
+                  <span class="badge ">
+                    [% IF !has_error && service_stats.unknown %][% service_stats.unknown %][% ELSE %]0[% END %]
+                  </span>
+                </span>
+              </h3>
+            </a>
+          </th>
+          <th class='serviceTotals text-center' style="background-color:white;">
+            <a class='serviceTotals text-dark' data-toggle="tooltip" data-placement="top" title="PENDING" href='[% uri_with(c, style => 'detail', servicestatustypes => 1,  hoststatustypes => hoststatustypes) %]'>
+              <h3>
+                <span class="label label-default">
+                  Pending 
+                  <span class="badge ">
+                    [% IF !has_error && service_stats.pending %][% service_stats.pending %][% ELSE %]0[% END %]
+                  </span>
+                </span>
+              </h3>
+            </a>
+          </th>
+        </tr>
+      </thead>
+      </table>
+  </p>
+</div>

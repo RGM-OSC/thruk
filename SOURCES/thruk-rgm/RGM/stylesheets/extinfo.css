@@ -71,7 +71,7 @@ th.downtime    { font-size: 11pt; center; padding: 0 3px 0 3px; background-color
 .downtimeACTIVE        { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; float: left; }
 .downtimeINACTIVE      { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; float: left; }
 .processOK             { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; }
-.processUNKNOWN        { color: #fff; background-color: #CC77C6; border: 1px solid #777777; font-weight: bold; }
+.processUNKNOWN        { color: #fff; background-color: #5bc0de; border: 1px solid #777777; font-weight: bold; }
 .processWARNING        { color: #fff; background-color: #ffa500; border: 1px solid #777777; font-weight: bold; }
 .processCRITICAL       { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; }
 .modeACTIVE            { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; }
@@ -85,7 +85,7 @@ th.downtime    { font-size: 11pt; center; padding: 0 3px 0 3px; background-color
 
 .serviceOK        { color: #fff; background-color: #00CC33; border: 1px solid #777777; font-weight: bold; float: left; }
 .serviceWARNING   { color: #fff; background-color: #ffa500; border: 1px solid #777777; font-weight: bold; float: left; }
-.serviceUNKNOWN   { color: #fff; background-color: #CC77C6; border: 1px solid #777777; font-weight: bold; float: left; }
+.serviceUNKNOWN   { color: #fff; background-color: #5bc0de; border: 1px solid #777777; font-weight: bold; float: left; }
 .serviceCRITICAL  { color: #fff; background-color: #ff3300; border: 1px solid #777777; font-weight: bold; float: left; }
 
 .queueTitle    { font-size: 14pt; text-align: center; font-weight: bold; }
