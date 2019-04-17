@@ -16,20 +16,20 @@ div.status   { font-size: 12pt; text-align: center; }
 .statusPENDING  { font-size: 11pt; background-color: #acacac; }
 .statusOK       { font-size: 11pt; color: #fff; background-color: #00CC33; }
 .statusRECOVERY { font-size: 11pt; color: #fff; background-color: #00CC33; }
-.statusUNKNOWN  { font-size: 11pt; color: #fff; background-color: #CC77C6; }
+.statusUNKNOWN  { font-size: 11pt; color: #fff; background-color: #5bc0de; }
 .statusWARNING  { font-size: 11pt; color: #fff; background-color: #ffa500; }
 .statusCRITICAL { font-size: 11pt; color: #fff; background-color: #ff3300; }
 
 .statusHOSTPENDING     { font-size: 11pt; background-color: #acacac; }
 .statusHOSTUP          { font-size: 11pt; color: #fff; background-color: #00CC33; }
 .statusHOSTDOWN        { font-size: 11pt; color: #fff; background-color: #ff3300; }
-.statusHOSTUNREACHABLE { font-size: 11pt; color: #fff; background-color: #CC77C6; }
+.statusHOSTUNREACHABLE { font-size: 11pt; color: #fff; background-color: #5bc0de; }
 
 .statusBGUNKNOWN       { font-size: 11pt; background-color: #ffddaa; }
 .statusBGWARNING       { font-size: 11pt; color: #fff; background-color: #ffda9f; }
 .statusBGCRITICAL      { font-size: 11pt; background-color: #ffdddd; }
 .statusBGDOWN          { font-size: 11pt; background-color: #ffdddd; }
-.statusBGUNREACHABLE   { font-size: 11pt; color: #fff; background-color: #CC77C6; }
+.statusBGUNREACHABLE   { font-size: 11pt; color: #fff; background-color: #5bc0de; }
 
 div.serviceTotals      { font-size: 12pt; text-align: center; font-weight: bold; }
 table.serviceTotals    { font-size: 12pt; font-weight: bold; }
@@ -37,7 +37,7 @@ th.serviceTotals,a.serviceTotals { font-size: 11pt; }
 td.serviceTotals       { font-size: 11pt; text-align: center; background-color: #e0e0e0; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
 .serviceTotalsOK       { font-size: 11pt; text-align: center; color: #fff; background-color: #00CC33; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
 .serviceTotalsWARNING  { font-size: 11pt; text-align: center; color: #fff; background-color: #ffa500; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
-.serviceTotalsUNKNOWN  { font-size: 11pt; text-align: center; color: #fff; background-color: #CC77C6; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
+.serviceTotalsUNKNOWN  { font-size: 11pt; text-align: center; color: #fff; background-color: #5bc0de; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
 .serviceTotalsCRITICAL { font-size: 11pt; text-align: center; color: #fff; background-color: #ff3300; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
 .serviceTotalsPENDING  { font-size: 11pt; text-align: center; background-color: #acacac; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
 .serviceTotalsPROBLEMS { font-size: 11pt; text-align: center; background-color: #aaccff; border: 1px solid #777777; padding: 2px 4px 2px 4px; }
@@ -49,16 +49,16 @@ th.hostTotals,a.hostTotals { font-size: 11pt; }
 td.hostTotals          { font-size: 11pt; text-align: center; background-color: #e4e4e4; }
 .hostTotalsUP          { font-size: 11pt; text-align: center; color: #fff; background-color: #00CC33; }
 .hostTotalsDOWN        { font-size: 11pt; text-align: center; color: #fff; background-color: #ff3300; }
-.hostTotalsUNREACHABLE { font-size: 11pt; text-align: center; color: #fff; background-color: #CC77C6; }
+.hostTotalsUNREACHABLE { font-size: 11pt; text-align: center; color: #fff; background-color: #5bc0de; }
 .hostTotalsPENDING     { font-size: 11pt; text-align: center; background-color: #acacac; }
 .hostTotalsPROBLEMS    { font-size: 11pt; text-align: center; background-color: #aaccff; }
 
 .miniStatusPENDING  { font-size: 11pt; background-color: #acacac; text-align: center; }
 .miniStatusOK       { font-size: 11pt; background-color: #66ffee; text-align: center; }
-.miniStatusUNKNOWN  { font-size: 11pt; color: #fff; background-color: #CC77C6; text-align: center; }
+.miniStatusUNKNOWN  { font-size: 11pt; color: #fff; background-color: #5bc0de; text-align: center; }
 .miniStatusWARNING  { font-size: 11pt; color: #fff; background-color: #ffa500; text-align: center; }
 .miniStatusCRITICAL { font-size: 11pt; color: #fff; background-color: #ff3300; text-align: center; }
 
 .miniStatusUP          { font-size: 11pt; background-color: #66ffee; text-align: center; }
 .miniStatusDOWN        { font-size: 11pt; color: #fff; background-color: #ff3300; text-align: center; }
-.miniStatusUNREACHABLE { font-size: 11pt; color: #fff; background-color: #CC77C6; text-align: center; }
+.miniStatusUNREACHABLE { font-size: 11pt; color: #fff; background-color: #5bc0de; text-align: center; }

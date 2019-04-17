@@ -1,0 +1,26 @@
+--- lib/Thruk/Utils/Filter.pm.orig	2019-04-15 13:59:09.329722227 +0200
++++ lib/Thruk/Utils/Filter.pm	2019-04-17 09:06:34.679420238 +0200
+@@ -119,6 +119,12 @@
+             $duration = $duration%86400;
+         }
+     }
++    if($options == 99) {
++        if($duration >= 86400) {
++            $days     = int($duration/86400);
++            $duration = $duration%86400;
++        }
++    }
+     if($duration >= 3600) {
+         $hours    = int($duration/3600);
+         $duration = $duration%3600;
+@@ -157,6 +163,10 @@
+         if($seconds > 0) { push @res, $seconds."sec"; }
+         return($minus.join(" ", @res));
+     }
++    elsif($options == 99) {
++        
++        return("<span class=\"label label-default\">${days}d ${hours}h ${minutes}m ${seconds}s</span>");
++    }
+     confess("unknown options in duration(): ".$options);
+ }
+ 

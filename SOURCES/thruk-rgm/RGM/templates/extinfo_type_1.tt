@@ -32,7 +32,7 @@
         <td align="center" valign="middle" width="33%" class="ext_head_attributes">
           <div class='data'>Host</div>
           <div class='dataTitle'>[% host.alias %]</div>
-          <div class='dataTitle'>([% host.display_name %])</div><br>
+          <div class='dataTitle'>([% host.display_name %])</div>
           [% IF matching_backends.size > 1 %]
           <div class='data'>
             <form action="extinfo.cgi" method="GET">
@@ -169,7 +169,6 @@
       <table border="0" cellpadding="0" width="100%" class="extdetails">
         <tr>
           <td align="center" valign="top" class='stateInfoPanel'>
-            <div class='dataTitle'>Host State Information</div>
             <table border="0">
               <tr>
                 <td>
@@ -181,15 +180,26 @@
                             <td class='dataVar'>Host Status:</td>
                             <td class='dataVal'>
                               [% IF host.has_been_checked == 0 %]
-                              <div class='hostPENDING'>&nbsp;&nbsp;PENDING&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-default">Pending</span> 
+                                   [% IF host.last_state_change %][% duration(date.now - host.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                </div>
                               [% ELSIF host.state == 0 %]
-                              <div class='hostUP'>&nbsp;&nbsp;UP&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-success">Running</span> 
+                                   [% IF host.last_state_change %][% duration(date.now - host.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                </div>
                               [% ELSIF host.state == 1 %]
-                              <div class='hostDOWN'>&nbsp;&nbsp;DOWN&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-danger">Down</span> 
+                                   [% IF host.last_state_change %][% duration(date.now - host.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                </div>
                               [% ELSIF host.state == 2 %]
-                              <div class='hostUNREACHABLE'>&nbsp;&nbsp;UNREACHABLE&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-info">Unreached</span> 
+                                   [% IF host.last_state_change %][% duration(date.now - host.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                </div>
                               [% END %]
-                              &nbsp;(for [% IF host.last_state_change %][% duration(date.now - host.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %])
                               [% IF host.acknowledged %]
                               &nbsp;(Has been acknowledged)
                               [% END %]
@@ -230,10 +240,6 @@
                           <tr>
                             <td class='dataVar'>Last Check Time:</td>
                             <td class='dataVal'>[% last_check(c, host.last_check) %]</td>
-                          </tr>
-                          <tr>
-                            <td class='dataVar'>Check Type:</td>
-                            <td class='dataVal'>[% IF host.check_type == 0 %]ACTIVE[% ELSE %]PASSIVE[% END %]</td>
                           </tr>
                           <tr>
                             <td class='dataVar' nowrap>Check Latency / Duration:</td>
@@ -287,11 +293,14 @@
                             <td class='dataVal'>
                               [% IF host.flap_detection_enabled %]
                                 [% IF host.is_flapping %]
-                                <div class='flapping'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                                  <div class='status'><span class = "label label-warning">Yes</span>
+                                    ([% FILTER format('%.2f') %][% host.percent_state_change %][% END %]% state change)
+                                  </div>
                                 [% ELSE %]
-                                <div class='notflapping'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                                 <div class='status'><span class = "label label-success">No</span>
+                                  ([% FILTER format('%.2f') %][% host.percent_state_change %][% END %]% state change)
+                                 </div>
                                 [% END %]
-                                &nbsp;([% FILTER format('%.2f') %][% host.percent_state_change %][% END %]% state change)
                               [% ELSE %]
                                 N/A
                               [% END %]
@@ -301,9 +310,13 @@
                             <td class='dataVar'>In Scheduled Downtime?</td>
                             <td class='dataVal'>
                               [% IF host.scheduled_downtime_depth > 0 %]
-                              <div class='downtimeACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-danger">Yes</span>
+                                </div>
                               [% ELSE %]
-                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-success">No</span>
+                                </div>
                               [% END %]
                             </td>
                           </tr>
@@ -311,9 +324,13 @@
                             <td class='dataVar'>In Check Period?</td>
                             <td class='dataVal'>
                               [% IF host.in_check_period %]
-                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-success">Yes</span>
+                                </div>
                               [% ELSE %]
-                              <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-warning">No</span>
+                                </div>
                               [% END %]
                             </td>
                           </tr>
@@ -321,9 +338,13 @@
                             <td class='dataVar'>In Notification Period?</td>
                             <td class='dataVal'>
                               [% IF host.in_notification_period %]
-                              <div class='downtimeINACTIVE'>&nbsp;&nbsp;YES&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-success">Yes</span>
+                                </div>
                               [% ELSE %]
-                              <div class='downtimeACTIVE'>&nbsp;&nbsp;NO&nbsp;&nbsp;</div>
+                                <div class='status'>
+                                  <span class = "label label-warning">No</span>
+                                </div>
                               [% END %]
                             </td>
                           </tr>
@@ -331,18 +352,6 @@
                             <td class='dataVar'>Last Update:</td>
                             <td class='dataVal'>[% date_format(c, date.now) %]&nbsp;&nbsp;( 0d 0h 0m 0s ago)</td>
                           </tr>
-                          [% IF show_contacts && c.check_user_roles('authorized_for_configuration_information') %]
-                          <tr>
-                            <td class='dataVar'>Contacts</td>
-                            <td class='dataVal'>[% host.contacts.join(', ') %]</td>
-                          </tr>
-                          [% END %]
-                          [% IF show_modified_attributes %]
-                          <tr>
-                            <td class='dataVar'>Modified Attributes</td>
-                            <td class='dataVal'>[% IF host.modified_attributes_list.size > 0 %]<div class='serviceWARNING' style="padding-right: 4px; padding-left: 4px;">[% host.modified_attributes_list.join(', ') %]</div>[% ELSE %]none[% END %]</td>
-                          </tr>
-                          [% END %]
                           [% IF backends && backends.size > 1 %]
                           <tr>
                             <td class='dataVar'>Monitored by:</td>

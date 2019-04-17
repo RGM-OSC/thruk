@@ -74,7 +74,7 @@ div.pref_pane {
   width:490px;
   min-height:100px;
   position:fixed;
-  top: 0px;
+  top: 10px;
   right: 0px;
   z-index: 99;
   color: black;
@@ -86,17 +86,17 @@ table.pref_pane {
   border-width: 1px;
   border-spacing: 2px;
   border-style: outset;
-  border-color: #C4C2C2;
+  border-color: #f8f8f8;
   border-collapse: separate;
-  background-color: #C4C2C2;
+  background-color: #f8f8f8;
 }
 table.pref_pane > tbody > tr > td {
   padding: 2px;
   margin: 0px;
   border-width: 1px;
   border-style: inset;
-  border-color: #C4C2C2;
-  background-color: #C4C2C2;
+  border-color: #f8f8f8;
+  background-color: #f8f8f8;
 }
 TABLE.pref_pane TD {
     text-align: left;
@@ -116,7 +116,7 @@ TABLE.pref_pane .separator {
 
 img.pref_pane_button {
   position:absolute;
-  top: 4px;
+  top: -2px;
   right: 4px;
   z-index: 100;
 }
@@ -137,7 +137,7 @@ td.top_nav_pref {
   padding: 0px;
   margin: 0px;
   vertical-align: top;
-}
+} 
 td.top_nav_pref button {
   width: 85px;
   height: 20px;
@@ -456,9 +456,9 @@ table.cmd_pane {
   border-width: 1px;
   border-spacing: 2px;
   border-style: outset;
-  border-color: #C4C2C2;
+  border-color: #f8f8f8;
   border-collapse: separate;
-  background-color: #C4C2C2;
+  background-color: #f8f8f8;
 }
 table.cmd_pane > tbody > tr > td {
   padding: 2px;
@@ -466,8 +466,7 @@ table.cmd_pane > tbody > tr > td {
   padding-right: 5px;
   margin: 0px;
   border-width: 1px;
-  border-style: inset;
-  border-color: #C4C2C2;
+  border-color: #f8f8f8;
 }
 
 img.cmd_pane_button {
@@ -478,11 +477,11 @@ img.cmd_pane_button {
 }
 th.cmd_pane a, th.cmd_pane {
   text-align:center;
-  color:#DCE5C1;
+  color:#337ab7;
   font-size:12pt;
 }
 th.status a:hover {
-  color:#DCE5C1;
+  color:#337ab7;
   text-decoration: none;
 }
 td.submit {
@@ -531,7 +530,7 @@ div.thruk_message table {
 
 /* show log filter */
 body.showlog .filter { font-family: "Fira Sans",arial,serif;  font-size: 10pt;  background-color: #DBDBDB; }
-body.showlog .filterTitle { font-family: "Fira Sans",arial,serif;  font-size: 12pt;  font-weight: bold;  background-color: #DBDBDB; }
+body.showlog .filterTitle { font-family: "Fira Sans",arial,serif;  font-size: 12pt;  background-color: #DBDBDB; }
 body.showlog .filterName { font-family: "Fira Sans",arial,serif;  font-size: 10pt;  background-color: #DBDBDB; }
 body.showlog .filterValue { font-family: "Fira Sans",arial,serif;  font-size: 10pt;  background-color: #DBDBDB; }
 

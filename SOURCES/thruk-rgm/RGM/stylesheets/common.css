@@ -41,6 +41,12 @@ INDETERMINATE:  purple           ddccff  777777
  src: url("/fonts/FiraSans-Regular.woff") format("woff");
 }
 
+.blank_row
+{
+    height: 11px !important; /* overwrites any other rules */
+    background-color: #FFFFFF;
+}
+
 body {
   margin: 0em;
   margin: 0.8em 0.8em 2em 0.8em;
@@ -256,7 +262,7 @@ ul.navsectionlinks li ul li ul {
 
 table.infoBox            { width: 100%; }
 td.infoBox               { font-size: 10pt; padding: 0 0 1em 0; white-space: nowrap; }
-div.infoBoxTitle         { font-size: 20pt; color: #a7a9ac;}
+div.infoBoxTitle         { font-size: 16pt; color: #a7a9ac;}
 div.infoBoxBadProcStatus { font-size: 10pt; font-weight: bold; color: red; }
 
 .linkBox         { font-size: 10pt; padding: 1px; }
