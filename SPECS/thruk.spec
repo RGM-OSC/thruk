@@ -36,7 +36,7 @@ It is designed to be a "dropin" replacement. The target is to cover 100% of the 
 
 %prep
 %setup -T -b 0 -n %{lname}-%{version}%{lver}
-%patch0 -p1
+%patch0 -p0
 %patch0 -p0
 %setup -T -b 1 -n %{name}-rgm
 
