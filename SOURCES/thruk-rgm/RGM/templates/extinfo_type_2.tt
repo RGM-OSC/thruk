@@ -1,4 +1,4 @@
-﻿[% USE date %]
+[% USE date %]
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 [% PROCESS custom_perf_bar_adjustments.tt %]
@@ -173,27 +173,27 @@
                               [% IF service.has_been_checked == 0 %]
                                 <div class='status'>
                                   <span class = "label label-default">Pending</span> 
-                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %][% END %]
                                 </div>
                               [% ELSIF service.state == 0 %]
                                 <div class='status'>
                                   <span class = "label label-success">Ok</span> 
-                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %][% END %]
                                 </div>
                               [% ELSIF service.state == 1 %]
                                 <div class='status'>
                                   <span class = "label label-warning">Warning</span> 
-                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %][% END %]
                                 </div>
                               [% ELSIF service.state == 2 %]
                                 <div class='status'>
                                   <span class = "label label-danger">Critical</span> 
-                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %][% END %]
                                 </div>
                               [% ELSIF service.state == 3 %]
                                   <div class='status'>
                                   <span class = "label label-info">Unknown</span> 
-                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %]+[% END %]
+                                   [% IF service.last_state_change %][% duration(date.now - service.last_state_change,99) %][% ELSE %][% duration(date.now - program_start,99) %][% END %]
                                 </div>
                               [% END %]
                               [% IF service.acknowledged %]
