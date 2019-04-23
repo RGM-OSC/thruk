@@ -9,7 +9,7 @@
 
 Name: thruk
 Version: 2.28
-Release: 7.rgm
+Release: 8.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -78,6 +78,7 @@ sed -i '/use lib "\/srv\/rgm\/thruk\/lib";/d' %{datadir}/script/*.pl %{datadir}/
 sed -i '/use lib "\/srv\/rgm\/thruk\/local-lib\/lib\/perl5";/d' %{datadir}/script/*.pl %{datadir}/script/thruk
 sed -i 's/use strict;/use lib "\/srv\/rgm\/thruk\/lib";\nuse lib "\/srv\/rgm\/thruk\/local-lib\/lib\/perl5";\n\nuse strict;/g' %{datadir}/script/*.pl %{datadir}/script/thruk
 ln -nsf %{datadir} %{linkdir}
+ln -s /srv/rgm/nagios/share/images/logos /srv/rgm/thruk/themes/themes-available/RGM/images/logos
 
 chown -h %{rgm_user_nagios}:%{rgm_group} %{linkdir}
 chmod 775 %{datadir}/script 
@@ -105,6 +106,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Tue Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-8.rgm
+- Fix icon symlink
+
 * Fri Apr 17 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-7.rgm
 - First RGM theme
 
