@@ -9,7 +9,7 @@
 
 Name: thruk
 Version: 2.28
-Release: 8.rgm
+Release: 9.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -106,6 +106,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Tue Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-9.rgm
+- Fix ajax bug (service, hosts, and groups list)
+
 * Tue Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-8.rgm
 - Fix icon symlink
 
