@@ -9,7 +9,7 @@
 
 Name: thruk
 Version: 2.28
-Release: 10.rgm
+Release: 11.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -106,6 +106,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Thu Jan 16 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-11.rgm
+- Preparing RGM 1.2 to run side by side with RGMR :)
+
 * Tue Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-10.rgm
 - Fix the fix :) of ajax bug (add the fix also in cache for production environnement)
 
