@@ -119,19 +119,19 @@ diff -Naur thruk-2.28-1.orig/plugins/plugins-available/reports2/templates/report
  ﻿[%# see https://thruk.org/documentation/reporting.html#customized-reports #%]
 +
 +<style type="text/css">
-+.logo_eon {
++.logo_rgm {
 +    position: absolute;
 +    right: 10px;
 +    top: 20px;
-+    width: 250px;
-+    height: 48px;
++    width: 90px;
++    height: 115px;
 +}
 +</style>
 +
 +<script language="javascript" type="text/javascript">
 +/* add complete new elements by javascript */
 +  jQuery(document).ready(function() {
-+    jQuery('<br><img class="logo_eon" src="/thruk/themes/RGM/images/logos/logo_eon.png"><br>').insertAfter('DIV.page.cover DIV.titletext');
++    jQuery('<br><img class="logo_rgm" src="/thruk/themes/RGM/images/logos/logo_RGM_2020_72.png"><br>').insertAfter('DIV.page.cover DIV.titletext');
 +  });
 +</script>
 diff -Naur thruk-2.28-1.orig/root/thruk/javascript/thruk-2.28-1.js thruk-2.28-1/root/thruk/javascript/thruk-2.28-1.js
