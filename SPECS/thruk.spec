@@ -9,7 +9,7 @@
 
 Name: thruk
 Version: 2.28
-Release: 12.rgm
+Release: 13.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -106,6 +106,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Tue Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-13.rgm
+- Fix SSL version repport issues
+
 * Fri May 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-12.rgm
 - Fix repport issues
 

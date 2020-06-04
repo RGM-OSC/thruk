@@ -22,7 +22,7 @@ export PATH=$PATH:$DIR
 
 [ -z $PHANTOMJS ] && PHANTOMJS="phantomjs"
 
-EXTRAOPTIONS="--ssl-protocol=tlsv1 --web-security=no --ignore-ssl-errors=true $PHANTOMJSOPTIONS"
+EXTRAOPTIONS="--ssl-protocol=any --web-security=no --ignore-ssl-errors=true $PHANTOMJSOPTIONS"
 
 INPUT="$INPUT&from=$START&to=$END"
 
