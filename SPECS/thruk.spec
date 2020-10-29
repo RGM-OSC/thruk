@@ -69,7 +69,6 @@ cp -afpvr %{name}-rgm/local-lib %{buildroot}%{datadir}/
 cp -afpvr %{name}-rgm/RGM %{buildroot}%{datadir}/themes/themes-available/
 cd %{buildroot}%{datadir}/root/thruk/themes/
 ln -sf ../themes-available/RGM %{buildroot}%{datadir}/root/thruk/themes/RGM
-cd
 install -m0644 etc/ %{buildroot}/%{_sysconfdir}/cron.d/thruk_logcache
 
 %clean
