@@ -12,6 +12,7 @@ Summary: Thruk Monitoring Webinterface
 Group: Applications/System
 License: GPL
 URL: http://www.thruk.org/
+# download source from upstream: https://download.thruk.org/pkg/v2.28/src/thruk-2.28.tar.gz
 Source0: thruk-%{version}.tar.gz
 Source1: %{name}-rgm.tar.gz
 Patch0:  %{name}-%{version}.patch
@@ -23,8 +24,8 @@ Requires: xorg-x11-server-Xvfb
 Requires: systemd
 
 # define path
-%define datadir		%{rgm_path}/%{name}-%{version}
-%define linkdir		%{rgm_path}/%{name}
+%define datadir %{rgm_path}/%{name}-%{version}
+%define linkdir %{rgm_path}/%{name}
 
 
 %description
@@ -107,7 +108,7 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
-* Tue Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-14.rgm
+* Thu Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-14.rgm
 - Fix cron and logcache
 
 * Tue Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-13.rgm
