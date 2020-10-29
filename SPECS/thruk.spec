@@ -41,7 +41,7 @@ It is designed to be a "dropin" replacement. The target is to cover 100% of the 
 %setup -T -b 2 -n etc
 
 %install
-cd ..
+cd %{_builddir}
 rm -rf %{buildroot}
 install -d -m0755 %{buildroot}%{datadir}
 install -d -m0775 %{buildroot}%{datadir}/bp
@@ -69,7 +69,7 @@ cp -afpvr %{name}-rgm/local-lib %{buildroot}%{datadir}/
 cp -afpvr %{name}-rgm/RGM %{buildroot}%{datadir}/themes/themes-available/
 cd %{buildroot}%{datadir}/root/thruk/themes/
 ln -sf ../themes-available/RGM %{buildroot}%{datadir}/root/thruk/themes/RGM
-install -m0644 etc/ %{buildroot}/%{_sysconfdir}/cron.d/thruk_logcache
+install -m 0644 %{_builddir}/etc/cron.d/thruk_logcache %{buildroot}%{_sysconfdir}/cron.d/thruk_logcache
 
 %clean
 rm -rf %{buildroot}
