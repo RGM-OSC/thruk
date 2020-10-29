@@ -111,7 +111,7 @@ systemctl restart httpd > /dev/null 2>&1
 * Thu Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-14.rgm
 - Fix cron and logcache
 
-* Tue Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-13.rgm
+* Thu Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-13.rgm
 - Fix SSL version repport issues
 
 * Fri May 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-12.rgm
@@ -120,19 +120,19 @@ systemctl restart httpd > /dev/null 2>&1
 * Thu Jan 16 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-11.rgm
 - Preparing RGM 1.2 to run side by side with RGMR :)
 
-* Tue Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-10.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-10.rgm
 - Fix the fix :) of ajax bug (add the fix also in cache for production environnement)
 
-* Tue Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-9.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-9.rgm
 - Fix ajax bug (service, hosts, and groups list)
 
-* Tue Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-8.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-8.rgm
 - Fix icon symlink
 
-* Fri Apr 17 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-7.rgm
+* Wed Apr 17 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-7.rgm
 - First RGM theme
 
-* Fri Apr 13 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-6.rgm
+* Sat Apr 13 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-6.rgm
 - Fix template issue and remove no longer used patch accordingly
 
 * Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-5.rgm
