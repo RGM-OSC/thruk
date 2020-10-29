@@ -4,18 +4,15 @@
 %global __perllib_requires /bin/false
 %global __perllib_provides /bin/false
 
-%define lname thruk
-%define lver  -1
-
 Name: thruk
-Version: 2.28
-Release: 13.rgm
+Version: 2.28.1
+Release: 14.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
 License: GPL
 URL: http://www.thruk.org/
-Source0: %{lname}-%{version}%{lver}.tar.gz
+Source0: thruk-%{version}.tar.gz
 Source1: %{name}-rgm.tar.gz
 Patch0:  %{name}-%{version}.patch
 Patch1:  filter.patch
@@ -35,10 +32,11 @@ Thruk is an independent multibackend monitoring webinterface which currently sup
 It is designed to be a "dropin" replacement. The target is to cover 100% of the original features plus additional enhancements for large installations.
 
 %prep
-%setup -T -b 0 -n %{lname}-%{version}%{lver}
+%setup -T -b 0 -n thruk-%{version}
 %patch0 -p1
 %patch1 -p0
 %setup -T -b 1 -n %{name}-rgm
+%setup -T -b 1 -n etc
 
 %install
 cd ..
@@ -50,7 +48,8 @@ install -d -m0775 %{buildroot}%{datadir}/panorama
 install -d -m0775 %{buildroot}%{datadir}/tmp
 install -d -m0775 %{buildroot}%{datadir}/var
 install -d -m0755 %{buildroot}%{_sysconfdir}/httpd/conf.d
-cp -afpvr %{lname}-%{version}%{lver}/* %{buildroot}%{datadir}
+install -d -m0755 %{buildroot}%{_sysconfdir}/cron.d
+cp -afpvr %{name}-%{version}/* %{buildroot}%{datadir}
 
 # rgm specifics
 install -d -m0755 %{buildroot}%{rgm_docdir}/%{name}
@@ -69,6 +68,7 @@ cp -afpvr %{name}-rgm/RGM %{buildroot}%{datadir}/themes/themes-available/
 cd %{buildroot}%{datadir}/root/thruk/themes/
 ln -sf ../themes-available/RGM %{buildroot}%{datadir}/root/thruk/themes/RGM
 cd
+install -m0644 etc/ %{buildroot}/%{_sysconfdir}/cron.d/thruk_logcache
 
 %clean
 rm -rf %{buildroot}
@@ -97,6 +97,7 @@ systemctl restart httpd > /dev/null 2>&1
 %files
 %defattr(-, root, root, 0755)
 %{_sysconfdir}/httpd/conf.d/thruk.conf
+%{_sysconfdir}/cron.d/thruk_logcache
 %config(noreplace) %{datadir}/thruk_local.conf
 %config(noreplace) %{datadir}/cgi.cfg
 %config(noreplace) %{datadir}/var/
@@ -106,6 +107,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Tue Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-14.rgm
+- Fix cron and logcache
+
 * Tue Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-13.rgm
 - Fix SSL version repport issues
 
