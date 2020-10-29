@@ -15,6 +15,7 @@ URL: http://www.thruk.org/
 # download source from upstream: https://download.thruk.org/pkg/v2.28/src/thruk-2.28.tar.gz
 Source0: thruk-%{version}.tar.gz
 Source1: %{name}-rgm.tar.gz
+Source2: etc.tar.gz
 Patch0:  %{name}-%{version}.patch
 Patch1:  filter.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -37,7 +38,7 @@ It is designed to be a "dropin" replacement. The target is to cover 100% of the 
 %patch0 -p1
 %patch1 -p0
 %setup -T -b 1 -n %{name}-rgm
-%setup -T -b 1 -n etc
+%setup -T -b 2 -n etc
 
 %install
 cd ..
