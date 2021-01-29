@@ -12,8 +12,10 @@ Summary: Thruk Monitoring Webinterface
 Group: Applications/System
 License: GPL
 URL: http://www.thruk.org/
+# download source from upstream: https://download.thruk.org/pkg/v2.28/src/thruk-2.28.tar.gz
 Source0: thruk-%{version}.tar.gz
 Source1: %{name}-rgm.tar.gz
+Source2: etc.tar.gz
 Patch0:  %{name}-%{version}.patch
 Patch1:  filter.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -23,8 +25,8 @@ Requires: xorg-x11-server-Xvfb
 Requires: systemd
 
 # define path
-%define datadir		%{rgm_path}/%{name}-%{version}
-%define linkdir		%{rgm_path}/%{name}
+%define datadir %{rgm_path}/%{name}-%{version}
+%define linkdir %{rgm_path}/%{name}
 
 
 %description
@@ -36,10 +38,10 @@ It is designed to be a "dropin" replacement. The target is to cover 100% of the 
 %patch0 -p1
 %patch1 -p0
 %setup -T -b 1 -n %{name}-rgm
-%setup -T -b 1 -n etc
+%setup -T -b 2 -n etc
 
 %install
-cd ..
+cd %{_builddir}
 rm -rf %{buildroot}
 install -d -m0755 %{buildroot}%{datadir}
 install -d -m0775 %{buildroot}%{datadir}/bp
@@ -67,8 +69,7 @@ cp -afpvr %{name}-rgm/local-lib %{buildroot}%{datadir}/
 cp -afpvr %{name}-rgm/RGM %{buildroot}%{datadir}/themes/themes-available/
 cd %{buildroot}%{datadir}/root/thruk/themes/
 ln -sf ../themes-available/RGM %{buildroot}%{datadir}/root/thruk/themes/RGM
-cd
-install -m0644 etc/ %{buildroot}/%{_sysconfdir}/cron.d/thruk_logcache
+install -m 0644 %{_builddir}/etc/cron.d/thruk_logcache %{buildroot}%{_sysconfdir}/cron.d/thruk_logcache
 
 %clean
 rm -rf %{buildroot}
@@ -107,10 +108,10 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
-* Tue Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-14.rgm
+* Thu Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-14.rgm
 - Fix cron and logcache
 
-* Tue Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-13.rgm
+* Thu Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-13.rgm
 - Fix SSL version repport issues
 
 * Fri May 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-12.rgm
@@ -119,19 +120,19 @@ systemctl restart httpd > /dev/null 2>&1
 * Thu Jan 16 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-11.rgm
 - Preparing RGM 1.2 to run side by side with RGMR :)
 
-* Tue Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-10.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-10.rgm
 - Fix the fix :) of ajax bug (add the fix also in cache for production environnement)
 
-* Tue Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-9.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-9.rgm
 - Fix ajax bug (service, hosts, and groups list)
 
-* Tue Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-8.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-8.rgm
 - Fix icon symlink
 
-* Fri Apr 17 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-7.rgm
+* Wed Apr 17 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-7.rgm
 - First RGM theme
 
-* Fri Apr 13 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-6.rgm
+* Sat Apr 13 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-6.rgm
 - Fix template issue and remove no longer used patch accordingly
 
 * Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-5.rgm

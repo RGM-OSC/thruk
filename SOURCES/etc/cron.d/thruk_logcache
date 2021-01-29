@@ -1,2 +1,2 @@
-* * * * * root /srv/rgm/thruk/script/thruk -a logcache update > /dev/null 2>&1
-*/5 * * * * root /srv/rgm/thruk/script/thruk -a logcache optimize > /dev/null 2>&1
+* * * * * root /srv/rgm/thruk/script/thruk -a logcache update &> /dev/null
+*/5 * * * * root /srv/rgm/thruk/script/thruk -a logcache optimize &> /dev/null
