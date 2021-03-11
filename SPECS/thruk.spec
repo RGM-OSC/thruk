@@ -6,7 +6,7 @@
 
 Name: thruk
 Version: 2.28.1
-Release: 14.rgm
+Release: 0.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -61,7 +61,7 @@ rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/conf
 rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/shinken_features
 install -m0644 %{name}-rgm/%{name}_local.conf %{buildroot}%{datadir}/%{name}_local.conf
 install -m0644 %{name}-rgm/cgi.cfg %{buildroot}%{datadir}/cgi.cfg
-install -m0644 %{name}-rgm/%{name}.conf %{buildroot}/%{_sysconfdir}/httpd/conf.d/%{name}.conf
+install -D -m 0644 %{name}-rgm/httpd-thruk.example.conf %{buildroot}%{rgm_docdir}/httpd/
 install -m0755 %{name}-rgm/fcgid_env.sh %{buildroot}%{datadir}/support/
 install -m0755 %{name}-rgm/phantomjs %{buildroot}%{datadir}/script/
 install -m0755 %{name}-rgm/pnp_export.sh %{buildroot}%{datadir}/script/
@@ -80,7 +80,9 @@ sed -i '/use lib "\/srv\/rgm\/thruk\/local-lib\/lib\/perl5";/d' %{datadir}/scrip
 sed -i 's/use strict;/use lib "\/srv\/rgm\/thruk\/lib";\nuse lib "\/srv\/rgm\/thruk\/local-lib\/lib\/perl5";\n\nuse strict;/g' %{datadir}/script/*.pl %{datadir}/script/thruk
 ln -nsf %{datadir} %{linkdir}
 ln -s /srv/rgm/nagios/share/images/logos /srv/rgm/thruk/themes/themes-available/RGM/images/logos
-
+if [ -e %{_sysconfdir}/httpd/conf.d/%{name}.conf ]; then
+    rm -f %{_sysconfdir}/httpd/conf.d/%{name}.conf
+fi
 chown -h %{rgm_user_nagios}:%{rgm_group} %{linkdir}
 chmod 775 %{datadir}/script 
 chown apache:%{rgm_group} %{datadir}/bp 
@@ -96,8 +98,8 @@ systemctl restart httpd > /dev/null 2>&1
 systemctl restart httpd > /dev/null 2>&1
 
 %files
+%doc %{rgm_docdir}/httpd/httpd-thruk.example.conf
 %defattr(-, root, root, 0755)
-%{_sysconfdir}/httpd/conf.d/thruk.conf
 %{_sysconfdir}/cron.d/thruk_logcache
 %config(noreplace) %{datadir}/thruk_local.conf
 %config(noreplace) %{datadir}/cgi.cfg
@@ -108,6 +110,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Thu Mar 11 2021 Eric Belhomme <ebelhomme@fr.scc.com> - 2.28-1-0.rgm
+- move httpd config file as example file in /usr/share/doc/rgm/httpd/
+
 * Thu Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-14.rgm
 - Fix cron and logcache
 
