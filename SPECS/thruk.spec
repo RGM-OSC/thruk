@@ -13,7 +13,7 @@ Group: Applications/System
 License: GPL
 URL: http://www.thruk.org/
 # download source from upstream: https://download.thruk.org/pkg/v2.28/src/thruk-2.28.tar.gz
-Source0: thruk-%{version}.tar.gz
+Source0: thruk.tar.gz
 Source1: %{name}-rgm.tar.gz
 Source2: etc.tar.gz
 Patch0:  %{name}-%{version}.patch
@@ -34,7 +34,7 @@ Thruk is an independent multibackend monitoring webinterface which currently sup
 It is designed to be a "dropin" replacement. The target is to cover 100% of the original features plus additional enhancements for large installations.
 
 %prep
-%setup -T -b 0 -n thruk-%{version}
+%setup -T -b 0 -n thruk
 %patch0 -p1
 %patch1 -p0
 %setup -T -b 1 -n %{name}-rgm
@@ -51,7 +51,7 @@ install -d -m0775 %{buildroot}%{datadir}/tmp
 install -d -m0775 %{buildroot}%{datadir}/var
 install -d -m0755 %{buildroot}%{_sysconfdir}/httpd/conf.d
 install -d -m0755 %{buildroot}%{_sysconfdir}/cron.d
-cp -afpvr %{name}-%{version}/* %{buildroot}%{datadir}
+cp -afpvr %{name}/* %{buildroot}%{datadir}
 
 # rgm specifics
 install -d -m0755 %{buildroot}%{rgm_docdir}/%{name}
