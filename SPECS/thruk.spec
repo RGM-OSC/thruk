@@ -51,24 +51,27 @@ install -d -m0775 %{buildroot}%{datadir}/tmp
 install -d -m0775 %{buildroot}%{datadir}/var
 install -d -m0755 %{buildroot}%{_sysconfdir}/httpd/conf.d
 install -d -m0755 %{buildroot}%{_sysconfdir}/cron.d
-cp -afpvr %{name}/* %{buildroot}%{datadir}
+cp -afpvr %{_builddir}/%{name}/* %{buildroot}%{datadir}
 
 # rgm specifics
 install -d -m0755 %{buildroot}%{rgm_docdir}/%{name}
-cp -afpvr %{name}-rgm/* %{buildroot}%{rgm_docdir}/%{name}
+cp -afpvr %{_builddir}/%{name}-rgm/* %{buildroot}%{rgm_docdir}/%{name}
 rm -rf %{buildroot}%{rgm_docdir}/%{name}/local-lib
 rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/conf
 rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/shinken_features
-install -m0644 %{name}-rgm/%{name}_local.conf %{buildroot}%{datadir}/%{name}_local.conf
-install -m0644 %{name}-rgm/cgi.cfg %{buildroot}%{datadir}/cgi.cfg
-install -D -m 0644 %{name}-rgm/httpd-thruk.example.conf %{buildroot}%{rgm_docdir}/httpd/
-install -m0755 %{name}-rgm/fcgid_env.sh %{buildroot}%{datadir}/support/
-install -m0755 %{name}-rgm/phantomjs %{buildroot}%{datadir}/script/
-install -m0755 %{name}-rgm/pnp_export.sh %{buildroot}%{datadir}/script/
-cp -afpvr %{name}-rgm/local-lib %{buildroot}%{datadir}/
-cp -afpvr %{name}-rgm/RGM %{buildroot}%{datadir}/themes/themes-available/
-cd %{buildroot}%{datadir}/root/thruk/themes/
-ln -sf ../themes-available/RGM %{buildroot}%{datadir}/root/thruk/themes/RGM
+install -m 0644 %{_builddir}/%{name}-rgm/%{name}_local.conf %{buildroot}%{datadir}/%{name}_local.conf
+install -m 0644 %{_builddir}/%{name}-rgm/cgi.cfg %{buildroot}%{datadir}/cgi.cfg
+install -m 0644 -t %{buildroot}%{rgm_docdir}/%{name}/ %{name}-rgm/httpd-thruk.example.conf
+install -m 0755 %{_builddir}/%{name}-rgm/fcgid_env.sh %{buildroot}%{datadir}/support/
+install -m 0755 %{_builddir}/%{name}-rgm/phantomjs %{buildroot}%{datadir}/script/
+install -m 0755 %{_builddir}/%{name}-rgm/pnp_export.sh %{buildroot}%{datadir}/script/
+cp -afpvr %{_builddir}/%{name}-rgm/local-lib %{buildroot}%{datadir}/
+cp -afpvr %{_builddir}/%{name}-rgm/RGM %{buildroot}%{datadir}/themes/themes-available/
+cd %{buildroot}%{datadir}/root/thruk
+ln -sf ../../themes/themes-enabled themes
+cd %{buildroot}%{datadir}/themes/themes-enabled
+ln -sf ../themes-available/RGM
+#ln -sf ../themes-available/RGM %{buildroot}%{datadir}/root/thruk/themes/RGM
 install -m 0644 %{_builddir}/etc/cron.d/thruk_logcache %{buildroot}%{_sysconfdir}/cron.d/thruk_logcache
 
 %clean
@@ -98,7 +101,7 @@ systemctl restart httpd > /dev/null 2>&1
 systemctl restart httpd > /dev/null 2>&1
 
 %files
-%doc %{rgm_docdir}/httpd/httpd-thruk.example.conf
+%doc %{rgm_docdir}/%{name}/httpd-thruk.example.conf
 %defattr(-, root, root, 0755)
 %{_sysconfdir}/cron.d/thruk_logcache
 %config(noreplace) %{datadir}/thruk_local.conf
