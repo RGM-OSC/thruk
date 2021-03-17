@@ -61,7 +61,7 @@ rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/conf
 rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/shinken_features
 install -m0644 %{name}-rgm/%{name}_local.conf %{buildroot}%{datadir}/%{name}_local.conf
 install -m0644 %{name}-rgm/cgi.cfg %{buildroot}%{datadir}/cgi.cfg
-install -D -m 0644 %{name}-rgm/httpd-thruk.example.conf %{buildroot}%{rgm_docdir}/httpd/
+install -D -m 0644 %{name}-rgm/httpd-thruk.example.conf %{buildroot}%{rgm_docdir}/%{name}/httpd/
 install -m0755 %{name}-rgm/fcgid_env.sh %{buildroot}%{datadir}/support/
 install -m0755 %{name}-rgm/phantomjs %{buildroot}%{datadir}/script/
 install -m0755 %{name}-rgm/pnp_export.sh %{buildroot}%{datadir}/script/
