@@ -1,2 +1,5 @@
 * * * * * root /srv/rgm/thruk/script/thruk -a logcache update &> /dev/null
 */5 * * * * root /srv/rgm/thruk/script/thruk -a logcache optimize &> /dev/null
+
+# Purge des logs thruk de plus de 3 mois
+0 2 * * * root mysql -u root thruk_log_cache -e 'delete from a6e75_log where time < unix_timestamp() - 3*31*24*3600;'
