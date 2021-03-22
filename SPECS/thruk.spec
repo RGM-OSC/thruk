@@ -5,8 +5,8 @@
 %global __perllib_provides /bin/false
 
 Name: thruk
-Version: 2.28.1
-Release: 0.rgm
+Version: 2.28-1
+Release: 15.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -113,49 +113,49 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
-* Thu Mar 11 2021 Eric Belhomme <ebelhomme@fr.scc.com> - 2.28-1-0.rgm
+* Thu Mar 11 2021 Eric Belhomme <ebelhomme@fr.scc.com> - 2.28-1-15.rgm
 - move httpd config file as example file in /usr/share/doc/rgm/httpd/
 
-* Thu Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-14.rgm
+* Thu Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-14.rgm
 - Fix cron and logcache
 
-* Thu Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-13.rgm
+* Thu Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-13.rgm
 - Fix SSL version repport issues
 
-* Fri May 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-12.rgm
+* Fri May 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-12.rgm
 - Fix repport issues
 
-* Thu Jan 16 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-11.rgm
+* Thu Jan 16 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-11.rgm
 - Preparing RGM 1.2 to run side by side with RGMR :)
 
-* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-10.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-10.rgm
 - Fix the fix :) of ajax bug (add the fix also in cache for production environnement)
 
-* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-9.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-9.rgm
 - Fix ajax bug (service, hosts, and groups list)
 
-* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-8.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-8.rgm
 - Fix icon symlink
 
-* Wed Apr 17 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-7.rgm
+* Wed Apr 17 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-7.rgm
 - First RGM theme
 
-* Sat Apr 13 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-6.rgm
+* Sat Apr 13 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-6.rgm
 - Fix template issue and remove no longer used patch accordingly
 
-* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-5.rgm
+* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-5.rgm
 - Update initial config
 
-* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-4.rgm
+* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-4.rgm
 - Fix button look
 
-* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-3.rgm
+* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-3.rgm
 - Fix themes issues
 
-* Wed Apr 10 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-2.rgm
+* Wed Apr 10 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-2.rgm
 - Update themes
 
-* Wed Apr 10 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-1.rgm
+* Wed Apr 10 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-1.rgm
 - New release
 
 * Tue Mar 19 2019 Eric Belhomme <ebelhomme@fr.scc.com> - 2.12-3-1.rgm
