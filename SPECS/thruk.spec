@@ -6,14 +6,14 @@
 
 Name: thruk
 Version: 2.28.1
-Release: 14.rgm
+Release: 15.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
 License: GPL
 URL: http://www.thruk.org/
 # download source from upstream: https://download.thruk.org/pkg/v2.28/src/thruk-2.28.tar.gz
-Source0: thruk-%{version}.tar.gz
+Source0: thruk.tar.gz
 Source1: %{name}-rgm.tar.gz
 Source2: etc.tar.gz
 Patch0:  %{name}-%{version}.patch
@@ -34,7 +34,7 @@ Thruk is an independent multibackend monitoring webinterface which currently sup
 It is designed to be a "dropin" replacement. The target is to cover 100% of the original features plus additional enhancements for large installations.
 
 %prep
-%setup -T -b 0 -n thruk-%{version}
+%setup -T -b 0 -n thruk
 %patch0 -p1
 %patch1 -p0
 %setup -T -b 1 -n %{name}-rgm
@@ -51,24 +51,27 @@ install -d -m0775 %{buildroot}%{datadir}/tmp
 install -d -m0775 %{buildroot}%{datadir}/var
 install -d -m0755 %{buildroot}%{_sysconfdir}/httpd/conf.d
 install -d -m0755 %{buildroot}%{_sysconfdir}/cron.d
-cp -afpvr %{name}-%{version}/* %{buildroot}%{datadir}
+cp -afpvr %{_builddir}/%{name}/* %{buildroot}%{datadir}
 
 # rgm specifics
 install -d -m0755 %{buildroot}%{rgm_docdir}/%{name}
-cp -afpvr %{name}-rgm/* %{buildroot}%{rgm_docdir}/%{name}
+cp -afpvr %{_builddir}/%{name}-rgm/* %{buildroot}%{rgm_docdir}/%{name}
 rm -rf %{buildroot}%{rgm_docdir}/%{name}/local-lib
 rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/conf
 rm -rf  %{buildroot}%{datadir}/plugins/plugins-enabled/shinken_features
-install -m0644 %{name}-rgm/%{name}_local.conf %{buildroot}%{datadir}/%{name}_local.conf
-install -m0644 %{name}-rgm/cgi.cfg %{buildroot}%{datadir}/cgi.cfg
-install -m0644 %{name}-rgm/%{name}.conf %{buildroot}/%{_sysconfdir}/httpd/conf.d/%{name}.conf
-install -m0755 %{name}-rgm/fcgid_env.sh %{buildroot}%{datadir}/support/
-install -m0755 %{name}-rgm/phantomjs %{buildroot}%{datadir}/script/
-install -m0755 %{name}-rgm/pnp_export.sh %{buildroot}%{datadir}/script/
-cp -afpvr %{name}-rgm/local-lib %{buildroot}%{datadir}/
-cp -afpvr %{name}-rgm/RGM %{buildroot}%{datadir}/themes/themes-available/
-cd %{buildroot}%{datadir}/root/thruk/themes/
-ln -sf ../themes-available/RGM %{buildroot}%{datadir}/root/thruk/themes/RGM
+install -m 0644 %{_builddir}/%{name}-rgm/%{name}_local.conf %{buildroot}%{datadir}/%{name}_local.conf
+install -m 0644 %{_builddir}/%{name}-rgm/cgi.cfg %{buildroot}%{datadir}/cgi.cfg
+install -m 0644 -t %{buildroot}%{rgm_docdir}/%{name}/ %{name}-rgm/httpd-thruk.example.conf
+install -m 0755 %{_builddir}/%{name}-rgm/fcgid_env.sh %{buildroot}%{datadir}/support/
+install -m 0755 %{_builddir}/%{name}-rgm/phantomjs %{buildroot}%{datadir}/script/
+install -m 0755 %{_builddir}/%{name}-rgm/pnp_export.sh %{buildroot}%{datadir}/script/
+cp -afpvr %{_builddir}/%{name}-rgm/local-lib %{buildroot}%{datadir}/
+cp -afpvr %{_builddir}/%{name}-rgm/RGM %{buildroot}%{datadir}/themes/themes-available/
+cd %{buildroot}%{datadir}/root/thruk
+ln -sf ../../themes/themes-enabled themes
+cd %{buildroot}%{datadir}/themes/themes-enabled
+ln -sf ../themes-available/RGM
+#ln -sf ../themes-available/RGM %{buildroot}%{datadir}/root/thruk/themes/RGM
 install -m 0644 %{_builddir}/etc/cron.d/thruk_logcache %{buildroot}%{_sysconfdir}/cron.d/thruk_logcache
 
 %clean
@@ -80,7 +83,9 @@ sed -i '/use lib "\/srv\/rgm\/thruk\/local-lib\/lib\/perl5";/d' %{datadir}/scrip
 sed -i 's/use strict;/use lib "\/srv\/rgm\/thruk\/lib";\nuse lib "\/srv\/rgm\/thruk\/local-lib\/lib\/perl5";\n\nuse strict;/g' %{datadir}/script/*.pl %{datadir}/script/thruk
 ln -nsf %{datadir} %{linkdir}
 ln -s /srv/rgm/nagios/share/images/logos /srv/rgm/thruk/themes/themes-available/RGM/images/logos
-
+if [ -e %{_sysconfdir}/httpd/conf.d/%{name}.conf ]; then
+    rm -f %{_sysconfdir}/httpd/conf.d/%{name}.conf
+fi
 chown -h %{rgm_user_nagios}:%{rgm_group} %{linkdir}
 chmod 775 %{datadir}/script 
 chown apache:%{rgm_group} %{datadir}/bp 
@@ -96,8 +101,8 @@ systemctl restart httpd > /dev/null 2>&1
 systemctl restart httpd > /dev/null 2>&1
 
 %files
+%doc %{rgm_docdir}/%{name}/httpd-thruk.example.conf
 %defattr(-, root, root, 0755)
-%{_sysconfdir}/httpd/conf.d/thruk.conf
 %{_sysconfdir}/cron.d/thruk_logcache
 %config(noreplace) %{datadir}/thruk_local.conf
 %config(noreplace) %{datadir}/cgi.cfg
@@ -108,46 +113,49 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
-* Thu Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-14.rgm
+* Thu Mar 11 2021 Eric Belhomme <ebelhomme@fr.scc.com> - 2.28-1-15.rgm
+- move httpd config file as example file in /usr/share/doc/rgm/httpd/
+
+* Thu Oct 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-14.rgm
 - Fix cron and logcache
 
-* Thu Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-13.rgm
+* Thu Jun 04 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-13.rgm
 - Fix SSL version repport issues
 
-* Fri May 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-12.rgm
+* Fri May 29 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-12.rgm
 - Fix repport issues
 
-* Thu Jan 16 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-11.rgm
+* Thu Jan 16 2020 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-11.rgm
 - Preparing RGM 1.2 to run side by side with RGMR :)
 
-* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-10.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-10.rgm
 - Fix the fix :) of ajax bug (add the fix also in cache for production environnement)
 
-* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-9.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-9.rgm
 - Fix ajax bug (service, hosts, and groups list)
 
-* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-8.rgm
+* Mon Apr 29 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-8.rgm
 - Fix icon symlink
 
-* Wed Apr 17 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-7.rgm
+* Wed Apr 17 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-7.rgm
 - First RGM theme
 
-* Sat Apr 13 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-6.rgm
+* Sat Apr 13 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-6.rgm
 - Fix template issue and remove no longer used patch accordingly
 
-* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-5.rgm
+* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-5.rgm
 - Update initial config
 
-* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-4.rgm
+* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-4.rgm
 - Fix button look
 
-* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-3.rgm
+* Fri Apr 12 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-3.rgm
 - Fix themes issues
 
-* Wed Apr 10 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-2.rgm
+* Wed Apr 10 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-2.rgm
 - Update themes
 
-* Wed Apr 10 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.26-1-1.rgm
+* Wed Apr 10 2019 Michael Aubertin <maubertin@fr.scc.com> - 2.28-1-1.rgm
 - New release
 
 * Tue Mar 19 2019 Eric Belhomme <ebelhomme@fr.scc.com> - 2.12-3-1.rgm
