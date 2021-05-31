@@ -6,7 +6,7 @@
 
 Name: thruk
 Version: 2.28.1
-Release: 15.rgm
+Release: 16.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -113,6 +113,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Mon May 31 2021 Alex Rocher <arocher@fr.scc.com> - 2.28-1-16.rgm
+- Fix symlinks 
+
 * Thu Mar 11 2021 Eric Belhomme <ebelhomme@fr.scc.com> - 2.28-1-15.rgm
 - move httpd config file as example file in /usr/share/doc/rgm/httpd/
 
