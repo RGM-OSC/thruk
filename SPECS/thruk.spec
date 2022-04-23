@@ -51,6 +51,7 @@ install -d -m0775 %{buildroot}%{datadir}/tmp
 install -d -m0775 %{buildroot}%{datadir}/var
 install -d -m0755 %{buildroot}%{_sysconfdir}/httpd/conf.d
 install -d -m0755 %{buildroot}%{_sysconfdir}/cron.d
+install -d -m0755 %{buildroot}%{_sysconfdir}/cron.daily
 cp -afpvr %{_builddir}/%{name}/* %{buildroot}%{datadir}
 
 # rgm specifics
@@ -73,6 +74,7 @@ cd %{buildroot}%{datadir}/themes/themes-enabled
 ln -sf ../themes-available/RGM
 #ln -sf ../themes-available/RGM %{buildroot}%{datadir}/root/thruk/themes/RGM
 install -m 0644 %{_builddir}/etc/cron.d/thruk_logcache %{buildroot}%{_sysconfdir}/cron.d/thruk_logcache
+install -m 0754 %{_builddir}/etc/cron.d/thruk_daily %{buildroot}%{_sysconfdir}/cron.daily/thruk_sanitization
 
 %clean
 rm -rf %{buildroot}
@@ -104,6 +106,7 @@ systemctl restart httpd > /dev/null 2>&1
 %doc %{rgm_docdir}/%{name}/httpd-thruk.example.conf
 %defattr(-, root, root, 0755)
 %{_sysconfdir}/cron.d/thruk_logcache
+%{_sysconfdir}/cron.daily/thruk_sanitization
 %config(noreplace) %{datadir}/thruk_local.conf
 %config(noreplace) %{datadir}/cgi.cfg
 %config(noreplace) %{datadir}/var/
@@ -113,8 +116,8 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
-* Thu Nov 04 2021 Alex Rocher <arocher@fr.scc.com> - 2.28-1-16.rgm
-- Add cron to purge log table (thruk_log_cache) for events (more than 3 month)
+* Sat Apr 23 2022 Eric Belhomme <ebelhomme@fr.scc.com> - 2.28-1-16.rgm
+- introduce daily cronjob for SQL sanitization
 
 * Thu Mar 11 2021 Eric Belhomme <ebelhomme@fr.scc.com> - 2.28-1-15.rgm
 - move httpd config file as example file in /usr/share/doc/rgm/httpd/

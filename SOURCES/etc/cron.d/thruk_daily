@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Performs Thruk SQL tables daily sanitization
+
+# Copyright 2021 & onwards, RGM - SCC France
+
+/srv/rgm/thruk/script/thruk -a logcache removeunused
+/srv/rgm/thruk/script/thruk -a logcache clean 3m
+/srv/rgm/thruk/script/thruk -a logcache optimize
