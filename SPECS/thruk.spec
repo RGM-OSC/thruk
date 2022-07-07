@@ -6,7 +6,7 @@
 
 Name: thruk
 Version: 2.28.1
-Release: 16.rgm
+Release: 17.rgm
 Summary: Thruk Monitoring Webinterface
 
 Group: Applications/System
@@ -116,6 +116,9 @@ systemctl restart httpd > /dev/null 2>&1
 
 
 %changelog
+* Thu Jul 07 2022 Christophe Cassan <ccassan@fr.scc.com> - 2.28-1-17.rgm
+- Change css description width ellipsis 
+
 * Sat Apr 23 2022 Eric Belhomme <ebelhomme@fr.scc.com> - 2.28-1-16.rgm
 - introduce daily cronjob for SQL sanitization
 
