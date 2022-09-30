@@ -5,5 +5,5 @@
 # Copyright 2021 & onwards, RGM - SCC France
 
 /srv/rgm/thruk/script/thruk -a logcache removeunused
-/srv/rgm/thruk/script/thruk -a logcache clean 3m
+/srv/rgm/thruk/script/thruk -a logcache clean 90d
 /srv/rgm/thruk/script/thruk -a logcache optimize
