@@ -1337,38 +1337,6 @@ sub _update_logcache_clean {
 }
 
 ##########################################################
-sub _scc_update_logcache_clean {
-    my($dbh, $prefix, $verbose, $blocksize) = @_;
-
-    if($blocksize =~ m/^\d+[a-z]{1}/mx) {
-        # blocksize is in days
-        $blocksize = int(Thruk::Utils::expand_duration($blocksize) / 86400);
-    }
-
-    my $start = time() - ($blocksize * 86400);
-    print "cleaning logs older than: ", scalar localtime $start, "\n" if $verbose > 1;
-
-    # clean old plugin outputs
-    print "cleaning old orphaned plugin outputs\n" if $verbose > 1;
-    my $log_count = 0;
-    my $deleted = 0;
-    eval {
-        # get all used message / plugin_output ids (DISTINCT is slower than using sort -u later)
-        my $sth = $dbh->prepare("SELECT plugin_output FROM `".$prefix."_log` WHERE time < ".$start);
-        $sth->execute;
-        for my $r (@{$sth->fetchall_arrayref()}) {
-            $dbh->do("DELETE FROM `".$prefix."_plugin_output` WHERE output_id = ".$r->[0]);
-            $deleted++;
-        }
-
-        $log_count = $dbh->do("DELETE FROM `".$prefix."_log` WHERE time < ".$start);
-    };
-
-    $dbh->commit or confess($dbh->errstr);
-    return([$log_count, $deleted]);
-}
-
-##########################################################
 sub _update_logcache_auth {
     #my($self, $c, $peer, $dbh, $prefix, $verbose) = @_;
     my($self, undef, $peer, $dbh, $prefix, $verbose) = @_;
